@@ -13,7 +13,7 @@ default: compile v1
 compile: $(TEST_SPAI)
 
 $(TEST_SPAI): tests.cu hostSkel.cu.h spaiKernels.cu.h qrKernels.cu.h constants.cu.h
-	$(COMPILER) $(OPT_FLAGS) -o $(TEST_SPS) testSPS.cu
+	$(COMPILER) $(OPT_FLAGS) -o $(TEST_SPAI) tests.cu
 
 
 clean:
