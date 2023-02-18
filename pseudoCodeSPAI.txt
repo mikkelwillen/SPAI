@@ -1,0 +1,12 @@
+Pseudocode for the SPAI algorithm
+
+For every column m_k of M
+(a) Find initial sparsity J-rond of m_k
+(b) Compute the row indices I-rond of the corresponding nonzero entries of A(i, J-rond)
+(c) Create Â = A(I-rond, J-rond) (all the rows not removed from the previous step
+(d) Do QR decomposition of Â
+(e) Compute ĉ = Q^T ê_k
+(f) Compute ^m_k = R^-1 ĉ(1 : n_2)
+(g) set m_k(J-rond) = ^m_k
+
+join all m_k to make M
