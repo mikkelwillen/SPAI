@@ -1,12 +1,28 @@
 Pseudocode for the SPAI algorithm
+M = sparsity matrix (set to diagonal, if no prior info is available)
+epsilon = tolerance (give as input to function, so user can choose)
+max_fill_in = constraint for the maximal number of iterations (give as input)
+s = number of rho_j - the most profitable indices (set to 5) (could think of a smart weighting)
+
 
 For every column m_k of M
-(a) Find initial sparsity J-rond of m_k
-(b) Compute the row indices I-rond of the corresponding nonzero entries of A(i, J-rond)
+(a) Find initial sparsity J-round of m_k
+(b) Compute the row indices I-round of the corresponding nonzero entries of A(i, J-rond)
 (c) Create Â = A(I-rond, J-rond) (all the rows not removed from the previous step
 (d) Do QR decomposition of Â
 (e) Compute ĉ = Q^T ê_k
 (f) Compute ^m_k = R^-1 ĉ(1 : n_2)
 (g) set m_k(J-rond) = ^m_k
 
-join all m_k to make M
+while residual > tolerance:
+	(a) Set L-rond set of indices, where r(l) =/= 0 (can be restricted to some number of largest elementsx in r)
+	(b) Set J-rond_tilde all new column indices of A that appear in all L-rond rows, but is not in J-rond yet
+	(c) For each j in J-rond_tilde compute:
+		rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
+	(d) find the indices J_tilde corrosponding to the smallest s elements of rho^2
+	(e) Determine the new indices I-rond_tilde
+	(f) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
+	(g) Update the QR decomposition with:
+		A' (alg. 17)
+	(h) compute the new residual
+		r = A' m_k - e_k
