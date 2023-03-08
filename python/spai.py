@@ -135,7 +135,13 @@ def SPAI(A, tol = 0.001, max_iter = 1, s = 5):
                     APrime[i, j] = A[I[i], J[j]]
             print("APrime:\n", APrime)
 
-            # g) Update the QR decomposition with algo 17
+            # g) Update the QR decomposition with algo 17 (too simple now)
+            QPrime, RPrime = np.linalg.qr(APrime)
+            print("QPrime:\n", QPrime)
+            print("RPRime:\n", RPrime)
+        
+    print("M:\n", M)
+    return M
             
 A = np.array([[0, 1, 2],[3, 4, 0], [6, 0, 0]])
 B = np.array([[9, 1, 2],[3, 4, 5], [6, 7, 8]])
