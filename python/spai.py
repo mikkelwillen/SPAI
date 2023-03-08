@@ -5,7 +5,7 @@ import scipy as sp
 # tol = tolerance
 # max_iter = constraint for the maximal number of iterations
 # s = number of rho_j, the most profitable indices
-def SPAI(A, tol = 0.001, max_iter = 1, s = 5):
+def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
     # M = sparsity matrix, set to diagonal
     M =  np.identity(A.shape[0])
     print(A)
@@ -56,7 +56,6 @@ def SPAI(A, tol = 0.001, max_iter = 1, s = 5):
                 e_kHat[i] = 1
         e_k = np.zeros(m_k.shape)
         e_k[k] = 1
-        k += 1
         print("e_k:", e_kHat)
         cHat = np.matmul(Q.T, e_kHat)
         print("cHat:", cHat)
@@ -98,7 +97,7 @@ def SPAI(A, tol = 0.001, max_iter = 1, s = 5):
             # c) For each j in Ĵ compute:
             rhoSq = []
             for j in JTilde:
-                e_j = np.zeros(M.shape[1])
+                e_j = np.zeros(A.shape[1])
                 e_j[j] = 1
                 µ = (np.matmul(np.matmul(residual.T, A), e_j) ** 2) / (np.linalg.norm(np.matmul(A, e_j)) ** 2)
                 tmp = np.linalg.norm(residual) - µ
@@ -138,12 +137,42 @@ def SPAI(A, tol = 0.001, max_iter = 1, s = 5):
             # g) Update the QR decomposition with algo 17 (too simple now)
             QPrime, RPrime = np.linalg.qr(APrime)
             print("QPrime:\n", QPrime)
-            print("RPRime:\n", RPrime)
+            print("RPrime:\n", RPrime)
+
+            # h) compute ĉ = Q^T ê_k
+            print("R:", RPrime)
+            print("Q:", QPrime)
+            e_kHat = np.zeros(len(I))
+            for i in range(len(I)):
+                if k == I[i]:
+                    e_kHat[i] = 1
+            e_k = np.zeros(m_k.shape)
+            e_k[k] = 1
+            print("e_k:", e_kHat)
+            cHat = np.matmul(QPrime.T, e_kHat)
+            print("cHat:", cHat)
+
+            # i) compute ^m_k = R^-1 ĉ
+            mHat_k = np.matmul(np.linalg.inv(RPrime), cHat)
+            print("mHat_k:", mHat_k)
+
+            # j) set m_k(J) = ^m_k
+            i = 0
+            for j in J:
+                m_k[j] = mHat_k[i]
+                i += 1
+            
+            print("A[:,J]:", A[:,J])
+            # k) compute residual
+            residual = np.subtract(np.matmul(A[:,J], mHat_k), e_k)
+            print("res:", residual)
         
+        #iterate k
+        k += 1
     print("M:\n", M)
     return M
             
-A = np.array([[0, 1, 2],[3, 4, 0], [6, 0, 0]])
-B = np.array([[9, 1, 2],[3, 4, 5], [6, 7, 8]])
-C = np.array([[1], [2], [3]])
-SPAI(A)
+# A = np.array([[0, 1, 2],[3, 4, 0], [6, 0, 0]])
+# B = np.array([[9, 1, 2],[3, 4, 5], [6, 7, 8]])
+# C = np.array([[1], [2], [3]])
+# SPAI(A)
