@@ -25,5 +25,8 @@ while residual > tolerance:
 	(f) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
 	(g) Update the QR decomposition with:
 		A' (alg. 17)
-	(h) compute the new residual
+	(h) Compute ĉ = Q^T ê_k
+	(i) Compute ^m_k = R^-1 ĉ(1 : n_2)
+	(j) set m_k(J-rond) = ^m_k
+	(k) compute the new residual
 		r = A' m_k - e_k
