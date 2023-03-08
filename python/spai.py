@@ -169,6 +169,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
         
         #iterate k
         k += 1
+    
     print("M:\n", M)
     return M
             
