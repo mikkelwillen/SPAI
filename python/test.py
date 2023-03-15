@@ -19,12 +19,16 @@ def compare(A):
 
 def checkIdentity(A):
     spaiTest = spai.SPAI(A)
+    print("shapeA:\n %a, shapeM:\n %a" %(A.shape, spaiTest.shape))
     identity = np.matmul(A, spaiTest)
     print("identity:\n", identity)
     print("normI:\n", np.linalg.norm(identity))
+    print("shape:\n", identity.shape)
 
 def test(A):
     spai.SPAI(A)
 
-test1 = arrayGen(10, 10)
+
+test1 = arrayGen(100, 100)
 checkIdentity(test1)
+    

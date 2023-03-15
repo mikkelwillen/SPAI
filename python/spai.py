@@ -1,13 +1,16 @@
 import numpy as np
 import scipy as sp
+import qr
 
 # A = The matrix we want to perform the SPAI on
 # tol = tolerance
 # max_iter = constraint for the maximal number of iterations
 # s = number of rho_j, the most profitable indices
-def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
+def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
     # M = sparsity matrix, set to diagonal
-    M =  np.identity(A.shape[0])
+    M = np.zeros((A.shape[1], A.shape[0]))
+    for i in range(M.shape[0]):
+        M[i, i] = 1
     print(A)
     print(M)
 
@@ -28,7 +31,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
 
         # b) Compute the row indices I of the corrosponding nonzero entries of A(i, J)
         I = []
-        for i in range(len(m_k)):
+        for i in range(A.shape[0]):
             keep = False
             for j in range(len(J)):
                 if A[i, J[j]] != 0:
@@ -45,7 +48,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
         print("J:", J)
 
         # d) Do QR decomposition
-        Q, R = np.linalg.qr(AHat)
+        Q, R = qr.qr_factorization(AHat)
         
         # e) compute ĉ = Q^T ê_k
         print("R:", R)
@@ -54,7 +57,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
         for i in range(len(I)):
             if k == I[i]:
                 e_kHat[i] = 1
-        e_k = np.zeros(m_k.shape)
+        e_k = np.zeros(M.shape[1])
         e_k[k] = 1
         print("e_k:", e_kHat)
         cHat = np.matmul(Q.T, e_kHat)
@@ -88,7 +91,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
             # b) Set Ĵ to all new column indices of A that appear in all L rows
             JTilde = []
             for i in L:
-                for j in range(M.shape[1]):
+                for j in range(A.shape[1]):
                     if A[i, j] != 0 and j not in JTilde and j not in J:
                         JTilde.append(j)
             JTilde.sort()
@@ -135,20 +138,18 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
             print("APrime:\n", APrime)
 
             # g) Update the QR decomposition with algo 17 (too simple now)
-            QPrime, RPrime = np.linalg.qr(APrime)
+            QPrime, RPrime = qr.qr_factorization(APrime)
             print("QPrime:\n", QPrime)
             print("RPrime:\n", RPrime)
 
             # h) compute ĉ = Q^T ê_k
-            print("R:", RPrime)
-            print("Q:", QPrime)
             e_kHat = np.zeros(len(I))
             for i in range(len(I)):
                 if k == I[i]:
                     e_kHat[i] = 1
-            e_k = np.zeros(m_k.shape)
+            e_k = np.zeros(M.shape[1])
             e_k[k] = 1
-            print("e_k:", e_kHat)
+            print("e_kHat:", e_kHat)
             cHat = np.matmul(QPrime.T, e_kHat)
             print("cHat:", cHat)
 
@@ -170,6 +171,7 @@ def SPAI(A, tol = 0.001, max_iter = 10, s = 5):
         #iterate k
         k += 1
     
+    print("A:\n", A)
     print("M:\n", M)
     return M
             
