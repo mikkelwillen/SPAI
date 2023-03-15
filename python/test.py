@@ -29,6 +29,6 @@ def test(A):
     spai.SPAI(A)
 
 
-test1 = arrayGen(100, 100)
+test1 = arrayGen(15, 10)
 checkIdentity(test1)
     
