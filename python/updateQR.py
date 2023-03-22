@@ -57,6 +57,32 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
     QB1, RB1 = qr.qr_factorization(B2)
     QB, RB = np.linalg.qr(B2)
 
+    # Stack matrices (from eq 17)
+    unsortedQ = np.zeros((Q.shape[0] + QB.shape[0], Q.shape[1] + QB.shape[1]))
+    for i in range(Q.shape[0]):
+        for j in range(Q.shape[1]):
+            unsortedQ[i, j] = Q[i, j]
+    
+    for i in range(QB.shape[0]):
+        for j in range(QB.shape[1]):
+            unsortedQ[Q.shape[0] + i, Q.shape[1] + j] = QB[i, j]
+    
+    print("UnsortedQ: ", unsortedQ)
+
+    newQ = np.zeros((Q.shape[0] + QB.shape[0], Q.shape[1] + QB.shape[1]))
+    # sort matrix
+    for j in range(len(UnionJ)):
+        for jj in range(len(J)):
+            if UnionJ[j] == J[jj]:
+                for i in range(newQ.shape[0]):
+                    newQ[i, j] = unsortedQ[i, jj]
+        for jj in range(len(JTilde)):
+            if UnionJ[j] == JTilde[jj]:
+                for i in range(newQ.shape[0]):
+                    newQ[i, j] = unsortedQ[i, len(J) + jj]
+
+    print("newQ: ", newQ)
+
     # 7. MTilde = do minimization
     #  a. compute ĉ = Q^T ê_k
     e_kHat = np.zeros(len(I) + len(ITilde) - len(J))
