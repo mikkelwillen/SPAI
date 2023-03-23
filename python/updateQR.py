@@ -82,17 +82,18 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
                     newQ[i, j] = unsortedQ[i, len(J) + jj]
 
     print("newQ: ", newQ)
+    print("newQ - UnsortedQ: ", newQ - unsortedQ)
 
     # 7. MTilde = do minimization
     #  a. compute ĉ = Q^T ê_k
-    e_kHat = np.zeros(len(I) + len(ITilde) - len(J))
-    for i in range(len(I) + len(ITilde) - len(J)):
+    e_kHat = np.zeros(len(UnionI))
+    for i in range(len(UnionI)):
         if k == UnionI[i]:
             e_kHat[i] = 1
     e_k = np.zeros(len(UnionI))
     e_k[k] = 1
     print("e_kHat:", e_kHat)
-    cHat = np.matmul(QB.T, e_kHat)
+    cHat = np.matmul(newQ.T, e_kHat)
     print("cHat:", cHat)
 
     #  b. compute ^m_k = R^-1 ĉ
