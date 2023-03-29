@@ -12,8 +12,15 @@ struct CSC;
 // n = number of columns
 struct CSC* createCSC(float* A, int m, int n);
 
+// Function for creating a compressed sparse column matrix with 1's in the diagonal
+// m = number of rows
+// n = number of columns
+struct CSC* createDiagonalCSC(int m, int n);
+
+// Frees all the elements of a CSC struct
 void freeCSC(struct CSC* csc);
 
+// Prints all the elements of a CSC struct
 void printCSC(struct CSC* csc);
 
 #endif

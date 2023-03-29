@@ -8,13 +8,21 @@ int main() {
     int n = 3;
 
     float* A = malloc(sizeof(float) * m * n);
+    float* B = malloc(sizeof(float) * m * n);
 
-    for (int i = 0; i > m - 1; i++) {
-        for (int j = 0; j > n - 1; j++) {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
             A[i * n + j] = (float) i * n + j;
-            printf("A: %f\n", A[i * n + j]);
         }
     }
-    struct CSC* csc1 = createCSC(A, m, n);
-    printCSC(csc1);
+
+    B[0] = 20.0; B[1] = 0.0; B[2] = 0.0; B[3] = 0.0; B[4] = 30.0; B[5] = 10.0; 
+    B[6] = 0.0; B[7] = 0.0; B[8] = 0.0; B[9] = 0.0; B[10] = 40.0; B[11] = 0.0;
+
+    struct CSC* cscA = createCSC(A, m, n);
+    struct CSC* cscB = createCSC(B, m, n);
+    struct CSC* cscDia = createDiagonalCSC(m, n);
+    printCSC(cscA);
+    printCSC(cscB);
+    printCSC(cscDia);
 }
