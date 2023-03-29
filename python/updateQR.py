@@ -52,11 +52,15 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
         for j in range(len(JTilde)):
             B2[len(I) - len(J) + i, j] = AITildeJTilde[i, j]
     print("B2:", B2)
+    print("B2 shape:", B2.shape)
+    print("Itilde len:", len(ITilde))
+    print("I + ITilde - J:", len(I)+len(ITilde)+len(J))
     
     # 6. QB, RB = qr(B2)
     QB1, RB1 = qr.qr_factorization(B2)
-    QB, RB = np.linalg.qr(B2)
+    QB, RB = np.linalg.qr(B2, mode="complete")
 
+    print("QB.shape: ", QB.shape)
     # Stack matrices (from eq 17)
     unsortedQ = np.zeros((Q.shape[0] + QB.shape[0], Q.shape[1] + QB.shape[1]))
     for i in range(Q.shape[0]):
@@ -86,6 +90,7 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
 
     # 7. MTilde = do minimization
     #  a. compute ĉ = Q^T ê_k
+    print("UnionI: ", len(UnionI))
     e_kHat = np.zeros(len(UnionI))
     for i in range(len(UnionI)):
         if k == UnionI[i]:

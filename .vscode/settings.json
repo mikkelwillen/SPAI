@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.le": "lisp",
+        "stdio.h": "c"
+    }
+}

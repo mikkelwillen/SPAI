@@ -1,10 +1,7 @@
+#include "spai.h"
 #include <stdio.h>
+#include <stdlib.h>
 
-// A = matrix we want to compute SPAI on
-// m, n = size of array
-// tol = tolerance
-// max_fill_in = constraint for the maximal number of iterations
-// s = number of rho_j - the most profitable indices
 int spai(float* A, int m, int n, float tol, int max_fill_in, int s) {
     // initialize M and set to diagonal
     float* M = calloc(n * n, sizeof(float));
@@ -21,8 +18,4 @@ int spai(float* A, int m, int n, float tol, int max_fill_in, int s) {
         int* J;
         
     }
-}
-
-int main() {
-    // run SPAI
 }
