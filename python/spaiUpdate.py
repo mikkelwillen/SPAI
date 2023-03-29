@@ -115,9 +115,10 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
             ITilde = []
             for i in range(len(m_k)):
                 keep = False
-                for j in range(len(JTilde)):
-                    if A[i, JTilde[j]] != 0:
-                        keep = True
+                if i not in I:
+                    for j in range(len(JTilde)):
+                        if A[i, JTilde[j]] != 0:
+                            keep = True
                 if keep:
                     ITilde.append(i)
 

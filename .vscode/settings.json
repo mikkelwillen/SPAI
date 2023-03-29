@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.le": "lisp",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "csc.h": "c"
     }
 }

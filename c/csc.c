@@ -10,7 +10,7 @@ struct CSC {
     int countNonZero;
     int* offset;
     float* flatData;
-    int* flatColsIndex;
+    int* flatRowIndex;
 }; 
 
 struct CSC* createCSC(float* A, int m, int n) {
@@ -51,12 +51,12 @@ struct CSC* createCSC(float* A, int m, int n) {
         }
     }
 
-    csc->flatColsIndex = malloc(sizeof(int) * csc->countNonZero);
+    csc->flatRowIndex = malloc(sizeof(int) * csc->countNonZero);
     index = 0;
     for (int j = 0; j < n; j++) {
         for (int i = 0; i < m; i++) {
             if (A[i * n + j] != 0.0) {
-                csc->flatColsIndex[index] = i;
+                csc->flatRowIndex[index] = i;
                 index++;
             }
         }
@@ -72,9 +72,12 @@ struct CSC* createDiagonalCSC(int m, int n){
     csc->countNonZero = n;
 
     csc->offset = malloc(sizeof(int) * (csc->n + 1));
-    for (int j = 0; j < m + 1; j++) {
-        if (j < n)
-        csc->offset[j] = j;
+    for (int j = 0; j < csc->n + 1; j++) {
+        if (j < csc->m) {
+            csc->offset[j] = j;
+        } else {
+            csc->offset[j] = csc->m;
+        }
     }
 
     csc->flatData = malloc(sizeof(float) * csc->countNonZero);
@@ -82,9 +85,9 @@ struct CSC* createDiagonalCSC(int m, int n){
         csc->flatData[j] = 1.0;
     }
 
-    csc->flatColsIndex = malloc(sizeof(int) * csc->countNonZero);
+    csc->flatRowIndex = malloc(sizeof(int) * csc->countNonZero);
     for (int i = 0; i < n; i++) {
-        csc->flatColsIndex[i] = i;
+        csc->flatRowIndex[i] = i;
     }
 
     return csc;
@@ -93,7 +96,7 @@ struct CSC* createDiagonalCSC(int m, int n){
 void freeCSC(struct CSC* csc) {
     free(csc->offset);
     free(csc->flatData);
-    free(csc->flatColsIndex);
+    free(csc->flatRowIndex);
 }
 
 void printCSC(struct CSC* csc) {
@@ -110,9 +113,9 @@ void printCSC(struct CSC* csc) {
         printf("%f ", csc->flatData[i]);
     }
     printf("\n");
-    printf("csc->flatColsIndex: ");
+    printf("csc->flatRowIndex: ");
     for (int i = 0; i < csc->countNonZero; i++) {
-        printf("%d ", csc->flatColsIndex[i]);
+        printf("%d ", csc->flatRowIndex[i]);
     }
     printf("\n");
 }

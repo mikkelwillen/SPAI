@@ -1,4 +1,5 @@
 #include "csc.h"
+#include "spai.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -20,9 +21,11 @@ int main() {
     B[6] = 0.0; B[7] = 0.0; B[8] = 0.0; B[9] = 0.0; B[10] = 40.0; B[11] = 0.0;
 
     struct CSC* cscA = createCSC(A, m, n);
-    struct CSC* cscB = createCSC(B, m, n);
-    struct CSC* cscDia = createDiagonalCSC(m, n);
-    printCSC(cscA);
-    printCSC(cscB);
-    printCSC(cscDia);
+    // struct CSC* cscB = createCSC(B, m, n);
+    // struct CSC* cscDia = createDiagonalCSC(m, n);
+    // printCSC(cscA);
+    // printCSC(cscB);
+    // printCSC(cscDia);
+
+    spai(cscA, 0.01, 5, 1);
 }

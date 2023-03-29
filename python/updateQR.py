@@ -62,8 +62,8 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
 
     print("QB.shape: ", QB.shape)
     # Stack matrices (from eq 17)
-    unsortedQ = np.zeros((Q.shape[0] + QB.shape[0], Q.shape[1] + QB.shape[1]))
-    for i in range(Q.shape[0]):
+    unsortedQ = np.zeros((Q.shape[1] + QB.shape[0], Q.shape[1] + QB.shape[1]))
+    for i in range(Q.shape[1]):
         for j in range(Q.shape[1]):
             unsortedQ[i, j] = Q[i, j]
     
@@ -73,7 +73,7 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
     
     print("UnsortedQ: ", unsortedQ)
 
-    newQ = np.zeros((Q.shape[0] + QB.shape[0], Q.shape[1] + QB.shape[1]))
+    newQ = np.zeros((Q.shape[1] + QB.shape[0], Q.shape[1] + QB.shape[1]))
     # sort matrix
     for j in range(len(UnionJ)):
         for jj in range(len(J)):
