@@ -100,6 +100,7 @@ void freeCSC(struct CSC* csc) {
 }
 
 void printCSC(struct CSC* csc) {
+    printf("--------Printing CSC data--------");
     printf("csc->m: %d\n", csc->m);
     printf("csc->n: %d\n", csc->n);
     printf("csc->countNonZero: %d\n", csc->countNonZero);

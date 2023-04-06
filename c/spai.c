@@ -12,7 +12,7 @@ struct CSC* spai(struct CSC* A, float tol, int max_fill_in, int s) {
 
         // a) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
-        int* J = malloc(sizeof(int) * (M->offset[k + 1] - M->offset[k]);
+        int* J = malloc(sizeof(int) * (M->offset[k + 1] - M->offset[k]));
 
         // iterate through row indeces from offset[k] to offset[k + 1]
         int j = 0;
