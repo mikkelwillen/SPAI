@@ -1,5 +1,5 @@
-#include "csc.h"
-#include "spai.h"
+#include "csc.cu.h"
+#include "sequentialSpai.cu.h"
 #include <stdio.h>
 #include <stdlib.h>
 

@@ -4,7 +4,20 @@
 #include <stdio.h>
 
 // A struct representing a sparse matrix
-struct CSC;
+// int m;
+// int n;
+// int countNonZero;
+// int* offset;
+// float* flatData;
+// int* flatRowIndex;
+struct CSC {
+    int m;
+    int n;
+    int countNonZero;
+    int* offset;
+    float* flatData;
+    int* flatRowIndex;
+};
 
 // Function for creating a compressed sparse column matrix
 // A = Dense matrix

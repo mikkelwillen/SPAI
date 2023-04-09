@@ -11,4 +11,4 @@ test: test.o csc.o spai.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 clean:
-	rm -rf spai
+	rm -rf spai test *.o

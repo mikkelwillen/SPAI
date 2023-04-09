@@ -2,7 +2,7 @@
 #define SPAI_H
 
 #include <stdio.h>
-#include "csc.h"
+#include "csc.cu.h"
 
 // A = matrix we want to compute SPAI on
 // m, n = size of array

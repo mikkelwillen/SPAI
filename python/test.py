@@ -90,7 +90,7 @@ def errorTestU(A):
     normINP = np.linalg.norm(identityNP)
 
     error = (normISPAI - normINP) / normINP
-    print("Error of the SPAI algorithm: %a", error)
+    print("Error of the SPAI algorithm: %a" % error)
 
 # Run SPAI
 def testU(A):

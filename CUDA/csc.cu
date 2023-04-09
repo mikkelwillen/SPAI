@@ -1,4 +1,4 @@
-#include "csc.h"
+#include "csc.cu.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>

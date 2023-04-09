@@ -30,7 +30,7 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
             if m_k[i] != 0:
                 J.append(i)
 
-        # b) Compute the row indices I of the corrosponding nonzero entries of A(i, J)
+        # b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         I = []
         for i in range(A.shape[0]):
             keep = False
@@ -124,15 +124,17 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             # f) Update the QR decomposition with algo 17 (too simple now)
             print("I: ", I)
-            mHat_k, newI, newJ = updateQR.updateQR(A, Q, R1, I, J, ITilde, JTilde, k)
+            mHat_k, newI, newJ, Q, R1 = updateQR.updateQR(A, Q, R1, I, J, ITilde, JTilde, k)
 
             I = newI
             J = newJ
 
             # h) set m_k(J) = ^m_k
             i = 0
-            for j in J:
-                m_k[j] = mHat_k[i]
+            print("J", J)
+            for j in range(len(J)):
+                print("(i, j): ", i, j)
+                m_k[J[j]] = mHat_k[i]
                 i += 1
             
         #iterate k

@@ -1,4 +1,4 @@
-#include "spai.h"
+#include "spai.cu.h"
 #include "csc.h"
 #include <stdio.h>
 #include <stdlib.h>

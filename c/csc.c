@@ -4,15 +4,6 @@
 #include <assert.h>
 #include <math.h>
 
-struct CSC {
-    int m;
-    int n;
-    int countNonZero;
-    int* offset;
-    float* flatData;
-    int* flatRowIndex;
-}; 
-
 struct CSC* createCSC(float* A, int m, int n) {
     struct CSC* csc = malloc(sizeof(struct CSC));
     csc->m = m;

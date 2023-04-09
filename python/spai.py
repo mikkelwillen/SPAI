@@ -6,7 +6,7 @@ import qr
 # tol = tolerance
 # max_iter = constraint for the maximal number of iterations
 # s = number of rho_j, the most profitable indices
-def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
+def SPAI(A, tol = 0.001, max_iter = 100, s = 1):
     # M = sparsity matrix, set to diagonal
     M = np.zeros((A.shape[1], A.shape[0]))
     for i in range(M.shape[0]):

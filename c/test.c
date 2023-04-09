@@ -27,5 +27,7 @@ int main() {
     // printCSC(cscB);
     // printCSC(cscDia);
 
-    spai(cscA, 0.01, 5, 1);
+    printf("test2");
+    struct CSC* M = spai(cscA, 0.01, 5, 1);
+    printCSC(M);
 }
