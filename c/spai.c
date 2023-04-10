@@ -23,12 +23,11 @@ struct CSC* spai(struct CSC* A, float tol, int max_fill_in, int s) {
         }
 
         // b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
-        printf("test1");
         int* I = calloc(M->m, sizeof(int));
-        printf("test");
         int n1 = 0;
+        printCSC(A);
         for (int j = 0; j < n2; j++) {
-            for (int i = A->offset[j]; A->offset[j + 1]; i++) {
+            for (int i = A->offset[j]; i < A->offset[j + 1]; i++) {
                 int keep = 1;
                 for (int h = 0; h < M->m; h++) {
                     if (A->flatRowIndex[i] == I[h]) {
