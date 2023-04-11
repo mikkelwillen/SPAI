@@ -21,13 +21,12 @@ int main() {
     B[6] = 0.0; B[7] = 0.0; B[8] = 0.0; B[9] = 0.0; B[10] = 40.0; B[11] = 0.0;
 
     struct CSC* cscA = createCSC(A, m, n);
-    // struct CSC* cscB = createCSC(B, m, n);
+    struct CSC* cscB = createCSC(B, m, n);
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);
     // printCSC(cscDia);
 
-    printf("test2");
-    struct CSC* M = spai(cscA, 0.01, 5, 1);
+    struct CSC* M = spai(cscB, 0.01, 5, 1);
     printCSC(M);
 }

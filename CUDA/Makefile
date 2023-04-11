@@ -1,16 +1,14 @@
-COMPILER = nvcc -O3 -arch=compute_35
+COMPILER = nvcc -lcublas
+OPT_FLAGS = -O3 -arch=compute_35
 
-SOURCES = sequentialSpai.cu
-HELPERS = csc.cu
+SOURCES = sequentialSpai.cu.h
+HELPERS = csc.cu.h constants.cu.h
 
 TEST1 = sequentialTest.cu
 EXECUTABLE1 = SequentialTest
 
 
 default: compile run
-
-.cu.o: $(SOURCES) $(HELPERS)
-	$(COMPILER) -c $@ $<
 
 
 compile: $(EXECUTABLE1)
@@ -24,4 +22,4 @@ run: $(EXECUTABLE1)
 
 
 clean:
-	rm -f $(EXECUTABLE1)
+	rm -f $(EXECUTABLE1) *.o

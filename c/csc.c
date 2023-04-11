@@ -4,8 +4,8 @@
 #include <assert.h>
 #include <math.h>
 
-struct CSC* createCSC(float* A, int m, int n) {
-    struct CSC* csc = malloc(sizeof(struct CSC));
+CSC* createCSC(float* A, int m, int n) {
+    CSC* csc = malloc(sizeof(CSC));
     csc->m = m;
     csc->n = n;
 
@@ -56,8 +56,8 @@ struct CSC* createCSC(float* A, int m, int n) {
     return csc;
 }
 
-struct CSC* createDiagonalCSC(int m, int n){
-    struct CSC* csc = malloc(sizeof(struct CSC));
+CSC* createDiagonalCSC(int m, int n){
+    CSC* csc = malloc(sizeof(CSC));
     csc->m = n;
     csc->n = m;
     csc->countNonZero = n;
@@ -84,14 +84,14 @@ struct CSC* createDiagonalCSC(int m, int n){
     return csc;
 }
 
-void freeCSC(struct CSC* csc) {
+void freeCSC(CSC* csc) {
     free(csc->offset);
     free(csc->flatData);
     free(csc->flatRowIndex);
 }
 
-void printCSC(struct CSC* csc) {
-    printf("--------Printing CSC data--------");
+void printCSC(CSC* csc) {
+    printf("\n--------Printing CSC data--------\n");
     printf("csc->m: %d\n", csc->m);
     printf("csc->n: %d\n", csc->n);
     printf("csc->countNonZero: %d\n", csc->countNonZero);
