@@ -107,6 +107,30 @@ CSC* createDiagonalCSC(int m, int n){
     return csc;
 }
 
+// Function for creating a random CSC with specified sparsity
+// m = number of rows
+// n = number of columns
+// sparsity = The sparsity of the matrix. Should be a number between 0.0-1.0. 
+CSC* createRandomCSC(int m, int n, float sparsity){
+    float* M = (float*) malloc(sizeof(float) * m * n);
+    
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            float x = ((float) rand() / (float) (RAND_MAX));
+            if (x < sparsity) {
+                float y = ((float) rand() / (float) (RAND_MAX)) * 100.0;
+                M[i * n + j] = y;
+            } else {
+                M[i * n + j] = 0.0;
+            }
+        }
+    }
+
+    CSC* A = createCSC(M, m, n);
+
+    return A;
+}
+
 // Frees all the elements of a CSC struct
 void freeCSC(CSC* csc) {
     free(csc->offset);

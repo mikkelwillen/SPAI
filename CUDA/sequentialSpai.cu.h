@@ -14,7 +14,7 @@
 // tol = tolerance
 // max_fill_in = constraint for the maximal number of iterations
 // s = number of rho_j - the most profitable indices
-CSC* spai(CSC* A, float tol, int max_fill_in, int s) {
+CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
     printCSC(A);
 
     // initialize cuBLAS

@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "csc.cu.h"
 #include "sequentialSpai.cu.h"
+#include "sequentialTest.cu.h"
+
+
 
 
 int main() {
@@ -22,11 +25,18 @@ int main() {
 
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
+    struct CSC* cscC = createRandomCSC(40, 40, 0.2);
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);
     // printCSC(cscDia);
+    // struct CSC* M = sequentialSpai(cscB, 0.01, 5, 1);
+    // printCSC(M);
 
-    struct CSC* M = spai(cscB, 0.01, 5, 1);
-    printCSC(M);
+    printCSC(cscC);
+    sequentialTest(cscC);
+
+
+
+
 }
