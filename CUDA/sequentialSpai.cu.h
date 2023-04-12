@@ -120,6 +120,40 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
         if (stat != CUBLAS_STATUS_SUCCESS) {
             printf("\ncublasSgeqrfBatched failed");
         }
+
+        // // e) compute ĉ = Q^T ê_k
+        // // make e_k and set index k to 1.0
+        // float* e_k = (float*) calloc(n1, sizeof(float));
+        // e_k[k] = 1.0;
+
+        // // malloc size for cHat and do matrix multiplication
+        // float* cHat = (float*) malloc(sizeof(float) * n1);
+        // for (int i = 0; i < n1; i++) {
+        //     for (int j = 0; j < n1; j++) {
+        //         cHat[i] = Q1[i * n1 + j] * e_k[i];
+        //     }
+        // }
+
+        // // f) compute ^m_k = R^-1 ĉ
+        // // malloc space for mHat_k
+        // float* mHat_k = (float*) malloc(sizeof(float) * n2);
+        
+        // // malloc space for the inverse of R1
+        // float* invR1 = (float*) malloc(sizeof(float) * n2 * n2);
+        // // make the inverse
+
+        // // matrix multiplication
+        // for (int i = 0; i < n2; i++) {
+        //     for (int j = 0; j < n2; j++) {
+        //         mHat_k[i] = invR1[i * n2 + j] * cHat[i];
+        //     }
+        // }
+
+        // // g) set m_k(J) = ^m_k
+        // // vi skal have lavet en function, som kan opdatere en CSC
+
+        // // compute residual
+
     }
     
     return M;

@@ -6,8 +6,6 @@
 #include "sequentialTest.cu.h"
 
 
-
-
 int main() {
     initHwd();
     int m = 4;
@@ -22,8 +20,10 @@ int main() {
         }
     }
 
-    B[0] = 20.0; B[1] = 0.0; B[2] = 0.0; B[3] = 0.0; B[4] = 30.0; B[5] = 10.0; 
-    B[6] = 0.0; B[7] = 0.0; B[8] = 0.0; B[9] = 0.0; B[10] = 40.0; B[11] = 0.0;
+    B[0] = 20.0; B[1] = 0.0;   B[2] = 0.0; 
+    B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
+    B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
+    B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
 
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
