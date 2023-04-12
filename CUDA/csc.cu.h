@@ -2,6 +2,7 @@
 #define CSC_H
 
 #include <stdio.h>
+#include <time.h>
 
 // A struct representing a sparse matrix
 // int m;
@@ -113,6 +114,9 @@ CSC* createDiagonalCSC(int m, int n){
 // sparsity = The sparsity of the matrix. Should be a number between 0.0-1.0. 
 CSC* createRandomCSC(int m, int n, float sparsity){
     float* M = (float*) malloc(sizeof(float) * m * n);
+    
+    time_t t;
+    srand((unsigned) time(&t));
     
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {

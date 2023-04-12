@@ -56,5 +56,12 @@ int timeval_subtract(struct timeval *result, struct timeval *t2, struct timeval 
     return (diff<0);
 }
 
+int gpuAssert(cudaError_t code) {
+  if(code != cudaSuccess) {
+    printf("GPU Error: %s\n", cudaGetErrorString(code));
+    return -1;
+  }
+  return 0;
+}
 
 #endif //HWD_SOFT_CONSTANTS

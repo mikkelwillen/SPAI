@@ -1,11 +1,11 @@
 COMPILER = nvcc -lcublas
 OPT_FLAGS = -O3 -arch=compute_35
 
-SOURCES = sequentialSpai.cu.h
+SOURCES = sequentialSpai.cu.h sequentialTest.cu.h
 HELPERS = csc.cu.h constants.cu.h
 
-TEST1 = sequentialTest.cu
-EXECUTABLE1 = SequentialTest
+TEST1 = testSpai.cu
+EXECUTABLE1 = testSpai
 
 
 default: compile run

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "csc.cu.h"
+#include "constants.cu.h"
 #include "sequentialSpai.cu.h"
 #include "sequentialTest.cu.h"
 
@@ -8,6 +9,7 @@
 
 
 int main() {
+    initHwd();
     int m = 4;
     int n = 3;
 
@@ -25,7 +27,7 @@ int main() {
 
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
-    struct CSC* cscC = createRandomCSC(40, 40, 0.2);
+    struct CSC* cscC = createRandomCSC(4, 4, 0.2);
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);
@@ -35,8 +37,4 @@ int main() {
 
     printCSC(cscC);
     sequentialTest(cscC);
-
-
-
-
 }
