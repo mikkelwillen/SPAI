@@ -1,0 +1,294 @@
+% key points of the implementation
+For the implementation of the single-pass scan algorithm, our approach was to first implement a chained-scan, and then extend that version into the single-pass scan, as we wanted to compare the results of the two approaches.
+
+Our implementation is split into five different files.
+We have \texttt{sPSKernels.cu.h}, \texttt{rTSKernels.cu.h} and \texttt{helperKernels.cu.h} which contain the kernels and kernels helper functions that we use in our project.
+
+\paragraph{Kernels and kernel functionality.}
+\texttt{sPSKernels.cu.h} contain the single-pass scan implementation, with the various strategies and optimisations that we have attempted.
+
+\texttt{rTSKernels.cu.h} contain the implementation of reduce-then-scan, from the second assignment of the course, which we use to compare our results with.
+
+\texttt{helperKernels.cu.h} contain some helper functionality that we use in both the single-pass scan and the reduce-then-scan kernel.
+
+\paragraph{Host skeleton.}
+The \texttt{hostSkel.cu.h} file contains the skeleton of our implementation. This is also based on the handed out code from the second assignment.
+
+It should be noted that we have different versions of the implementation, and therefore we take as input an integer parameter, ranging from $0$ to $3$, indicating which version we want to run.
+
+\paragraph{Tests.}
+The \texttt{testSPS.cu} file contains the tests of our implementation.
+We test both the validity and performance of the implementation.
+
+First we compute a sequential scan directly on the CPU, to have a reference solution to compare with our result, in order to ensure validity.
+
+Then we compute the scan using a reduce-then-scan approach, to get something to compare performance with. It is also checked that this vrsion validates, and the runtime in microseconds and the GB/sec is reported.
+
+Lastly we run our implementation, and checks validity by comparing the result with the reference solution, and reports the performance in the same way as for reduce-then-scan.
+
+\paragraph{Makefile.}
+We have provided a Makefile, with which you can compile the program, and run the tests different versions of the impelmentation.
+To test on a specific version simply run
+\begin{lstlisting}
+  $ make v<version>
+\end{lstlisting}
+where $version$ is the number of version you want to run. Eg. for running the tests if version two, run
+\begin{lstlisting}
+  $ make v2
+\end{lstlisting}
+in the terminal.
+
+
+\subsection{Skeleton}
+The way we build up our implementation is by following the algorithm as directly as possible.
+This means that we follow the six steps of the algorithm, but allow for different versions of step 4.
+This means that we must first initialise the partition descriptors of all partitions.
+We use blocks as our partitions, and let each thread in a block scan over \texttt{CHUNK} elements.
+Now to implement the partition descriptors we use three arrays, one for storing the flags of all blocks, one for storing the aggregate values, and one for storing the prefix values.
+The flags are either $0$, $1$ or $2$, representing $X$, $A$ and $P$ respectively.
+These arrays are allocated in global memory, as all blocks need to be able to access them, and to get the updated values from other blocks.
+To ensure that the arrays are initialized before step 3, i.e. to ensure the synchronization of step 2, we allocate the two arrays before starting the kernel.
+This is done in the host skeleton file. Here we also initialise the flag array to be filled with $0$s.
+
+Now, after initialisation of these arrays, we start the kernel, giving the arrays as input.
+To make the order in which blocks compute their results follow the order in which blocks get shcedule ressources for computing, we want to use a dynamically allocated block id, instead of the physical block id.
+This will ensure that preceeding blocks, i.e. blocks with lower block ids, have been started earlier.
+The way that we dynamically allocate the block id is by instantiating a \texttt{int* block_num} to zero in the host skeleton file, and then passing the pointer to the kernel.
+Now a block computes its block id by calling an atomic add on the \texttt{block_num}, ensuring that the next block will get the next block id.
+We furthermore ensure that only one thread of the block computes the block id, and that the block id is shared block-wide, as seen in the listing below.
+\begin{lstlisting}[language=c++]
+volatile __shared__ int block_id;
+if (threadIdx.x == 0) {
+    block_id = atomicAdd(block_num, 1);
+} __syncthreads();
+\end{lstlisting}
+
+Now we are finally ready to move on to step 3: computing and recording the block-wide aggregate.
+This is done in parallel, by having eavh thread compute the scan of its own chunk elements.
+Each thread has a local array of chunk elements, which is used for storing the results of the scan over the chunk.
+This array is ensured to be in local memory, as \texttt{CHUNK} is a constant.
+
+Now the thread copies chunk elements from global to shared memory in a coalesced fashion.
+It can then compute the scan of the chunk elements by a simple sequential loop, and store the values in the chunk array, as seen below.
+\begin{lstlisting}[language=c++]
+typename OP::RedElTp acc = OP::identity();
+#pragma unroll
+for (uint32_t i = 0; i < CHUNK; i++) {
+    typename OP::RedElTp elm = shmem[shmem_offset + i];
+    acc = OP::apply(acc, elm);
+    chunk[i] = acc;
+}
+__syncthreads();
+\end{lstlisting}
+
+Next we want to compute the aggregate of the block.
+This is done by letting each thread publish their chunk aggregate to shared memory, and then scanning over the array, to get the chunk inclusive prefix (the sum of aggregates up til and including the current chunk).
+Each thread then again publishes the chunk inclusive prefix to shared memory, so that each thread can fetch their chunk exclusive prefix.
+Finally each thread initialize their local block exclusive prefix to zero, and we are ready for publishing the block aggregate and finding the block exclusive prefix.
+The implementation is shown below.
+\begin{lstlisting}[language=c++]
+// 3.1 last elem of each thread is placed in shmem_buf.
+shmem[threadIdx.x] = acc;
+__syncthreads();
+
+// 3.2 block-wise scan over the shmem_buff
+acc = scanIncBlock<OP>(shmem, threadIdx.x);
+__syncthreads();
+
+shmem[threadIdx.x] = acc;
+__syncthreads();
+
+// chunk_exl_prefix is set to be the previous chunks inclusive prefix
+typename OP::RedElTp chunk_exl_prefix =
+    (threadIdx.x == 0) ? OP::remVolatile(shmem[blockDim.x - 1]) : OP::remVolatile(shmem[threadIdx.x - 1]);
+__syncthreads();
+
+block_exl_prefix = OP::identity();
+\end{lstlisting}
+
+The next part of the implementation is determined by the version, and both publishes the aggregate values, computes the block exclusive prefix, and publishes the block inclusive prefix.
+We will present the approach for each version in the next subsections.
+\\~\\
+
+After steps 4 and 5 have been computed, we are ready for adding the block exclusive prefix and chunk exclusive prefix to the scan results of each chunk elements, an copying the result to global memory.
+Again this is done with a simple sequential loop, followed by a coalesced copy from shared to global memory, as seen below.
+\begin{lstlisting}[language=c++]
+// 3.3 update the per thread-scan with the corresponding prefix
+#pragma unroll
+for (uint32_t i = 0; i < chunk; i++) {
+    shmem[shmem_offset + i] = op::apply(chunk_exl_prefix, chunk[i]);
+} __syncthreads();
+
+// 6. write back from shared to global memory in coalesced fashion.
+copyfromshr2glbmem<typename op::redeltp, chunk>
+    (block_offs, n, d_out, shmem);
+\end{lstlisting}
+
+And now the scan is complete.
+We will now look at the different versions for completing step 4 and 5.
+
+\subsection{Version 0: Chained-scan}
+The first version is the simple chained-scan version, which does not use aggregate values, and instead just waits for the previous block to have computed its inclusive prefix.
+
+The implementation simply ensures that the first block publishes its aggregate as the prefix,
+updates the flag to $P$,
+and then lets one thread of each block wait for the previous block to compute its prefix.
+The inclusive is then computed and published, and the exclusive prefix is shared with the rest of the block by placing the value in shared memory.
+
+The code can be seen in the listing below:
+\begin{lstlisting}[language=c++]
+if (version == 0) { // chained version
+    if (threadIdx.x == 0) {
+        if (block_id == 0) {
+            d_ps[block_id] = chunk_exl_prefix;
+            __threadfence();
+            d_fs[block_id] = 2;
+            chunk_exl_prefix = OP::identity();
+            sh_vs[0] = OP::identity();
+        } else {
+            uint32_t prev = block_id - 1;
+            while(d_fs[prev] != 2) {
+                // wait
+            }
+            block_exl_prefix = OP::apply(block_exl_prefix, d_ps[prev]);
+        }
+        sh_vs[0] = block_exl_prefix;
+    } __syncthreads();
+}
+\end{lstlisting}
+
+Finally thread zero publishes the inclusive prefix to global memory.
+The implementation of this is the same for both version 0, 1 and 2.
+
+
+\subsection{Version 1: Decoupled look-back}
+% initial strategy
+%fx how we do it per block
+%write some pseudocode, explain the code, go to next pseudocode etc
+This approach is very similar to that of version 0, however now we start to utilise the aggregates for computing the prefixes faster with less blocking.
+
+Version 1 and 2 uses the same implementation for publishing the aggregate values to global memory, and updating the flags.
+It simply ensures that the first block publishes its aggregate as the prefix, setting the flag to $P$, and all other blocks publishes its aggregates, setting the flag to $A$.
+
+Now version 1 implements the decoupled look-back by a simple change to the while-loop of the chained version.
+The alteration is shown below:
+\begin{lstlisting}[language=c++]
+while(d_fs[prev] != 2) {
+    if (d_fs[prev] == 1) {
+        block_exl_prefix = OP::apply(block_exl_prefix, d_as[prev]);
+        prev -= 1;
+    }
+}
+\end{lstlisting}
+We see that the difference is that the thread waits for either an aggregate or a prefix, updates the block exclusive prefix accordingly, and either loops again looking at the next preceeding block, or stops looping if it has found a prefix.
+
+Now we have the basic version of a single-pass scan with decoupled look-back.
+In the next subsection we will take a look at how we attempted to optimise this, resulting in versions 2 and 3.
+
+\subsection{Version 2 + 3: Optimisations}
+%key points of optimization
+%various strategies
+The two optimisations that we attempted are bound together in that the optimisation of version 2 is actually a sub part of the optimisation of version 3.
+
+We attempt to make the look-back in step 4 parallel, thus utilizing multiple threads in the block.
+This is done by the following optimisations:
+\begin{itemize}
+  \item [Version 2] Using a WARP of threads to copy the results of the preceeding WARP blocks into shared memory, and then having one thread to loop through the result, computing the exclusive prefix. If none of the preceeding WARP blocks have completed their prefix, the window is slides down another WARP blocks, continuing until a prefix has been found.
+  \item [Version 3] Using a WARP of threads to both copy the results into shared memory, and to compute the exclusive prefix by a warp scan approach.
+\end{itemize}
+
+\subsubsection{Version 2 - WARP Parallel copying, decoupled look-back.}
+First we do the simple version, in which only the copy is parallel, but the computation is still handled by just one thread.
+
+To do this we let only the first WARP threads enter a loop, where they continue copying WARP elements from the flag and aggregate/prefix array to shared memory, until the exclusive prefix has been computed.
+This is done by defining where in shared memory we put flags and values, which are put in \texttt{sh_fs} and \texttt{sh_vs} respectively.
+
+For each block, thread zero will look through the shared memory and compute the result, breaking out of the loop if a prefix is found, and updating the first element in shared memory with the result so that all threads can fetch it.
+
+The code is as follows:
+\begin{lstlisting}[language=c++]
+if (version == 2) { // WARP thread copy - single thread lookback:
+    int32_t window_offset = block_id - WARP;
+    int32_t loop_stop = - WARP;
+    if (block_id != 0 && threadIdx.x < WARP) {
+        while(window_offset > loop_stop) {
+            int lookup_block_id = window_offset + threadIdx.x;
+            if (lookup_block_id >= 0) {
+                while (d_fs[lookup_block_id] == 0) {}  // wait for some result
+                uint32_t flag = d_fs[lookup_block_id];
+                sh_fs[threadIdx.x] = flag;
+                if (flag == 1) {
+                    sh_vs[threadIdx.x] = d_as[lookup_block_id];
+                } else if (flag == 2) {
+                    sh_vs[threadIdx.x] = d_ps[lookup_block_id];
+                }
+            }
+
+            if (threadIdx.x == 0) {
+                // do lookback
+                int i = 0;
+                while (i < WARP) {
+                    int index = (WARP - 1) - i;
+                    uint32_t flag = sh_fs[index];
+                    if (flag == 1) {
+                        block_exl_prefix = OP::apply(block_exl_prefix,
+                                                        sh_vs[index]);
+                        i++;
+                    } else if (flag == 2) {
+                        block_exl_prefix = OP::apply(block_exl_prefix,
+                                                        sh_vs[index]);
+                        window_offset = loop_stop;
+                        i = WARP;
+                    }
+                }
+            }
+            window_offset -= WARP;
+        }
+
+        if (threadIdx.x == 0) {
+            sh_vs[0] = block_exl_prefix;
+        }
+    }
+    __syncthreads();
+}
+\end{lstlisting}
+
+We do not need to worry about syncronization of threads, as the first WARP threads execute in lock step.
+
+\subsubsection{Version 3 - WARP parallel copying and parallel decoupled look-back.}
+Now we attempt to also make the computation of the exclusive prefix in parallel, exploiting the first WARP of threads.
+This version has publication of aggregates and prefixes built-in, thus not sharing implementation with the other versions.
+\\~\\
+For this we still copy from memory as in version 2, but now we use the approach of a warp scan to compute the result (using slides \texttt{Lab2-RedScan.pdf}).
+The code is also inspired by the handed out code for assignment 2, which defines a warp inclusive scan, and the implementation in opencl from \cite{opencl}.
+The only difference is that we do not want to reduce unconditionally, as we want to check the flag before applying the operator on two elements.
+This is done by, when looking at two threads with ids $tid$ and $tid - h$, checking the flag according to $tid$, and if the flag is already set to $P$ we do nothing.
+If not, we apply the operator to the values of the two threads, using the result as the new value for thread with $tid$, and updating the flag to be that of $tid - h$.
+This makes sense as, if thread $tid -h$ has already computed its prefix, the flag will be propagated.
+The implementation of the parallel warp scan is seen below.
+\begin{lstlisting}[language=c++]
+// WARP-Level inclusive scan
+if (sh_fs[WARP - 1] != 2) {
+    const uint32_t lane = threadIdx.x & (WARP - 1);
+    #pragma unroll
+    for(int d = 0; d < lgWARP; d++) {
+        uint32_t h = 1 << d;
+        if (lane >= h) {
+            uint32_t flag1 = sh_fs[threadIdx.x];
+            uint32_t flag2 = sh_fs[threadIdx.x - h];
+            typename OP::RedElTp value1 = sh_vs[threadIdx.x];
+            typename OP::RedElTp value2 = sh_vs[threadIdx.x - h];
+            if (flag1 == 1) {
+                sh_fs[threadIdx.x] = flag2;
+                sh_vs[threadIdx.x] = OP::apply(value1, value2);
+            }
+        }
+    }
+}
+\end{lstlisting}
+
+\\~\\
+When determining whether to loop on, each thread must check the flag of the $WARP - 1$ element in shared memory, as this indicates whether we need to loop on.
+Also, the block exclusive prefix is updated with the value of $WARP - 1$, so that the result is gradually accumulated.
+
+% why not just one global array for values? because of updates of values??

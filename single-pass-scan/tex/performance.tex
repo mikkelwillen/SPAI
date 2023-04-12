@@ -1,0 +1,202 @@
+%performance and validation
+% - high level : what do we expect?
+% - how does the code adhere to this?
+%giga flops / s : 2*N*sizeof(elmTp)/(runtime) (multiplied by something idk)
+
+Now we will present the validity and performance of our solution, reporting the runtime of the different versions, and discussing the robustness of the implementations.
+We run all our tests on the GPU4.
+
+\subsection{Expectations}
+Before we look at the actual numbers, we want to discuss our expectations for the different versions.
+
+We expect the chained-scan to perform significantly worse than the single-pass scan decoupled look-back versions.
+We would assume that version 2 would run faster than version 1, as we parallelize parts of the implementation, and expect version 3 to run much faster than the other versions, as it parallelizes the entire look-back and computation part of the algorithm.
+
+\subsection{Validity}
+We determine whether our solutions are viable by comparing the result to a sequential scan performed on the CPU.
+In \autoref{tab:validity} we report the validity of the different versions. %given different length of arrays.
+
+\begin{table}[h!]
+  \centering
+  \begin{array}{r||c|c|c|c}
+    \text{array length $\backslash$ version} & \text{version } 0 & \text{version } 1 & \text{version } 2 & \text{version } 3 \\
+    \hline
+    \hline
+    5003565 & valid & valid & valid & valid \\
+    \hline
+    50003565 & valid & valid & valid & valid \\
+    \hline
+    500003565 & valid & valid & valid & \color{red} invalid \\
+    \hline
+    1000003565 & valid & valid & valid & \color{red} invalid
+  \end{array}
+  \caption{Validity of the different versions, at a certain array length, on GPU4}
+  \label{tab:validity}
+\end{table}
+
+From the table we see that the different version are quite robust, validating on different sizes of arrays, with the exception of version $3$.
+It seems we get a race condition somewhere, that we have not been able to locate, and the possibility of the race condition occuring increases with the number of elements in the array.
+It also sometimes happens for smaller array sizes, but most of the time it succeeds for these smaller arrays.
+
+\subsection{Performance}
+Now lets look into the runtime of the different versions.
+We compare to a reduce-then-scan approach, to see how the solution performs in comparison.
+
+\begin{table}[H]
+  \centering
+  \begin{array}{r||r|r|r|r|r}
+    \text{array length $\backslash$ version} & \text{reduce-then-scan} & \text{version } 0 & \text{version } 1 & \text{version } 2 & \text{version } 3 \\
+    \hline
+    \hline
+    5003565 & 137 & 3047 & 383 & 644 & 380 \\
+    \hline
+    50003565 & 1230 & 20037 & 1597 & 15321 & 1005 \\
+    \hline
+    500003565 & 11996 & 208068 & 12109 & 1518315 & - \\
+    \hline
+    1000003565 & 23924 & 418624 & 23360 & 5410449 & - \\
+  \end{array}
+  \caption{Runtime of the different versions measured in microsecs, given a certain array length, on GPU4}
+  \label{tab:performance}
+\end{table}
+
+From \autoref{tab:performance} we see that version 0 runs quite slowly for all array sizes, as one would expect.
+Version 1 runs quite fast, showing the improvement in runtime from chained-scan to single-pass scan with decoupled look-back.
+In contrast to what we expected, version 2 runs rathler slowly, but still not as slowly as the chained-scan version.
+Lastly version 3 runs very fast, but sadly does not validate on larger array sizes.
+\\~\\
+We also want to take a look at the throughput, to compare to the device throughput.
+In \autoref{tab:gbps} the throughput, measured in GB/s, is presented.
+The device throughput of GPU4 is $616$ GB/s.
+
+\begin{table}[H]
+  \centering
+  \begin{array}{r||r|r|r|r|r}
+    \text{array length $\backslash$ version} & \text{reduce-then-scan} & \text{version } 0 & \text{version } 1 & \text{version } 2 & \text{version } 3 \\
+    \hline
+    \hline
+    5003565 & 438.27 & 26.53 & 142.62 & 92.23 & 156.77 \\
+    \hline
+    50003565 & 438.27 & 19.71 & 142.62 & 93.23 & 597.06 \\
+    \hline
+    500003565 & 500.17 & 28.84 & 495.5 & 3.95 & - \\
+    \hline
+    1000003565 & 500.84 & 28.67 & 513.7 & 2.22 & - \\
+  \end{array}
+  \caption{Runtime of the different versions measured in GB/s, given a certain array length}
+  \label{tab:gbps}
+\end{table}
+
+From \autoref{tab:gbps} we see that for sufficiently large array sizes, version 1 gets throughput values very similar to reduce-then-scan. The reduce-then-scan approach is relatively stable, whereas our implementations are more unstable.
+It furthermore shows that version 3 almost reaches device throughput when it validates, but at aforementioned it does not always validate, and we have never seen it validate of larger array sizes.
+\autoref{tab:percent} shows the effeciency in percentage of device throughput.
+
+\begin{table}[H]
+  \centering
+  \begin{array}{r||r|r|r|r|r}
+    \text{array length $\backslash$ version} & \text{reduce-then-scan} & \text{version } 0 & \text{version } 1 & \text{version } 2 & \text{version } 3 \\
+    \hline
+    \hline
+    5003565 & 71 \% & 4.3 \% & 23.15\% & 15 \% & 25.4 \% \\
+    \hline
+    50003565 & 71 \% & 3.2 \% & 23.15 \% & 15 \% & 96.9 \% \\
+    \hline
+    500003565 & 81.2 \% & 4.7 \% & 80.4 \% & 0.64 \% & - \\
+    \hline
+    1000003565 & 81.3 \% & 4.65 \% & 83.4 \% & 0.36 \% & - \\
+  \end{array}
+  \caption{Percentage of device throughput, for the different versions}
+  \label{tab:percent}
+\end{table}
+
+This table makes it clear that version 3 is extremely efficient when working, but it is also very unstable.
+Version 1 has a good percentwise throughput, especially when the array is larger, whereas version 2 gets slower when the array size increase.
+\\~\\
+An interesting, and somewhat depressing, detail is that running the implementation on GPU3 or A100 does not work. Somehow our solution is not robust, and therefore we only test on GPU4.
+
+% \begin{figure}[h]
+% \includegraphics[width=\textwidth]{images/.png}
+% \label{fig:procent}
+% \end{figure}
+
+% \begin{figure}[h!]
+%   \centering
+%   \begin{array}{r||r|r|r|r|r}
+%     \text{GPU $\backslash$ version} & \text{device throughput} & \text{version } 0 & \text{version } 1 & \text{version } 2 & \text{version } 3 \\
+%     \hline
+%     \hline
+%     GPU03 & 336 & - & - & - & - \\
+%     \hline
+%     GPU04 & 616 & 19.71 & 142.62 & 93.23 & 158.01 \\
+%     \hline
+%     A100 & 1555 & & & &  \\
+%   \end{array}
+%   \caption{Throughput of the different version for array length 50003565, on different GPUs}
+%   \label{fig:band}
+% \end{figure}
+
+% [jtw868@a00333 src]$ make v1
+% nvcc -O3 -arch=compute_35 -o test-sps testSPS.cu
+% nvcc warning : The 'compute_35', 'compute_37', 'compute_50', 'sm_35', 'sm_37' and 'sm_50' architectures are deprecated, and may be removed in a future release (Use -Wno-deprecated-gpu-targets to suppress warning).
+% ./test-sps 50003565 128 1
+% Device name: NVIDIA GeForce RTX 2080 Ti
+% Number of hardware threads: 69632
+% Max block size: 1024
+% Shared memory size: 49152
+% ====
+% Testing parallel basic blocks for input length: 50003565 and CUDA-block size: 128
+
+
+% Scan Inclusive AddI32 GPU Kernel runs in: 1230 microsecs, GB/sec: 487.84
+% Reduce-then-scan AddI32: VALID result!
+
+% Single-pass scan AddI32 GPU Kernel runs in: 1597 microsecs, GB/sec: 375.73
+% Single-pass scan AddI32: VALID result!
+
+% [jtw868@a00333 src]$ make v0
+% ./test-sps 50003565 128 0
+% Device name: NVIDIA GeForce RTX 2080 Ti
+% Number of hardware threads: 69632
+% Max block size: 1024
+% Shared memory size: 49152
+% ====
+% Testing parallel basic blocks for input length: 50003565 and CUDA-block size: 128
+
+
+% Scan Inclusive AddI32 GPU Kernel runs in: 1230 microsecs, GB/sec: 487.84
+% Reduce-then-scan AddI32: VALID result!
+
+% Single-pass scan AddI32 GPU Kernel runs in: 20037 microsecs, GB/sec: 29.95
+% Single-pass scan AddI32: VALID result!
+
+% [jtw868@a00333 src]$ make v2
+% ./test-sps 50003565 128 2
+% Device name: NVIDIA GeForce RTX 2080 Ti
+% Number of hardware threads: 69632
+% Max block size: 1024
+% Shared memory size: 49152
+% ====
+% Testing parallel basic blocks for input length: 50003565 and CUDA-block size: 128
+
+
+% Scan Inclusive AddI32 GPU Kernel runs in: 1231 microsecs, GB/sec: 487.44
+% Reduce-then-scan AddI32: VALID result!
+
+% Single-pass scan AddI32 GPU Kernel runs in: 15321 microsecs, GB/sec: 39.16
+% Single-pass scan AddI32: VALID result!
+
+% [jtw868@a00333 src]$ make v3
+% ./test-sps 50003565 128 3
+% Device name: NVIDIA GeForce RTX 2080 Ti
+% Number of hardware threads: 69632
+% Max block size: 1024
+% Shared memory size: 49152
+% ====
+% Testing parallel basic blocks for input length: 50003565 and CUDA-block size: 128
+
+
+% Scan Inclusive AddI32 GPU Kernel runs in: 1230 microsecs, GB/sec: 487.84
+% Reduce-then-scan AddI32: VALID result!
+
+% Single-pass scan AddI32 GPU Kernel runs in: 1005 microsecs, GB/sec: 597.06
+% Single-pass scan AddI32: VALID result!

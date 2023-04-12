@@ -1,0 +1,12 @@
+%some conclusion
+From the results of examining validity, performance, and robustness of our different implementation versions, we see that our implementation of the unoptimized single-pass scan with decoupled look-back is quite efficient and robust, as it validates of different array sizes, and computes the result fairly quickly.
+
+Against our expectations, version 3 does not perform very well, which we assume is due to a bug in our code.
+We expected it to be more robust than it was.
+
+All in all we did not get our implementation to be as robust as we wanted, as we could not run on other GPUs, and could not make the optimizations work as intended.
+
+For future work it would be good to ensure that the implementation runs on more GPUs, and to figure out why version 3 sometimes fails on larger array sizes.
+It would also be nice to try to implement more of the optimizations from the article.
+
+However, the unoptimized version was more effective than we had expected, and we are quite content with the performance of that version, even though we would have liked the others to perform better.
