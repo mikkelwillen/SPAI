@@ -31,14 +31,17 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
                 J.append(i)
 
         # b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
-        I = []
-        for i in range(A.shape[0]):
-            keep = False
-            for j in range(len(J)):
-                if A[i, J[j]] != 0:
-                    keep = True
-            if keep:
-                I.append(i)
+        # I = []
+        # for i in range(A.shape[0]):
+        #     keep = False
+        #     for j in range(len(J)):
+        #         if A[i, J[j]] != 0:
+        #             keep = True
+        #     if keep:
+        #         I.append(i)
+
+        A_J = A[:,J]
+        I = list(np.unique(A_J.nonzero()[0]))
         
         # c) Create Â = A(I, J)
         AHat = np.zeros((len(I), len(J)), dtype = float)

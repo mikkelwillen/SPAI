@@ -49,7 +49,7 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
     B2 = np.zeros((len(I) + len(ITilde) - len(J), len(JTilde)))
     for i in range(len(J), len(I)):
         for j in range(len(JTilde)):
-            B2[i, j] = ABreve[i, j]
+            B2[i - len(J), j] = ABreve[i, j]
     
     for i in range(len(ITilde)):
         for j in range(len(JTilde)):
@@ -57,7 +57,7 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
     print("B2:", B2)
     print("B2 shape:", B2.shape)
     print("Itilde len:", len(ITilde))
-    print("I + ITilde - J:", len(I)+len(ITilde)+len(J))
+    print("I + ITilde - J:", len(I)+len(ITilde)-len(J))
     
     # 6. QB, RB = qr(B2)
     QB, RB = np.linalg.qr(B2, mode="complete")
@@ -65,14 +65,30 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
 
     print("QB.shape: ", QB.shape)
     # Stack matrices (from eq 17)
-    unsortedQ = np.zeros((len(UnionI), len(UnionJ)))
-    for i in range(len(J)):
-        for j in range(len(J)):
-            unsortedQ[i, j] = Q[i, j]
+    # unsortedQ = np.zeros((len(UnionI), len(UnionJ)))
+    # for i in range(len(J)):
+    #     for j in range(len(J)):
+    #         unsortedQ[i, j] = Q[i, j]
     
-    for i in range(len(UnionI) - len(J)):
-        for j in range(len(JTilde)):
-            unsortedQ[len(J) + i, len(J) + j] = QB[i, j]
+    # for i in range(len(UnionI) - len(J)):
+    #     for j in range(len(JTilde)):
+    #         unsortedQ[len(J) + i, len(J) + j] = QB[i, j]
+       
+    # unsortedQ = np.hstack((np.vstack((Q, np.zeros((len(UnionI) - len(JTilde), len(J))))), np.vstack((np.zeros((len(J), len(JTilde))), QB))))
+
+    In1tilde = np.identity(len(ITilde))
+    
+    In2 = np.identity(len(J))
+    
+    n1tilden1zeros = np.zeros((len(ITilde), len(I)))
+
+    n1n1tildezeros = np.zeros((len(I), len(ITilde)))
+
+    firstmat17 = np.hstack((np.vstack((Q, n1tilden1zeros)), np.vstack((n1n1tildezeros, In1tilde))))
+
+    secondmat17 = np.hstack((np.vstack((In2, np.zeros((len(UnionI) - len(JTilde), len(J))))), np.vstack((len(J), np.zeros((len(UnionI) - len(JTilde))), QB))))
+
+    Q = firstmat17 * secondmat17                  
     
     print("UnsortedQ: ", unsortedQ)
 
@@ -99,7 +115,8 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
     # print("newQ: ", newQ)
     # print("newQ - UnsortedQ: ", newQ - unsortedQ)
 
-    newR = np.hstack((np.vstack((R, np.zeros((len(UnionI) - len(J), len(J))))), np.vstack((B1, RB))))
+    R1 = R[0:len(J),:]
+    newR = np.hstack((np.vstack((R1, np.zeros((len(UnionI) - len(J), len(J))))), np.vstack((B1, RB))))
     newR = np.matmul(newR, Pc)
 
     RB1 = newR[0:len(UnionJ),:]
@@ -131,3 +148,5 @@ def updateQR(A, Q, R, I, J, ITilde, JTilde, k):
 
 # nogen gange er Jtilde uden elementer, og det fucker derfor på linje 102. Vi burde egentligt ikke kunne opdatere noget, hvis Jtilde er tom
 # vi bruger pt. ikke s og tilføjer bare alle elementer, som ikke allerede er med.
+
+# nu er der problemer med at stacke Q sammen. HVILKEN SHAPE ER QB?????
