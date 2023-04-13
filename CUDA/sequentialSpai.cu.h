@@ -32,6 +32,8 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
     // m_k = column in M
     for (int k = 0; k < M->n; k++) {
 
+        printf("\n\n------NEW COLUMN: %d------", k);
+
         // a) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
         int n2 = M->offset[k + 1] - M->offset[k];
@@ -122,56 +124,109 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
             printf("\ncublasSgeqrfBatched failed");
         }
 
-        // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
-        float* Q = (float*) malloc(sizeof(n1 * n2));
+        // // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
+        // float* Q = (float*) malloc(sizeof(float) * n1 * n2);
 
-        if (k == 0) {
-            Q[0] = 1.0;
-        }
-        else if (k == 1) {
-            Q[0] = 0.6;
-            Q[1] = 0.8;
-        }
-        else if (k == 2) {
-            Q[0] = 1;
-        }
-        printf("\nQ: ")
-        for (int i = 0; i < n1; i++) {
-            printf("%f", Q[i]);
-        }
-
-        // e) compute ĉ = Q^T ê_k
-        // make e_k and set index k to 1.0
-        // float* e_k = (float*) calloc(n1, sizeof(float));
-        // e_k[k] = 1.0;
-
-        // // malloc size for cHat and do matrix multiplication
-        // float* cHat = (float*) malloc(sizeof(float) * n1);
+        // if (k == 0) {
+        //     Q[0] = 1.0;
+        // }
+        // else if (k == 1) {
+        //     Q[0] = 0.6;
+        //     Q[1] = 0.8;
+        // }
+        // else if (k == 2) {
+        //     Q[0] = 1;
+        // }
+        // printf("\nQ: ");
         // for (int i = 0; i < n1; i++) {
-        //     for (int j = 0; j < n1; j++) {
-        //         cHat[i] = Q1[i * n1 + j] * e_k[i];
-        //     }
+        //     printf("%f ", Q[i]);
         // }
 
-        // // f) compute ^m_k = R^-1 ĉ
-        // // malloc space for mHat_k
+        // // e) compute ĉ = Q^T ê_k
+        // // make e_k and set index k to 1.0
+        // // printf("\nk: %d", k);
+        // float* e_k = (float*) calloc(n1, sizeof(float));
+        // for (int i = 0; i < n1; i++) {
+        //     if (k == I[i]) {
+        //         e_k[i] = 1.0;
+        //     } else {
+        //         e_k[i] = 0.0;
+        //     }
+        // }
+        // printf("\ne_k: ");
+        // for (int i = 0; i < n1; i++) {
+        //     printf("%f ", e_k[i]);
+        // }
+
+        // // malloc size for cHat and do matrix multiplication
+        // float* cHat = (float*) malloc(sizeof(float) * n2);
+        // for (int i = 0; i < n1; i++) {
+        //     for (int j = 0; j < n2; j++) {
+        //         cHat[j] += Q[j * n1 + i] * e_k[i];
+        //     }
+        // }
+        // printf("\ncHat: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", cHat[i]);
+        // }
+
+        // // Placeholder R. R is n2 x n2
+        // float* R1 = (float*) malloc(sizeof(float) * n2 * n2);
+
+        // if (k == 0) {
+        //     R1[0] = 20.0;
+        // }
+        // else if (k == 1) {
+        //     R1[0] = 50.0;
+        // }
+        // else if (k == 2) {
+        //     R1[0] = 10.0;
+        // }
+        // printf("\nR1: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", R1[i]);
+        // }
+
+        // // f) compute mHat_k = R^-1 cHat
+        // // Malloc space for mHat_k
         // float* mHat_k = (float*) malloc(sizeof(float) * n2);
         
-        // // malloc space for the inverse of R1
+        // // Make the inverse
+        // // Placeholder InvR. R is n2 x n2
+        // // Malloc space for the inverse of R
         // float* invR1 = (float*) malloc(sizeof(float) * n2 * n2);
-        // // make the inverse
 
-        // // matrix multiplication
+        // if (k == 0) {
+        //     invR1[0] = 0.05;
+        // }
+        // else if (k == 1) {
+        //     invR1[0] = 0.02;
+        // }
+        // else if (k == 2) {
+        //     invR1[0] = 0.1;
+        // }
+        // printf("\ninvR: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", invR1[i]);
+        // }
+
+        // // Matrix multiplication
         // for (int i = 0; i < n2; i++) {
         //     for (int j = 0; j < n2; j++) {
         //         mHat_k[i] = invR1[i * n2 + j] * cHat[i];
         //     }
         // }
+        // printf("\nmHat_k: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", mHat_k[i]);
+        // }
 
         // // g) set m_k(J) = ^m_k
         // // vi skal have lavet en function, som kan opdatere en CSC
+        // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
 
         // // h) compute residual
+        // // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
 
     }
     

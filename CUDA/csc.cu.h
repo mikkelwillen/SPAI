@@ -144,7 +144,7 @@ void freeCSC(CSC* csc) {
 
 // Prints all the elements of a CSC struct
 void printCSC(CSC* csc) {
-    printf("\n--------Printing CSC data--------\n");
+    printf("\n\n--------Printing CSC data--------\n");
     printf("csc->m: %d\n", csc->m);
     printf("csc->n: %d\n", csc->n);
     printf("csc->countNonZero: %d\n", csc->countNonZero);
@@ -153,7 +153,7 @@ void printCSC(CSC* csc) {
         printf("%d ", csc->offset[i]);
     }
     printf("\n");
-    printf("csc->flatData:");
+    printf("csc->flatData: ");
     for (int i = 0; i < csc->countNonZero; i++) {
         printf("%f ", csc->flatData[i]);
     }

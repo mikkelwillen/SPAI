@@ -35,6 +35,5 @@ int main() {
     // struct CSC* M = sequentialSpai(cscB, 0.01, 5, 1);
     // printCSC(M);
 
-    printCSC(cscC);
-    sequentialTest(cscC);
+    sequentialTest(cscB);
 }
