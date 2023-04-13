@@ -23,7 +23,7 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
     stat = cublasCreate(&cHandle);
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cuBLAS initialization failed\n");
-        printf("cuBLAS error: %d", stat);
+        printf("cuBLAS error: %d\n", stat);
     }
 
     // initialize M and set to diagonal
