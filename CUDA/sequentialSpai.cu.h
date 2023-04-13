@@ -23,6 +23,7 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
     stat = cublasCreate(&cHandle);
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cuBLAS initialization failed\n");
+        printf("cuBLAS error: %d", stat);
     }
 
     // initialize M and set to diagonal
@@ -152,7 +153,7 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
         // // g) set m_k(J) = ^m_k
         // // vi skal have lavet en function, som kan opdatere en CSC
 
-        // // compute residual
+        // // h) compute residual
 
     }
     
