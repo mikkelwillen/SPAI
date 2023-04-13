@@ -122,8 +122,26 @@ CSC* sequentialSpai(CSC* A, float tol, int max_fill_in, int s) {
             printf("\ncublasSgeqrfBatched failed");
         }
 
-        // // e) compute ĉ = Q^T ê_k
-        // // make e_k and set index k to 1.0
+        // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
+        float* Q = (float*) malloc(sizeof(n1 * n2));
+
+        if (k == 0) {
+            Q[0] = 1.0;
+        }
+        else if (k == 1) {
+            Q[0] = 0.6;
+            Q[1] = 0.8;
+        }
+        else if (k == 2) {
+            Q[0] = 1;
+        }
+        printf("\nQ: ")
+        for (int i = 0; i < n1; i++) {
+            printf("%f", Q[i]);
+        }
+
+        // e) compute ĉ = Q^T ê_k
+        // make e_k and set index k to 1.0
         // float* e_k = (float*) calloc(n1, sizeof(float));
         // e_k[k] = 1.0;
 
