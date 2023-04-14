@@ -135,6 +135,69 @@ CSC* createRandomCSC(int m, int n, float sparsity){
     return A;
 }
 
+// Function for updating a CSC matrix with a new value
+// csc = The CSC matrix
+// newValues = The new values to be inserted
+// k = the column index of the new values
+// J = the row indices of the new values
+// n2 = the number of new values
+CSC* updateKthColumnCSC(CSC* A, float* newVaules, int k, int* J, int n2) {
+    CSC* newA = (CSC*) malloc(sizeof(CSC));
+    newA->m = A->m;
+    newA->n = A->n;
+    
+    // Compute the new number of nonzeros
+    int deltaNonzeros = 0;
+    for (int i = 0; i < n2; i++) {
+        if (newVaules[i] != 0.0) {
+            deltaNonzeros++;
+        }
+    }
+    deltaNonzeros -= A->offset[k + 1] - A->offset[k];
+
+    // set the new number of nonzeros
+    newA->countNonZero = A->countNonZero + deltaNonzeros;
+
+    // Malloc space for the new offset array
+    newA->offset = (int*) malloc(sizeof(int) * (A->n + 1));
+
+    // Copy the offset values before k
+    for (int i = 0; i < k + 1; i++) {
+        newA->offset[i] = A->offset[i];
+    }
+
+    // Compute the new offset values for k and onwards
+    for (int i = k + 1; i < A->n + 1; i++) {
+        newA->offset[i] = A->offset[i] + deltaNonzeros;
+    }
+
+    // Malloc space
+    newA->flatData = (float*) malloc(sizeof(float) * newA->countNonZero);
+    newA->flatRowIndex = (int*) malloc(sizeof(int) * newA->countNonZero);
+
+    // Copy the old flatData and flatRowIndex values before k
+    for (int i = 0; i < A->offset[k] + 1; i++) {
+        newA->flatData[i] = A->flatData[i];
+        newA->flatRowIndex[i] = A->flatRowIndex[i];
+    }
+
+    // insert the new values into the flatData and flatRowIndex from k
+    int index = 0;
+    for (int i = A->offset[k]; i < A->offset[k] + deltaNonzeros + 1; i++) {
+        newA->flatData[i] = newVaules[index];
+        newA->flatRowIndex[i] = J[index];
+        index++;
+    }
+
+    // Copy the old flatData and flatRowIndex values after k
+    for (int i = newA->offset[k + 1]; i < newA->countNonZero; i++) {
+        newA->flatData[i] = A->flatData[i - deltaNonzeros];
+        newA->flatRowIndex[i] = A->flatRowIndex[i - deltaNonzeros];
+    }
+
+    return newA;
+}
+
 // Frees all the elements of a CSC struct
 void freeCSC(CSC* csc) {
     free(csc->offset);
