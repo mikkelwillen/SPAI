@@ -101,16 +101,21 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // // d) do QR decomposition of AHat
         // // set variables
+        // printf("\nDo QR decomposition of AHat\n");
         // int lda = n1;
         // int ltau = MAX(1, MIN(n1, n2));
         // float* d_AHat;
         // float* d_Tau;
+        // float* h_Tau = (float*) malloc(sizeof(float) * ltau * BATCHSIZE);
         // int info;
 
         // // qr initialization
         // cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
         // cudaMalloc((void**) &d_Tau, ltau * BATCHSIZE * sizeof(float));
+        
         // cudaMemcpy(d_AHat, AHat, sizeof(AHat), cudaMemcpyHostToDevice);
+        // cudaMemset(d_Tau, 0, sizeof(d_Tau));
+
         // stat = cublasSgeqrfBatched(cHandle,
         //                            n1,
         //                            n2,
@@ -119,10 +124,17 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //                            &d_Tau,
         //                            &info,
         //                            BATCHSIZE);
-                                   
+        
+        // if (info != 0) {
+        //     printf("\nparameters are invalid\n");
+        // }
         // if (stat != CUBLAS_STATUS_SUCCESS) {
         //     printf("\ncublasSgeqrfBatched failed");
         // }
+
+        // cudaMemcpy(h_Tau, d_Tau, sizeof(d_Tau), cudaMemcpyDeviceToHost);
+
+        // printf("\nh_Tau: %f", h_Tau[0]);
 
         // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
         float* Q = (float*) malloc(sizeof(float) * n1 * n2);
@@ -251,12 +263,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
         
         // compute the norm of the residual
-        float norm = 0.0;
+        float residualNorm = 0.0;
         for (int i = 0; i < A->m; i++) {
-            norm += residual[i] * residual[i];
+            residualNorm += residual[i] * residual[i];
         }
-        norm = sqrt(norm);
-        printf("\nnorm: %f", norm);
+        residualNorm = sqrt(residualNorm);
+        printf("\nnorm: %f", residualNorm);
         
         int iteration = 0;
         // while norm of residual > tolerance do
@@ -276,29 +288,115 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // malloc space for L and fill it with the indices
             int* L = (int*) malloc(sizeof(int) * l);
             int index = 0;
+
+            // check if k is in I
+            int kNotInI = 1;
+            for (int i = 0; i < n1; i++) {
+                if (k == I[i]) {
+                    kNotInI = 0;
+                }
+            }
+
             for (int i = 0; i < A->m; i++) {
-                if (residual[i] != 0.0) {
+                if (residual[i] != 0.0 || (kNotInI && i == k)) {
                     L[index] = i;
                     index++;
                 }
             }
 
             // print L
+            printf("\nL: ");
             for (int i = 0; i < l; i++) {
-                printf("\nL[%d]: %d", i, L[i]);
+                printf("%d ", L[i]);
             }
 
             // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
-            // compute the length of JTilde
-            int n2Tilde = 0;
+            // check what indeces we should keep
+            int* keepArray = (int*) calloc(A->n, sizeof(int));
             for (int i = 0; i < l; i++) {
                 for (int j = 0; j < A->n; j++) {
-                    // skal lave noget logik for at indeksere i A
+                    for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
+                        keepArray[h] = 1;
+                    }
+                }
+            }
+
+            // remove the indeces that are already in J
+            for (int i = 0; i < n2; i++) {
+                keepArray[J[i]] = 0;
+            }
+
+            // compute the length of JTilde
+            int n2Tilde = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    n2Tilde++;
+                }
+            }
+
+            // malloc space for JTilde
+            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+
+            // fill JTilde
+            index = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    JTilde[index] = i;
+                    index++;
+                }
+            }
+
+            printf("\nJ: ");
+            for(int i = 0; i < n2; i++) {
+                printf("%d ", J[i]);
+            }
+            printf("\nJTilde: ");
+            for (int i = 0; i < n2Tilde; i++) {
+                printf("%d ", JTilde[i]);
+            }
+
+            // c) for each j in JTilde, solve the minimization problem
+            // Malloc space for rhoSq
+            float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
+            for (int i = 0; i < n2Tilde; i++) {
+                float rTAe_j = 0.0; // r^T * A(.,j)
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    rTAe_j += A->flatData[j] * residual[A->flatRowIndex[j]];
+                }
+
+                float Ae_jNorm = 0.0;
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    Ae_jNorm += A->flatData[j] * A->flatData[j];
+                }
+                Ae_jNorm = sqrt(Ae_jNorm);
+
+                rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
+            }
+
+            // d) find the s indeces of the column with the smallest rhoSq
+            int newN2Tilde = MIN(s, n2Tilde);
+            int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
+
+            for (int i = 0; i < newN2Tilde; i++) {
+                smallestIndices[i] = -1;
+            }
+
+            for (int i = 0; i < n2Tilde; i++) {
+                for (int j = 0; j < newN2Tilde; j++) {
+                    if (smallestIndices[j] == -1) {
+                        smallestIndices[j] = i;
+                    } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
+                        for (int h = newN2Tilde - 1; h > j; h--) {
+                            smallestIndices[h] = smallestIndices[h - 1];
+                        }
+                    }
                 }
             }
         }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
+        // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
+        // vi skal teste om step d) giver det rigtige.
 
 
     }
