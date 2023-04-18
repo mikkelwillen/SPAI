@@ -5,6 +5,7 @@
 #include <math.h>
 #include <cuda_runtime.h>
 #include "cublas_v2.h"
+#include "cusolverDn.h"
 #include "csc.cu.h"
 #include "constants.cu.h"
 
@@ -18,13 +19,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printCSC(A);
 
     // initialize cuBLAS
-    cublasHandle_t cHandle;
-    cublasStatus_t stat;
-    stat = cublasCreate(&cHandle);
-    if (stat != CUBLAS_STATUS_SUCCESS) {
-        printf("cuBLAS initialization failed\n");
-        printf("cuBLAS error: %d\n", stat);
-    }
+    cusolverDnHandle_t cHandle;
+    cusolverStatus_t stat;
+    stat = cusolverDnCreate(&cHandle);
+    if (stat != CUSOLVER_STATUS_SUCCESS) {
+        printf("cusolver initialization failed\n");
+        printf("cusolver error: %d\n", stat);
+    } 
 
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
@@ -58,6 +59,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         for (int i = 0; i < A->m; i++) {
             I[i] = -1;
         }
+
         int n1 = 0;
         for (int j = 0; j < n2; j++) {
             for (int i = A->offset[J[j]]; i < A->offset[J[j] + 1]; i++) {
@@ -100,8 +102,53 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
 
         // // d) do QR decomposition of AHat
-        // // set variables
+        // set variables
         // printf("\nDo QR decomposition of AHat\n");
+        // int lda = MAX(1, n1);
+        // int lWork;
+
+        // stat = cusolverDnSgeqrf_bufferSize(cHandle, 
+        //                                    n1, 
+        //                                    n2, 
+        //                                    AHat, 
+        //                                    lda, 
+        //                                    &lWork);
+
+        // if (stat != CUSOLVER_STATUS_SUCCESS) {
+        //     printf("Workspace buffersize failed\n");
+        //     printf("cusovler error: %d\n", stat);
+        // }
+
+        // printf("lWork: %d\n", lWork);
+        // int sizeTau = MIN(n1, n2);
+        // float* tau = (float*) malloc(sizeTau * sizeof(float));
+        // float* workspace = (float*) malloc(lWork * sizeof(float));
+        // int devInfo = 0;
+
+        // stat = cusolverDnSgeqrf(cHandle, 
+        //                         n1, 
+        //                         n2, 
+        //                         AHat, 
+        //                         lda, 
+        //                         tau, 
+        //                         workspace, 
+        //                         lWork, 
+        //                         &devInfo);
+
+        // if (stat != CUSOLVER_STATUS_SUCCESS) {
+        //     printf("QR decomposition failed\n");
+        //     printf("cusovler error: %d\n", stat);
+        // }
+
+        // printf("devInfo: %d\n", devInfo);
+
+        // // print AHat
+        // printf("Tau: ");
+        // int temp = MIN(n1, n2);
+        // for (int i = 0; i < temp; i++) {
+        //     printf("%f ", tau[i]);
+        // }
+
         // int lda = n1;
         // int ltau = MAX(1, MIN(n1, n2));
         // float* d_AHat;
@@ -392,7 +439,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     }
                 }
             }
-        }
+
+            // e) determine the new indices Î
+
+        // }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
         // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces

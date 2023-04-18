@@ -1,4 +1,4 @@
-COMPILER = nvcc -lcublas
+COMPILER = nvcc -lcublas -lcusolver
 OPT_FLAGS = -O3 -arch=compute_35
 
 SOURCES = sequentialSpai.cu.h sequentialTest.cu.h

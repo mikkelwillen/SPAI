@@ -11,6 +11,8 @@ int main() {
     int m = 4;
     int n = 3;
 
+
+
     float* A = (float*) malloc(sizeof(float) * m * n);
     float* B = (float*) malloc(sizeof(float) * m * n);
 
@@ -27,7 +29,7 @@ int main() {
 
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
-    struct CSC* cscC = createRandomCSC(4, 4, 0.2);
+    struct CSC* cscC = createRandomCSC(10, 10, 0.2);
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);
