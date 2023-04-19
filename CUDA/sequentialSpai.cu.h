@@ -177,6 +177,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
         if (stat != CUBLAS_STATUS_SUCCESS) {
             printf("\ncublasSgeqrfBatched failed");
+            printf("\ncublas error: %d\n", stat);
         }
 
         // cudaMemcpy(h_Tau, d_Tau, sizeof(d_Tau), cudaMemcpyDeviceToHost);
