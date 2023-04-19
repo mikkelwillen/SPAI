@@ -104,7 +104,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // // d) do QR decomposition of AHat
         // set variables
         printf("\nDo QR decomposition of AHat\n");
-        int lda = MAX(1, n1);
+        // int lda = MAX(1, n1);
         // int lWork;
 
         // stat = cusolverDnSgeqrf_bufferSize(cHandle, 
