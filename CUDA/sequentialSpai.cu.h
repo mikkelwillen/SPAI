@@ -160,7 +160,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
         cudaMalloc((void**) &d_Tau, ltau * BATCHSIZE * sizeof(float));
         
-        cudaMemcpy(d_AHat, AHat, sizeof(AHat), cudaMemcpyHostToDevice);
+        cudaMemcpy(d_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice);
         cudaMemset(d_Tau, 0, ltau * BATCHSIZE * sizeof(float));
 
         stat = cublasSgeqrfBatched(cHandle,
