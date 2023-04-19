@@ -19,10 +19,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printCSC(A);
 
     // initialize cuBLAS
-    cusolverDnHandle_t cHandle;
-    cusolverStatus_t stat;
-    stat = cusolverDnCreate(&cHandle);
-    if (stat != CUSOLVER_STATUS_SUCCESS) {
+    cublasHandle_t cHandle;
+    cublasStatus_t stat;
+    stat = cublasCreate(&cHandle);
+    if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cusolver initialization failed\n");
         printf("cusolver error: %d\n", stat);
     } 
@@ -149,35 +149,35 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     printf("%f ", tau[i]);
         // }
 
-        // int lda = n1;
-        // int ltau = MAX(1, MIN(n1, n2));
-        // float* d_AHat;
-        // float* d_Tau;
-        // float* h_Tau = (float*) malloc(sizeof(float) * ltau * BATCHSIZE);
-        // int info;
+        int lda = n1;
+        int ltau = MAX(1, MIN(n1, n2));
+        float* d_AHat;
+        float* d_Tau;
+        float* h_Tau = (float*) malloc(sizeof(float) * ltau * BATCHSIZE);
+        int info;
 
-        // // qr initialization
-        // cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
-        // cudaMalloc((void**) &d_Tau, ltau * BATCHSIZE * sizeof(float));
+        // qr initialization
+        cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
+        cudaMalloc((void**) &d_Tau, ltau * BATCHSIZE * sizeof(float));
         
-        // cudaMemcpy(d_AHat, AHat, sizeof(AHat), cudaMemcpyHostToDevice);
-        // cudaMemset(d_Tau, 0, sizeof(d_Tau));
+        cudaMemcpy(d_AHat, AHat, sizeof(AHat), cudaMemcpyHostToDevice);
+        cudaMemset(d_Tau, 0, sizeof(d_Tau));
 
-        // stat = cublasSgeqrfBatched(cHandle,
-        //                            n1,
-        //                            n2,
-        //                            &d_AHat,
-        //                            lda,
-        //                            &d_Tau,
-        //                            &info,
-        //                            BATCHSIZE);
+        stat = cublasSgeqrfBatched(cHandle,
+                                   n1,
+                                   n2,
+                                   &d_AHat,
+                                   lda,
+                                   &d_Tau,
+                                   &info,
+                                   BATCHSIZE);
         
-        // if (info != 0) {
-        //     printf("\nparameters are invalid\n");
-        // }
-        // if (stat != CUBLAS_STATUS_SUCCESS) {
-        //     printf("\ncublasSgeqrfBatched failed");
-        // }
+        if (info != 0) {
+            printf("\nparameters are invalid\n");
+        }
+        if (stat != CUBLAS_STATUS_SUCCESS) {
+            printf("\ncublasSgeqrfBatched failed");
+        }
 
         // cudaMemcpy(h_Tau, d_Tau, sizeof(d_Tau), cudaMemcpyDeviceToHost);
 
