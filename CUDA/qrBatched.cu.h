@@ -26,6 +26,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     float* h_Tau = (float*) malloc(sizeof(float) * ltau * ltau * BATCHSIZE);
     int info;
 
+    printf("ltau: %d\n", ltau");
+
     // qr initialization
     cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
     cudaMalloc((void**) &d_Tau, ltau * ltau * BATCHSIZE * sizeof(float));
