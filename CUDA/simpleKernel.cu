@@ -6,7 +6,7 @@
 __global__ void simpleKernel(int length) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
-        printf("Hello World! I'm thread %d", tid);
+        printf("Hello World! I'm thread %d\n", tid);
     }
 }
 
