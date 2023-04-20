@@ -10,9 +10,9 @@
 #include "constants.cu.h"
 
 __global__ void printKernel(float* D, int length) {
+    printf("inside printKernel\n");
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < length) {
-        printf("inside printKernel\n");
         printf("D[%d]: %f \n", tid, D[tid]);
     }
 }
