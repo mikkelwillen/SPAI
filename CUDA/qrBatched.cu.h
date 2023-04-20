@@ -32,13 +32,17 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // qr initialization
     gpuAssert(
         cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float)));
+    printf("malloc d_AHat\n");
     gpuAssert(
         cudaMalloc((void**) &d_Tau, ltau * ltau * BATCHSIZE * sizeof(float)));
-    
+    printf("malloc d_Tau\n");
+
     gpuAssert(
         cudaMemcpy(d_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
+    printf("copy AHat to d_AHat\n");
     gpuAssert(
         cudaMemset(d_Tau, 0.0, ltau * ltau * BATCHSIZE * sizeof(float)));
+    printf("memset d_Tau\n");
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -59,6 +63,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     gpuAssert(
         cudaMemcpy(h_Tau, d_Tau, ltau * ltau * BATCHSIZE * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
     for (int i = 0; i < ltau * BATCHSIZE; i++) {
