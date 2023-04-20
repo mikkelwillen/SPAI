@@ -13,7 +13,7 @@ __global__ void printKernel(float** D, int length) {
     printf("inside printKernel\n");
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < length) {
-        printf("D[%d]: %f \n", tid, D[tid][0]);
+        printf("tid %d: \n", tid);
     }
 }
 
@@ -84,7 +84,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // }
     printf("after cublasSgeqrfBatched\n");
     printKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2);
-    __syncthreads();
+    gpuAssert(
+        cudaDeviceSynchronize());
     // printf("after printKernel\n");
     // gpuAssert(
     //     cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
