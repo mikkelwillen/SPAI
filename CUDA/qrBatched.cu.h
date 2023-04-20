@@ -61,22 +61,22 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyHostToDevice));
     printf("memset d_Tau\n");
 
-    // stat = cublasSgeqrfBatched(cHandle,
-    //                             n1,
-    //                             n2,
-    //                             d_AHat,
-    //                             lda,
-    //                             d_Tau,
-    //                             &info,
-    //                             BATCHSIZE);
+    stat = cublasSgeqrfBatched(cHandle,
+                                n1,
+                                n2,
+                                d_AHat,
+                                lda,
+                                d_Tau,
+                                &info,
+                                BATCHSIZE);
     
-    // if (info != 0) {
-    //     printf("\nparameters are invalid\n");
-    // }
-    // if (stat != CUBLAS_STATUS_SUCCESS) {
-    //     printf("\ncublasSgeqrfBatched failed");
-    //     printf("\ncublas error: %d\n", stat);
-    // }
+    if (info != 0) {
+        printf("\nparameters are invalid\n");
+    }
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf("\ncublasSgeqrfBatched failed");
+        printf("\ncublas error: %d\n", stat);
+    }
 
     // // for (int i = 0; i < ltau * ltau; i++) {
     // //     gpuAssert(
