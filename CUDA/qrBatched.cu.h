@@ -41,9 +41,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     gpuAssert(
         cudaMemcpy(d_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
     printf("copy AHat to d_AHat\n");
-    gpuAssert(
-        cudaMemset(d_Tau, 0, tauMemSize));
-    printf("memset d_Tau\n");
+    // gpuAssert(
+    //     cudaMemset(d_Tau, 0, tauMemSize));
+    // printf("memset d_Tau\n");
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -63,7 +63,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     gpuAssert(
-        cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
