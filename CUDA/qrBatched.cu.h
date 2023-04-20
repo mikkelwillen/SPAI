@@ -25,7 +25,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     const size_t AHatMemSize = n1 * n2 * sizeof(float);
     float* d_AHat;
     float* d_Tau;
-    float* h_Tau = (float*) malloc(sizeof(float) * ltau * ltau * BATCHSIZE);
+    float* h_Tau = (float*) malloc(tauMemSize);
     int info;
 
     printf("ltau: %d\n", ltau);
@@ -63,7 +63,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     gpuAssert(
-        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
