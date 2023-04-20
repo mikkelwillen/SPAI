@@ -23,15 +23,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int ltau = MAX(1, MIN(n1, n2));
     float* d_AHat;
     float* d_Tau;
-    float* h_Tau = (float*) malloc(sizeof(float) * ltau * BATCHSIZE);
+    float* h_Tau = (float*) malloc(sizeof(float) * ltau * ltau * BATCHSIZE);
     int info;
 
     // qr initialization
     cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float));
-    cudaMalloc((void**) &d_Tau, ltau * BATCHSIZE * sizeof(float));
+    cudaMalloc((void**) &d_Tau, ltau * ltau * BATCHSIZE * sizeof(float));
     
     cudaMemcpy(d_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemset(d_Tau, 0, ltau * BATCHSIZE * sizeof(float));
+    cudaMemset(d_Tau, 0.0, ltau * ltau * BATCHSIZE * sizeof(float));
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
