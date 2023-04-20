@@ -17,25 +17,25 @@ __global__ void printKernel(int length) {
 }
 
 int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
-    // printf("\nDo QR decomposition of AHat\n");
-    // // create cublas handle
-    // cublasHandle_t cHandle;
-    // cublasStatus_t stat = cublasCreate(&cHandle);
-    // if (stat != CUBLAS_STATUS_SUCCESS) {
-    //     printf("\ncublasCreate failed");
-    //     printf("\ncublas error: %d\n", stat);
-    // }
-    // int lda = n1;
-    // int min = MIN(n1, n2);
-    // int ltau = MAX(1, min);
-    // const size_t tauMemSize = ltau * ltau * BATCHSIZE * sizeof(float);
-    // const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
-    // float* tau = (float*) malloc(tauMemSize);
-    // float* h_AHat[BATCHSIZE];
-    // float* h_Tau[BATCHSIZE];
-    // float** d_AHat;
-    // float** d_Tau;
-    // int info;
+    printf("\nDo QR decomposition of AHat\n");
+    // create cublas handle
+    cublasHandle_t cHandle;
+    cublasStatus_t stat = cublasCreate(&cHandle);
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf("\ncublasCreate failed");
+        printf("\ncublas error: %d\n", stat);
+    }
+    int lda = n1;
+    int min = MIN(n1, n2);
+    int ltau = MAX(1, min);
+    const size_t tauMemSize = ltau * ltau * BATCHSIZE * sizeof(float);
+    const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
+    float* tau = (float*) malloc(tauMemSize);
+    float* h_AHat[BATCHSIZE];
+    float* h_Tau[BATCHSIZE];
+    float** d_AHat;
+    float** d_Tau;
+    int info;
 
     // // set h_AHat and h_Tau
     // for (int i = 0; i < BATCHSIZE; i++) {
