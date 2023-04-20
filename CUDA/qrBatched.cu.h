@@ -20,7 +20,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     int lda = n1;
-    int ltau = MAX(1, MIN(n1, n2));
+    int min = MIN(n1, n2);
+    int ltau = MAX(1, min);
     float* d_AHat;
     float* d_Tau;
     float* h_Tau = (float*) malloc(sizeof(float) * ltau * ltau * BATCHSIZE);
