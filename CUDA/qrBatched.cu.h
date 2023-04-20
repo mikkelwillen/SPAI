@@ -50,7 +50,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublas error: %d\n", stat);
     }
 
-    cudaMemcpy(h_Tau, d_Tau, sizeof(d_Tau), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_Tau, d_Tau, ltau * ltau * BATCHSIZE * sizeof(float), cudaMemcpyDeviceToHost);
 
     printf("\nh_Tau: ");
     for (int i = 0; i < ltau * BATCHSIZE; i++) {
