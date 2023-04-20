@@ -9,6 +9,13 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
+__global__ void printKernel(float* D, int length) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < length) {
+        printf("D[%d]: %f, ", tid, D[tid]);
+    }
+}
+
 int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printf("\nDo QR decomposition of AHat\n");
     // create cublas handle
@@ -61,13 +68,16 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublasSgeqrfBatched failed");
         printf("\ncublas error: %d\n", stat);
     }
-    for (int i = 0; i < ltau * ltau; i++) {
-        printf("i: %d\n", i);
-        gpuAssert(
-            cudaMemcpy(h_Tau + i, d_Tau + i, sizeof(float), cudaMemcpyDeviceToHost));
-    }
-    // gpuAssert(
-    //     cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+
+    // for (int i = 0; i < ltau * ltau; i++) {
+    //     gpuAssert(
+    //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
+    // }
+    printKernel <<< 1, 1 >>> (d_Tau, ltau);
+    gpuAssert(
+        cudaDeviceSynchronize());
+    gpuAssert(
+        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
@@ -78,6 +88,16 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
     printf("\nh_Tau: %f", h_Tau[0]);
+
+
+    // free and destroy
+    gpuAssert(
+        cudaFree(d_AHat));
+    gpuAssert(
+        cudaFree(d_Tau));
+    free(h_Tau);
+    cublasDestroy(cHandle);
+    return 0;
 }
 
 #endif
