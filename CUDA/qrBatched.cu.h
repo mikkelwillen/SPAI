@@ -77,6 +77,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printKernel <<< 1, ltau >>> (d_Tau[0], ltau);
     gpuAssert(
         cudaDeviceSynchronize());
+    printf("after printKernel\n");
     gpuAssert(
         cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
