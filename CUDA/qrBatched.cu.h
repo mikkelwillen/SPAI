@@ -48,10 +48,10 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     // qr initialization
     gpuAssert(
-        cudaMalloc((void**) &d_AHat, AHatMemSize));
+        cudaMalloc((void***) &d_AHat, AHatMemSize));
     printf("malloc d_AHat\n");
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, tauMemSize));
+        cudaMalloc((void***) &d_Tau, tauMemSize));
     printf("malloc d_Tau\n");
 
     gpuAssert(
