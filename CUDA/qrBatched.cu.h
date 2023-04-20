@@ -18,10 +18,11 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublasCreate failed");
         printf("\ncublas error: %d\n", stat);
     }
-
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
+    const size_t tauMemSize = ltau * ltau * sizeof(float);
+    const size_t AHatMemSize = n1 * n2 * sizeof(float);
     float* d_AHat;
     float* d_Tau;
     float* h_Tau = (float*) malloc(sizeof(float) * ltau * ltau * BATCHSIZE);
@@ -31,17 +32,17 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     // qr initialization
     gpuAssert(
-        cudaMalloc((void**) &d_AHat, n1 * n2 * BATCHSIZE * sizeof(float)));
+        cudaMalloc((void**) &d_AHat, AHatMemSize));
     printf("malloc d_AHat\n");
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, ltau * ltau * BATCHSIZE * sizeof(float)));
+        cudaMalloc((void**) &d_Tau, tauMemSize));
     printf("malloc d_Tau\n");
 
     gpuAssert(
-        cudaMemcpy(d_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
+        cudaMemcpy(d_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
     printf("copy AHat to d_AHat\n");
     gpuAssert(
-        cudaMemset(d_Tau, 0, ltau * ltau * BATCHSIZE * sizeof(float)));
+        cudaMemset(d_Tau, 0, tauMemSize));
     printf("memset d_Tau\n");
 
     stat = cublasSgeqrfBatched(cHandle,
@@ -62,7 +63,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     gpuAssert(
-        cudaMemcpy(h_Tau, d_Tau, ltau * ltau * BATCHSIZE * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
