@@ -12,7 +12,7 @@
 __global__ void printKernel(float* D, int length) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < length) {
-        printf("D[%d]: %f, ", tid, D[tid]);
+        printf("D[%d]: %f \n", tid, D[tid]);
     }
 }
 
