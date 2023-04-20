@@ -4,6 +4,7 @@
 #include "constants.cu.h"
 #include "sequentialSpai.cu.h"
 #include "sequentialTest.cu.h"
+#include "qrBatched.cu.h"
 
 
 int main() {
@@ -37,5 +38,10 @@ int main() {
     // struct CSC* M = sequentialSpai(cscB, 0.01, 5, 1);
     // printCSC(M);
 
-    sequentialTest(cscB);
+    // sequentialTest(cscB);
+
+    float* Q = (float*) malloc(sizeof(float) * m * n);
+    float* R = (float*) malloc(sizeof(float) * n * n);
+
+    qrBatched(B, m, n, 1, Q, R);
 }
