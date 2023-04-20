@@ -37,11 +37,11 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     float** d_Tau;
     int info;
 
-    // // set h_AHat and h_Tau
-    // for (int i = 0; i < BATCHSIZE; i++) {
-    //     h_AHat[i] = AHat + i * n1 * n2;
-    //     h_Tau[i] = tau + i * ltau;
-    // }
+    // set h_AHat and h_Tau
+    for (int i = 0; i < BATCHSIZE; i++) {
+        h_AHat[i] = AHat + i * n1 * n2;
+        h_Tau[i] = tau + i * ltau;
+    }
 
     // printf("ltau: %d\n", ltau);
 
