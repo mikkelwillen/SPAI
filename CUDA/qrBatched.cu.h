@@ -9,7 +9,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
-int qrBatched(float* AHat, int n1, int n2, int batchSize, float* Q, float* R) {
+int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printf("\nDo QR decomposition of AHat\n");
     // create cublas handle
     cublasHandle_t cHandle;
@@ -52,6 +52,13 @@ int qrBatched(float* AHat, int n1, int n2, int batchSize, float* Q, float* R) {
 
     cudaMemcpy(h_Tau, d_Tau, sizeof(d_Tau), cudaMemcpyDeviceToHost);
 
+    printf("\nh_Tau: ");
+    for (int i = 0; i < ltau * BATCHSIZE; i++) {
+        printf("\nith vector: ");
+        for (int j = 0; j < ltau; j++) {
+            printf("%f ", h_Tau[i * ltau + j]);
+        }
+    }
     printf("\nh_Tau: %f", h_Tau[0]);
 }
 

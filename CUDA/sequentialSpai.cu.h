@@ -150,7 +150,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // }
 
 
-        // printf("\nh_Tau: %f", h_Tau[0]);
+
 
         // // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
         // float* Q = (float*) malloc(sizeof(float) * n1 * n2);
