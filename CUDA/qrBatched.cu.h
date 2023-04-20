@@ -43,15 +43,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         h_Tau[i] = tau + i * ltau;
     }
 
-    // printf("ltau: %d\n", ltau);
+    printf("ltau: %d\n", ltau);
 
-    // // qr initialization
-    // gpuAssert(
-    //     cudaMalloc((void**) &d_AHat, AHatMemSize));
-    // printf("malloc d_AHat\n");
-    // gpuAssert(
-    //     cudaMalloc((void**) &d_Tau, tauMemSize));
-    // printf("malloc d_Tau\n");
+    // qr initialization
+    gpuAssert(
+        cudaMalloc((void**) &d_AHat, AHatMemSize));
+    printf("malloc d_AHat\n");
+    gpuAssert(
+        cudaMalloc((void**) &d_Tau, tauMemSize));
+    printf("malloc d_Tau\n");
 
     // gpuAssert(
     //     cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyHostToDevice));
