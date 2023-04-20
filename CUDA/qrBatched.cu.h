@@ -31,8 +31,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     const size_t tauMemSize = ltau * ltau * sizeof(float);
     const size_t AHatMemSize = n1 * n2 * sizeof(float);
     float* d_AHat;
-    float* d_Tau;
-    float* h_Tau = (float*) malloc(tauMemSize);
+    float** d_Tau;
+    float** h_Tau = (float**) malloc(tauMemSize);
     int info;
 
     printf("ltau: %d\n", ltau);
@@ -42,7 +42,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &d_AHat, AHatMemSize));
     printf("malloc d_AHat\n");
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, tauMemSize));
+        cudaMalloc((void***) &d_Tau, tauMemSize));
     printf("malloc d_Tau\n");
 
     gpuAssert(
@@ -57,7 +57,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                                 n2,
                                 &d_AHat,
                                 lda,
-                                &d_Tau,
+                                d_Tau,
                                 &info,
                                 BATCHSIZE);
     
@@ -74,7 +74,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
     // }
 
-    printKernel <<< 1, ltau >>> (&d_Tau[0], ltau);
+    printKernel <<< 1, ltau >>> (d_Tau[0], ltau);
     gpuAssert(
         cudaDeviceSynchronize());
     gpuAssert(
