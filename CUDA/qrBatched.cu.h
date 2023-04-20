@@ -78,12 +78,12 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublas error: %d\n", stat);
     }
 
-    // // for (int i = 0; i < ltau * ltau; i++) {
-    // //     gpuAssert(
-    // //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
-    // // }
-    // printf("after cublasSgeqrfBatched\n");
-    // printKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2);
+    // for (int i = 0; i < ltau * ltau; i++) {
+    //     gpuAssert(
+    //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
+    // }
+    printf("after cublasSgeqrfBatched\n");
+    printKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2);
     // gpuAssert(
     //     cudaDeviceSynchronize());
     // printf("after printKernel\n");
