@@ -19,7 +19,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublas error: %d\n", stat);
     }
 
-    int lda = n1;
+    int lda = 0;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
     float* d_AHat;
