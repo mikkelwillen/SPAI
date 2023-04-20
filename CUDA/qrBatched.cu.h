@@ -26,10 +26,6 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     float* d_AHat;
     float* d_Tau;
     float* h_Tau = (float*) malloc(tauMemSize);
-    if (h_Tau == NULL) {
-        printf("malloc h_Tau failed\n");
-        return 1;
-    }
     int info;
 
     printf("ltau: %d\n", ltau);
@@ -65,9 +61,13 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublasSgeqrfBatched failed");
         printf("\ncublas error: %d\n", stat);
     }
-
-    gpuAssert(
-        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+    for (int i = 0; i < ltau * ltau; i++) {
+        printf("i: %d\n", i);
+        gpuAssert(
+            cudaMemcpy(h_Tau + i, d_Tau + i, sizeof(float), cudaMemcpyDeviceToHost));
+    }
+    // gpuAssert(
+    //     cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("copy d_Tau to h_Tau\n");
 
     printf("\nh_Tau: ");
