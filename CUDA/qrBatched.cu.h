@@ -54,60 +54,60 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &d_Tau, tauMemSize));
     printf("malloc d_Tau\n");
 
-    gpuAssert(
-        cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyHostToDevice));
-    printf("copy AHat to d_AHat\n");
-    gpuAssert(
-        cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyHostToDevice));
-    printf("memset d_Tau\n");
+    // gpuAssert(
+    //     cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyHostToDevice));
+    // printf("copy AHat to d_AHat\n");
+    // gpuAssert(
+    //     cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyHostToDevice));
+    // printf("memset d_Tau\n");
 
-    stat = cublasSgeqrfBatched(cHandle,
-                                n1,
-                                n2,
-                                d_AHat,
-                                lda,
-                                d_Tau,
-                                &info,
-                                BATCHSIZE);
+    // stat = cublasSgeqrfBatched(cHandle,
+    //                             n1,
+    //                             n2,
+    //                             d_AHat,
+    //                             lda,
+    //                             d_Tau,
+    //                             &info,
+    //                             BATCHSIZE);
     
-    if (info != 0) {
-        printf("\nparameters are invalid\n");
-    }
-    if (stat != CUBLAS_STATUS_SUCCESS) {
-        printf("\ncublasSgeqrfBatched failed");
-        printf("\ncublas error: %d\n", stat);
-    }
-
-    // for (int i = 0; i < ltau * ltau; i++) {
-    //     gpuAssert(
-    //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
+    // if (info != 0) {
+    //     printf("\nparameters are invalid\n");
     // }
-    printf("after cublasSgeqrfBatched\n");
-    printKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2);
-    gpuAssert(
-        cudaDeviceSynchronize());
-    printf("after printKernel\n");
-    gpuAssert(
-        cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
-    printf("copy d_Tau to h_Tau\n");
+    // if (stat != CUBLAS_STATUS_SUCCESS) {
+    //     printf("\ncublasSgeqrfBatched failed");
+    //     printf("\ncublas error: %d\n", stat);
+    // }
 
-    printf("\nh_Tau: ");
-    for (int i = 0; i < ltau * BATCHSIZE; i++) {
-        printf("\nith vector: ");
-        for (int j = 0; j < ltau; j++) {
-            printf("%f ", h_Tau[i * ltau + j]);
-        }
-    }
-    printf("\nh_Tau: %f", h_Tau[0]);
+    // // for (int i = 0; i < ltau * ltau; i++) {
+    // //     gpuAssert(
+    // //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
+    // // }
+    // printf("after cublasSgeqrfBatched\n");
+    // printKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2);
+    // gpuAssert(
+    //     cudaDeviceSynchronize());
+    // printf("after printKernel\n");
+    // gpuAssert(
+    //     cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+    // printf("copy d_Tau to h_Tau\n");
+
+    // printf("\nh_Tau: ");
+    // for (int i = 0; i < ltau * BATCHSIZE; i++) {
+    //     printf("\nith vector: ");
+    //     for (int j = 0; j < ltau; j++) {
+    //         printf("%f ", h_Tau[i * ltau + j]);
+    //     }
+    // }
+    // printf("\nh_Tau: %f", h_Tau[0]);
 
 
-    // free and destroy
-    gpuAssert(
-        cudaFree(d_AHat));
-    gpuAssert(
-        cudaFree(d_Tau));
-    free(h_Tau);
-    cublasDestroy(cHandle);
+    // // free and destroy
+    // gpuAssert(
+    //     cudaFree(d_AHat));
+    // gpuAssert(
+    //     cudaFree(d_Tau));
+    // free(h_Tau);
+    // cublasDestroy(cHandle);
     return 0;
 }
 
