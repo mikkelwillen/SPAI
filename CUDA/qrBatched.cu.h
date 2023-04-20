@@ -10,8 +10,7 @@
 #include "constants.cu.h"
 
 __global__ void printKernel(int length) {
-    printf("inside printKernel\n");
-    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
         printf("tid %d: \n", tid);
     }
@@ -83,7 +82,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
     // }
     printf("after cublasSgeqrfBatched\n");
-    printKernel <<< 1, n1 * n2 >>> (n1 * n2);
+    int numberOfBlocks = (n1 * n2 + BLOCK_SIZE - 1) / BLOCK_SIZE;
+    printKernel <<< numberOfBlocks,  BLOCK_SIZE >>> (n1 * n2);
     gpuAssert(
         cudaDeviceSynchronize());
     // printf("after printKernel\n");
