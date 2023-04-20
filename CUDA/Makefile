@@ -20,6 +20,9 @@ $(EXECUTABLE1): $(TEST1) $(SOURCES) $(HELPERS)
 run: $(EXECUTABLE1)
 	./$(EXECUTABLE1)
 
+simple: simpleKernel.cu
+	$(COMPILER) -c simple simpleKernel.cu
+	./simple
 
 clean:
 	rm -f $(EXECUTABLE1) *.o
