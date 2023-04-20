@@ -83,7 +83,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
     // }
     printf("after cublasSgeqrfBatched\n");
-    printKernel <<< 1, n1 * n2 >>> (n1 * n2);
+    printKernel <<<1, n1 * n2>>> (n1 * n2);
     gpuAssert(
         cudaDeviceSynchronize());
     // printf("after printKernel\n");
