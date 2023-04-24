@@ -67,9 +67,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
             cudaMalloc((void**) &h_AHat, AHatMemSize));
         gpuAssert(
             cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
-        deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, i, n1, n2);
         gpuAssert(
             cudaMalloc((void**) &d_AHat, AHatMemSize));
+        deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, i, n1, n2);
         printf("d_AHat: \n");
         printDeviceArrayPointerKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2, i);
         h_Tau[i] = tau + i * ltau;
