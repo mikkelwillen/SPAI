@@ -36,7 +36,7 @@ __global__ void printDeviceArrayKernel(float* h_AHat, int length) {
 __global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
-        printf("tid %d: %f\n", tid, d_AHat[batch * length + tid]);
+        printf("tid %d: %f\n", tid, d_AHat[batch][tid]);
     }
 }
 
@@ -57,7 +57,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     float* tau = (float*) malloc(tauMemSize);
     float* h_AHat;
     float* h_Tau[BATCHSIZE];
-    float** d_AHat;
+    float* d_AHat[BATCHSIZE];
     float** d_Tau;
     int info;
 
