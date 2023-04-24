@@ -19,13 +19,6 @@ __global__ void printKernel(int length) {
     }
 }
 
-__global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch, int n1, int n2) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid == batch) {
-        d_AHat[batch] = h_AHat;
-    }
-}
-
 __global__ void printDeviceArrayKernel(float* h_AHat, int length) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
@@ -33,10 +26,17 @@ __global__ void printDeviceArrayKernel(float* h_AHat, int length) {
     }
 }
 
+__global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch, int n1, int n2) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid == batch) {
+        d_AHat[batch] = h_AHat;
+    }
+}
+
 __global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
-        printf("tid %d: %f\n", tid, d_AHat[batch][tid]);
+        printf("tid %d: %f\n", tid, d_AHat[tid]);
     }
 }
 
