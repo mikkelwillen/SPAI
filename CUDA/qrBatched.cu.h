@@ -36,7 +36,7 @@ __global__ void printDeviceArrayKernel(float* h_AHat, int length) {
 __global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
-        printf("tid %d: %f\n", tid, d_AHat[batch * length + tid]);
+        printf("tid %d: %f\n", tid, d_AHat[batch][tid]);
     }
 }
 
