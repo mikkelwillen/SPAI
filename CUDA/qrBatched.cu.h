@@ -9,6 +9,9 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
+// vi skal have kigget på nogle forskellige størrelser
+// fx skal vi finde ud af, om vi vil kopiere alt data til GPU'en med det samme, eller om vi skal kopiere hver aHat separat og så lave en batch af dem
+
 __global__ void printKernel(int length) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
@@ -19,14 +22,21 @@ __global__ void printKernel(int length) {
 __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid = batch) {
-        d_AHat[tid] = h_AHat + tid;
+        d_AHat[tid] = h_AHat
     }
 }
 
-__global__ void printH_AHatKernel(float* h_AHat, int length) {
+__global__ void printDeviceArrayKernel(float* h_AHat, int length) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
         printf("tid %d: %f\n", tid, h_AHat[tid]);
+    }
+}
+
+__global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < length) {
+        printf("tid %d: %f\n", tid, d_AHat[batch][tid]);
     }
 }
 
@@ -57,12 +67,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
             cudaMalloc((void**) &h_AHat, AHatMemSize));
         gpuAssert(
             cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
+        deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, i);
+        printf("d_AHat: \n");
+        printDeviceArrayPointerKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2, i);
         h_Tau[i] = tau + i * ltau;
     }
 
     // print h_AHat
     printf("\nh_AHat");
-    printH_AHatKernel <<< 1, n1 * n2 >>> (h_AHat, n1 * n2);
+    // printDeviceArrayKernel <<< 1, n1 * n2 >>> (h_AHat, n1 * n2);
     printf("ltau: %d\n", ltau);
 
     // qr initialization
