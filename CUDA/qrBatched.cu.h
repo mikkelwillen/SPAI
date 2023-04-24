@@ -22,10 +22,6 @@ __global__ void printKernel(int length) {
 __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch, int n1, int n2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n2) {
-        if (tid == 0) {
-        gpuAssert(
-            cudaMalloc((void**) &d_AHat[batch], sizeof(float)));
-        }
         d_AHat[batch][tid] = h_AHat[tid];
     }
 }
