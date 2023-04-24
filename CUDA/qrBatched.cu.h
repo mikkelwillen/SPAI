@@ -71,7 +71,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         gpuAssert(
             cudaMalloc((void**) &d_AHat, AHatMemSize));
         gpuAssert(
-            cudaMalloc((void**) d_AHat[i], AHatMemSize));
+            cudaMalloc((void**) &d_AHat[i], AHatMemSize));
         gpuAssert(
             cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyDeviceToDevice));
         printf("d_AHat: \n");
