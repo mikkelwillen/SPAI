@@ -49,6 +49,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\ncublasCreate failed");
         printf("\ncublas error: %d\n", stat);
     }
+
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
@@ -57,7 +58,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     float* tau = (float*) malloc(tauMemSize);
     float* h_AHat;
     float* h_Tau[BATCHSIZE];
-    float* d_AHat[BATCHSIZE];
+    float** d_AHat;
     float** d_Tau;
     int info;
 
