@@ -16,6 +16,20 @@ __global__ void printKernel(int length) {
     }
 }
 
+__global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid = batch) {
+        d_AHat[tid] = h_AHat + tid;
+    }
+}
+
+__global__ void printH_AHatKernel(float* h_AHat, int length) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < length) {
+        printf("tid %d: %f\n", tid, h_AHat[tid]);
+    }
+}
+
 int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printf("\nDo QR decomposition of AHat\n");
     // create cublas handle
@@ -31,7 +45,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     const size_t tauMemSize = ltau * ltau * BATCHSIZE * sizeof(float);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
     float* tau = (float*) malloc(tauMemSize);
-    float* h_AHat[BATCHSIZE];
+    float* h_AHat;
     float* h_Tau[BATCHSIZE];
     float** d_AHat;
     float** d_Tau;
@@ -39,10 +53,16 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     // set h_AHat and h_Tau
     for (int i = 0; i < BATCHSIZE; i++) {
-        h_AHat[i] = AHat + i * n1 * n2;
+        gpuAssert(
+            cudaMalloc((void**) &h_AHat, AHatMemSize));
+        gpuAssert(
+            cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
         h_Tau[i] = tau + i * ltau;
     }
 
+    // print h_AHat
+    printf("\nh_AHat");
+    printH_AHatKernel <<< 1, n1 * n2 >>> (h_AHat, n1 * n2);
     printf("ltau: %d\n", ltau);
 
     // qr initialization
