@@ -29,7 +29,7 @@ __global__ void printDeviceArrayKernel(float* h_AHat, int length) {
 __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch, int n1, int n2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid == batch) {
-        d_AHat = &h_AHat;
+        d_AHat[batch] = h_AHat;
     }
 }
 
@@ -69,11 +69,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         gpuAssert(
             cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
         gpuAssert(
-            cudaMalloc((void**) &d_AHat, AHatMemSize));
-        gpuAssert(
-            cudaMalloc((void**) &d_AHat[i], AHatMemSize));
-        gpuAssert(
-            cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyDeviceToDevice));
+            cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
+        deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, i, n1, n2);
         printf("d_AHat: \n");
         printDeviceArrayPointerKernel <<< 1, n1 * n2 >>> (d_AHat, n1 * n2, i);
         h_Tau[i] = tau + i * ltau;
