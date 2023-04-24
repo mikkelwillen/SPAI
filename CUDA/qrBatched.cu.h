@@ -22,7 +22,7 @@ __global__ void printKernel(int length) {
 __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid = batch) {
-        d_AHat[tid] = h_AHat
+        d_AHat[tid] = h_AHat;
     }
 }
 
