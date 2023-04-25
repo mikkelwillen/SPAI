@@ -33,6 +33,17 @@ __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int b
     }
 }
 
+__global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int batch, int ltau) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < BATCHSIZE * ltau * ltau) {
+        int i = tid / ltau;
+        int j = tid % ltau;
+        h_tau[tid] = d_tau[i][j];
+    }
+}
+
+
+// virker sgu ikke rigtigt
 __global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < length) {
@@ -75,7 +86,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_Tau, tauMemSize));
     
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, BATCHSIZE * n2 * sizeof(float*)));
+        cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -92,6 +103,21 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgeqrfBatched failed");
         printf("\ncublas error: %d\n", stat);
+    }
+
+    // copy d_Tau to h_Tau
+    devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
+
+    gpuAssert(
+        cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+    
+    // print tau
+    printf("\nTau: ");
+    for (int i = 0; i < ltau * BATCHSIZE; i++) {
+        printf("\nith vector: ");
+        for (int j = 0; j < ltau; j++) {
+            printf("%f ", tau[i * ltau + j]);
+        }
     }
 
     // // for (int i = 0; i < ltau * ltau; i++) {
