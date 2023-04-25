@@ -107,7 +107,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("after cublasSgeqrfBatched\n");
     // copy d_AHat to h_AHat
-    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1);
+    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     printf("after devicePointerToDeviceKernel\n");
     printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
     // copy d_Tau to h_Tau
