@@ -46,7 +46,7 @@ __global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int bat
 // virker sgu ikke rigtigt
 __global__ void printDeviceArrayPointerKernel(float** d_AHat, int length, int batch) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    printf("hallo?");
+    printf("hallo?\n");
     if (tid < length) {
         printf("tid %d: %f\n", tid, d_AHat[batch][tid]);
     }
