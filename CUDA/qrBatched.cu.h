@@ -33,11 +33,11 @@ __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int b
     }
 }
 
-__global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int batch, int ltau) {
+__global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int batch, int n1, int n2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < BATCHSIZE * ltau * ltau) {
-        int i = tid / ltau;
-        int j = tid % ltau;
+    if (tid < BATCHSIZE * n1 * n2) {
+        int i = tid / n1;
+        int j = tid % n1;
         h_tau[tid] = d_tau[i][j];
     }
 }
@@ -107,7 +107,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("after cublasSgeqrfBatched\n");
     // copy d_AHat to h_AHat
-    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
+    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1);
     printf("after devicePointerToDeviceKernel\n");
     printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
     // copy d_Tau to h_Tau
