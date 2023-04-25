@@ -38,7 +38,7 @@ __global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int bat
     if (tid < BATCHSIZE * ltau * ltau) {
         int i = tid / ltau;
         int j = tid % ltau;
-        h_tau[tid] = (d_tau[i] + j * sizeof(float));
+        h_tau[tid] = d_tau[i][j];
     }
 }
 
