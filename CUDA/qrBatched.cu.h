@@ -75,7 +75,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_Tau, tauMemSize));
     
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, BATCHSIZE * sizeof(float*)));
+        cudaMalloc((void**) &d_Tau, BATCHSIZE * n2 * sizeof(float*)));
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
