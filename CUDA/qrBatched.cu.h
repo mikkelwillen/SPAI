@@ -108,6 +108,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // copy d_Tau to h_Tau
     devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
     printf("after devicePointerToDeviceKernel\n");
+    printDeviceArrayKernel <<< 1, n1 * n2 >>> (h_Tau, BATCHSIZE * ltau * ltau);
+    printf("after printDeviceArrayKernel\n");
     gpuAssert(
         cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("after cudaMemcpy\n");
@@ -121,7 +123,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
     printf("after tau print\n");
-    cudaMemcpy2D(R, n1 * sizeof(float), d_AHat[0], lda * sizeof(float), n1 * sizeof(float), n2, cudaMemcpyDeviceToDevice);
+
     // // for (int i = 0; i < ltau * ltau; i++) {
     // //     gpuAssert(
     // //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
