@@ -106,24 +106,28 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     printf("after cublasSgeqrfBatched\n");
-    // copy d_Tau to h_Tau
-    devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
+    // copy d_AHat to h_AHat
+    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     printf("after devicePointerToDeviceKernel\n");
-    printDeviceArrayKernel <<< 1, BATCHSIZE * ltau * ltau >>> (h_Tau, BATCHSIZE * ltau * ltau);
-    printf("after printDeviceArrayKernel\n");
-    gpuAssert(
-        cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
-    printf("after cudaMemcpy\n");
+    printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
+    // copy d_Tau to h_Tau
+    // devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
+    // printf("after devicePointerToDeviceKernel\n");
+    // printDeviceArrayKernel <<< 1, BATCHSIZE * ltau * ltau >>> (h_Tau, BATCHSIZE * ltau * ltau);
+    // printf("after printDeviceArrayKernel\n");
+    // gpuAssert(
+    //     cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+    // printf("after cudaMemcpy\n");
     
-    // print tau
-    printf("\nTau: ");
-    for (int i = 0; i < ltau * BATCHSIZE; i++) {
-        printf("\nith vector: ");
-        for (int j = 0; j < ltau; j++) {
-            printf("%f ", tau[i * ltau + j]);
-        }
-    }
-    printf("after tau print\n");
+    // // print tau
+    // printf("\nTau: ");
+    // for (int i = 0; i < ltau * BATCHSIZE; i++) {
+    //     printf("\nith vector: ");
+    //     for (int j = 0; j < ltau; j++) {
+    //         printf("%f ", tau[i * ltau + j]);
+    //     }
+    // }
+    // printf("after tau print\n");
 
     // // for (int i = 0; i < ltau * ltau; i++) {
     // //     gpuAssert(
