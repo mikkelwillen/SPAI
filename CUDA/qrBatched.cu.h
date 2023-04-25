@@ -70,44 +70,29 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
     
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
-    gpuAssert(
-        cudaDeviceSynchronize());
-    printDeviceArrayPointerKernel <<< 1, BATCHSIZE >>> (d_AHat, n1 * n2, BATCHSIZE);
-
-    // // print h_AHat
-    // printf("\nh_AHat");
-    // // printDeviceArrayKernel <<< 1, n1 * n2 >>> (h_AHat, n1 * n2);
-    // printf("ltau: %d\n", ltau);
-
-    // // qr initialization
-    // printf("malloc d_AHat\n");
-    // gpuAssert(
-    //     cudaMalloc((void**) &d_Tau, tauMemSize));
-    // printf("malloc d_Tau\n");
-
-    // gpuAssert(
-    //     cudaMemcpy(d_AHat, h_AHat, AHatMemSize, cudaMemcpyHostToDevice));
-    // printf("copy AHat to d_AHat\n");
-    // gpuAssert(
-    //     cudaMemcpy(d_Tau, h_Tau, tauMemSize, cudaMemcpyHostToDevice));
-    // printf("memset d_Tau\n");
-
-    // // stat = cublasSgeqrfBatched(cHandle,
-    // //                             n1,
-    // //                             n2,
-    // //                             d_AHat,
-    // //                             lda,
-    // //                             d_Tau,
-    // //                             &info,
-    // //                             BATCHSIZE);
     
-    // // if (info != 0) {
-    // //     printf("\nparameters are invalid\n");
-    // // }
-    // // if (stat != CUBLAS_STATUS_SUCCESS) {
-    // //     printf("\ncublasSgeqrfBatched failed");
-    // //     printf("\ncublas error: %d\n", stat);
-    // // }
+    gpuAssert(
+        cudaMalloc((void**) &h_Tau, tauMemSize));
+    
+    gpuAssert(
+        cudaMalloc((void**) &d_Tau, BATCHSIZE * sizeof(float*)));
+
+    stat = cublasSgeqrfBatched(cHandle,
+                                n1,
+                                n2,
+                                d_AHat,
+                                lda,
+                                d_Tau,
+                                &info,
+                                BATCHSIZE);
+    
+    if (info != 0) {
+        printf("\nparameters are invalid\n");
+    }
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf("\ncublasSgeqrfBatched failed");
+        printf("\ncublas error: %d\n", stat);
+    }
 
     // // for (int i = 0; i < ltau * ltau; i++) {
     // //     gpuAssert(
