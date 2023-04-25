@@ -38,7 +38,7 @@ __global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int bat
     if (tid < BATCHSIZE * ltau * ltau) {
         int i = tid / ltau;
         int j = tid % ltau;
-        h_tau[tid] = d_tau[i][j];
+        h_tau[tid] = (d_tau[i] + j * sizeof(float));
     }
 }
 
@@ -111,6 +111,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     gpuAssert(
         cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     printf("after cudaMemcpy\n");
+    
     // print tau
     printf("\nTau: ");
     for (int i = 0; i < ltau * BATCHSIZE; i++) {
@@ -120,6 +121,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
     printf("after tau print\n");
+    cudaMemcpy2D(R, n1 * sizeof(float), d_AHat[0], lda * sizeof(float), n1 * sizeof(float), n2, cudaMemcpyDeviceToDevice);
     // // for (int i = 0; i < ltau * ltau; i++) {
     // //     gpuAssert(
     // //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
