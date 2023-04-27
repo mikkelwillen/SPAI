@@ -221,6 +221,24 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\n");
     }
 
+    // compute Q * R
+    float* QR = (float*) malloc(n1 * n2 * sizeof(float));
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            QR[i * n2 + j] = 0;
+            for (int k = 0; k < n2; k++) {
+                QR[i * n2 + j] += Q[i * n2 + k] * R[k * n2 + j];
+            }
+        }
+    }
+
+    printf("print QR\n");
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            printf("%f ", QR[i * n2 + j]);
+        }
+        printf("\n");
+    }
 
 
     // // free and destroy
