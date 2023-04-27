@@ -79,7 +79,6 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     gpuAssert(
         cudaMemcpy(h_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
     printf("print h_AHat\n");
-    printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
     gpuAssert(
         cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
     
@@ -89,6 +88,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_Tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
+    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_Tau, h_Tau, BATCHSIZE, ltau, ltau);
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -111,7 +111,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
     while(1) {
-        
+
     }
     gpuAssert(
         cudaMemcpy(AHat, h_AHat, BATCHSIZE * n1 * n2 * sizeof(float), cudaMemcpyDeviceToHost));
