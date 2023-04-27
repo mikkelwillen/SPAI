@@ -129,7 +129,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
             }
         }
     }
-    
+
     // make Q
     for (int j = 0; j < ltau; j++) {
         // compute v * v^T
@@ -137,6 +137,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         for (int i = 0; i < ltau; i++) {
             vvt += tau[j * ltau + i] * tau[j * ltau + i];
         }
+        printf("vvt: %f\n", vvt);
 
         // malloc H_j
         float* H = (float*) malloc(ltau * ltau * sizeof(float));
