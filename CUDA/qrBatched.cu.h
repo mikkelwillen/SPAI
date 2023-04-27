@@ -79,38 +79,38 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     gpuAssert(
         cudaMemcpy(h_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
     printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
-    gpuAssert(
-        cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
+    // gpuAssert(
+    //     cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
     
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
+    // deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     
-    gpuAssert(
-        cudaMalloc((void**) &h_Tau, tauMemSize));
-    gpuAssert(
-        cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
+    // gpuAssert(
+    //     cudaMalloc((void**) &h_Tau, tauMemSize));
+    // gpuAssert(
+    //     cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
 
-    stat = cublasSgeqrfBatched(cHandle,
-                                n1,
-                                n2,
-                                d_AHat,
-                                lda,
-                                d_Tau,
-                                &info,
-                                BATCHSIZE);
+    // stat = cublasSgeqrfBatched(cHandle,
+    //                             n1,
+    //                             n2,
+    //                             d_AHat,
+    //                             lda,
+    //                             d_Tau,
+    //                             &info,
+    //                             BATCHSIZE);
     
-    if (info != 0) {
-        printf("\nparameters are invalid\n");
-    }
-    if (stat != CUBLAS_STATUS_SUCCESS) {
-        printf("\ncublasSgeqrfBatched failed");
-        printf("\ncublas error: %d\n", stat);
-    }
+    // if (info != 0) {
+    //     printf("\nparameters are invalid\n");
+    // }
+    // if (stat != CUBLAS_STATUS_SUCCESS) {
+    //     printf("\ncublasSgeqrfBatched failed");
+    //     printf("\ncublas error: %d\n", stat);
+    // }
 
-    printf("after cublasSgeqrfBatched\n");
-    // copy d_AHat to h_AHat
-    devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
-    printf("after devicePointerToDeviceKernel\n");
-    printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
+    // printf("after cublasSgeqrfBatched\n");
+    // // copy d_AHat to h_AHat
+    // devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
+    // printf("after devicePointerToDeviceKernel\n");
+    // printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
     // copy d_Tau to h_Tau
     // devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
     // printf("after devicePointerToDeviceKernel\n");
