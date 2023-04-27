@@ -72,8 +72,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
-    const size_t tauMemSize = ltau * ltau * BATCHSIZE * sizeof(float);
-    const size_t tauPointerMemSize = BATCHSIZE * ltau * sizeof(float*);
+    const size_t tauMemSize = n1T * n1T * BATCHSIZE * sizeof(float);
+    const size_t tauPointerMemSize = BATCHSIZE * n1T * sizeof(float*);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
     const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
     float* tau = (float*) malloc(tauMemSize);
@@ -95,7 +95,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_Tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_Tau, tauPointerMemSize));
-    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
+    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * n1T >>> (d_Tau, h_Tau, BATCHSIZE, n1T);
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -124,9 +124,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // print tau
     for (int i = 0; i < BATCHSIZE; i++) {
         printf("tau %d:\n", i);
-        for (int j = 0; j < ltau; j++) {
-            for (int k = 0; k < ltau; k++) {
-                printf("%f ", tau[i * ltau * ltau + j * ltau + k]);
+        for (int j = 0; j < n1T; j++) {
+            for (int k = 0; k < n1T; k++) {
+                printf("%f ", tau[i * n1T * n1T + j * n1T + k]);
             }
             printf("\n");
         }
@@ -156,7 +156,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     // make Q
-    for (int j = 0; j < ltau; j++) {
+    for (int j = 0; j < n1T; j++) {
         // compute v * v^T
         float* v = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
@@ -178,7 +178,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
 
         // malloc H_j
-        float* H = (float*) malloc(ltau * ltau * sizeof(float));
+        float* H = (float*) malloc(n1T * n1T * sizeof(float));
         // compute H_j
         
     }
