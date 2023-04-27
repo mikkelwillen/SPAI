@@ -119,17 +119,6 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     gpuAssert(
         cudaMemcpy(tau, h_Tau, BATCHSIZE * ltau * ltau * sizeof(float), cudaMemcpyDeviceToHost));
     
-    // make R
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            if (i <= j) {
-                R[i * n2 + j] = AHat[i * n2 + j];
-            } else {
-                R[i * n2 + j] = 0;
-            }
-        }
-    }
-
     // print tau
     for (int i = 0; i < BATCHSIZE; i++) {
         printf("tau %d:\n", i);
@@ -141,6 +130,29 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
         printf("\n");
     }
+    // print AHat
+    for (int i = 0; i < BATCHSIZE; i++) {
+        printf("AHat %d:\n", i);
+        for (int j = 0; j < n1; j++) {
+            for (int k = 0; k < n2; k++) {
+                printf("%f ", AHat[i * n1 * n2 + j * n2 + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+    
+    // make R
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2; j++) {
+            if (i <= j) {
+                R[i * n2 + j] = AHat[i * n2 + j];
+            } else {
+                R[i * n2 + j] = 0;
+            }
+        }
+    }
+
 
     // make Q
     for (int j = 0; j < ltau; j++) {
