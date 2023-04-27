@@ -80,9 +80,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMemcpy(h_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
     printf("print h_AHat\n");
     printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
-    cudaDeviceSyncronize();
     while(1) {
-        
+
     }
     // gpuAssert(
     //     cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
