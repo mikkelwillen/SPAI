@@ -73,7 +73,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
     const size_t tauMemSize = ltau * ltau * BATCHSIZE * sizeof(float);
+    const size_t tauPointerMemSize = BATCHSIZE * ltau * sizeof(float*);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
+    const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
     float* tau = (float*) malloc(tauMemSize);
     float* h_AHat;
     float* h_Tau;
@@ -82,17 +84,17 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int info;
 
     gpuAssert(
-        cudaMalloc((void**) &h_AHat, BATCHSIZE * n1 * n2 * sizeof(float)));
+        cudaMalloc((void**) &h_AHat, AHatMemSize));
     gpuAssert(
-        cudaMemcpy(h_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
+        cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
     gpuAssert(
-        cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
+        cudaMalloc((void**) &d_AHat, AHatPointerMemSize));
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     
     gpuAssert(
         cudaMalloc((void**) &h_Tau, tauMemSize));
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
+        cudaMalloc((void**) &d_Tau, tauPointerMemSize));
     tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
 
     stat = cublasSgeqrfBatched(cHandle,
@@ -115,9 +117,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printf("after cublasSgeqrfBatched\n");
 
     gpuAssert(
-        cudaMemcpy(AHat, h_AHat, BATCHSIZE * n1 * n2 * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpy(AHat, h_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
     gpuAssert(
-        cudaMemcpy(tau, h_Tau, BATCHSIZE * ltau * ltau * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
     
     // print tau
     for (int i = 0; i < BATCHSIZE; i++) {
@@ -153,69 +155,97 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
 
-
     // make Q
     for (int j = 0; j < ltau; j++) {
         // compute v * v^T
-        float vvt = 0;
-        for (int i = 0; i < ltau; i++) {
-            vvt += tau[i * ltau + j] * tau[i * ltau + j];
+        float* v = (float*) malloc(n1 * sizeof(float));
+        for (int i = 0; i < n1; i++) {
+            if (i > j) {
+                v[i] = 0;
+            } else if (i == j) {
+                v[i] = 1;
+            }
+            else {
+                v[i] = AHat[i * n2 + j];
+            }
         }
-        printf("vvt: %f\n", vvt);
+
+        float* vvt = (float*) malloc(n1 * n1 * sizeof(float));
+        for (int i = 0; i < n1; i++) {
+            for (int k = 0; k < n1; k++) {
+                vvt[i * n1 + k] = v[i] * v[k];
+            }
+        }
 
         // malloc H_j
         float* H = (float*) malloc(ltau * ltau * sizeof(float));
         // compute H_j
-        for (int i = 0; i < ltau; i++) {
-            for (int k = 0; k < ltau; k++) {
-                if (i == k) {
-                    H[i * ltau + k] = 1 - 2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
-                } else {
-                    H[i * ltau + k] = -2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
-                }
-            }
-        }
-        // print H_j
-        printf("H_%d:\n", j);
-        for (int i = 0; i < ltau; i++) {
-            for (int k = 0; k < ltau; k++) {
-                printf("%f ", H[i * ltau + k]);
-            }
-            printf("\n");
-        }
-
-        if (j == 0) {
-            for (int i = 0; i < ltau; i++) {
-                for (int k = 0; k < ltau; k++) {
-                    Q[i * ltau + k] = H[i * ltau + k];
-                }
-            }
-        } else {
-            float* QH = (float*) malloc(ltau * ltau * sizeof(float));
-            for (int i = 0; i < ltau; i++) {
-                for (int k = 0; k < ltau; k++) {
-                    QH[i * ltau + k] = 0;
-                    for (int m = 0; m < ltau; m++) {
-                        QH[i * ltau + k] += Q[i * ltau + m] * H[m * ltau + k];
-                    }
-                }
-            }
-            // print QH
-            printf("QH_%d:\n", j);
-            for (int i = 0; i < ltau; i++) {
-                for (int k = 0; k < ltau; k++) {
-                    printf("%f ", QH[i * ltau + k]);
-                }
-                printf("\n");
-            }
-
-            for (int i = 0; i < ltau; i++) {
-                for (int k = 0; k < ltau; k++) {
-                    Q[i * ltau + k] = QH[i * ltau + k];
-                }
-            }
-        }
+        
     }
+
+
+    // make Q
+    // for (int j = 0; j < ltau; j++) {
+    //     compute v * v^T
+    //     float vvt = 0;
+    //     for (int i = 0; i < ltau; i++) {
+    //         vvt += tau[i * ltau + j] * tau[i * ltau + j];
+    //     }
+    //     printf("vvt: %f\n", vvt);
+
+    //     malloc H_j
+    //     float* H = (float*) malloc(ltau * ltau * sizeof(float));
+    //     compute H_j
+    //     for (int i = 0; i < ltau; i++) {
+    //         for (int k = 0; k < ltau; k++) {
+    //             if (i == k) {
+    //                 H[i * ltau + k] = 1 - 2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
+    //             } else {
+    //                 H[i * ltau + k] = -2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
+    //             }
+    //         }
+    //     }
+    //     print H_j
+    //     printf("H_%d:\n", j);
+    //     for (int i = 0; i < ltau; i++) {
+    //         for (int k = 0; k < ltau; k++) {
+    //             printf("%f ", H[i * ltau + k]);
+    //         }
+    //         printf("\n");
+    //     }
+
+    //     if (j == 0) {
+    //         for (int i = 0; i < ltau; i++) {
+    //             for (int k = 0; k < ltau; k++) {
+    //                 Q[i * ltau + k] = H[i * ltau + k];
+    //             }
+    //         }
+    //     } else {
+    //         float* QH = (float*) malloc(ltau * ltau * sizeof(float));
+    //         for (int i = 0; i < ltau; i++) {
+    //             for (int k = 0; k < ltau; k++) {
+    //                 QH[i * ltau + k] = 0;
+    //                 for (int m = 0; m < ltau; m++) {
+    //                     QH[i * ltau + k] += Q[i * ltau + m] * H[m * ltau + k];
+    //                 }
+    //             }
+    //         }
+    //         print QH
+    //         printf("QH_%d:\n", j);
+    //         for (int i = 0; i < ltau; i++) {
+    //             for (int k = 0; k < ltau; k++) {
+    //                 printf("%f ", QH[i * ltau + k]);
+    //             }
+    //             printf("\n");
+    //         }
+
+    //         for (int i = 0; i < ltau; i++) {
+    //             for (int k = 0; k < ltau; k++) {
+    //                 Q[i * ltau + k] = QH[i * ltau + k];
+    //             }
+    //         }
+    //     }
+    // }
 
     printf("print R\n");
     for (int i = 0; i < n2; i++) {
