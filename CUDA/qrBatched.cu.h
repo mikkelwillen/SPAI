@@ -33,6 +33,13 @@ __global__ void deviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int b
     }
 }
 
+__global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int batch, int ltau) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < BATCHSIZE * ltau) {
+        d_Tau[tid] = &h_Tau[tid * ltau];
+    }
+}
+
 __global__ void devicePointerToDeviceKernel(float** d_tau, float* h_tau, int batch, int n1, int n2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < BATCHSIZE * n1 * n2) {
@@ -88,7 +95,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_Tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_Tau, BATCHSIZE * ltau * sizeof(float*)));
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_Tau, h_Tau, BATCHSIZE, ltau, ltau);
+    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
@@ -109,7 +116,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("after cublasSgeqrfBatched\n");
 
-    printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
+    printDeviceArrayKernel <<< 1, BATCHSIZE * ltau * ltau >>> (h_Tau, BATCHSIZE * ltau * ltau);
     while(1) {
 
     }
