@@ -85,10 +85,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMalloc((void**) &h_AHat, BATCHSIZE * n1 * n2 * sizeof(float)));
     gpuAssert(
         cudaMemcpy(h_AHat, AHat, n1 * n2 * sizeof(float), cudaMemcpyHostToDevice));
-    printf("print h_AHat\n");
     gpuAssert(
         cudaMalloc((void**) &d_AHat, BATCHSIZE * sizeof(float*)));
-    
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     
     gpuAssert(
@@ -116,15 +114,29 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("after cublasSgeqrfBatched\n");
 
-    printDeviceArrayKernel <<< 1, BATCHSIZE * ltau * ltau >>> (h_Tau, BATCHSIZE * ltau * ltau);
-    while(1) {
-
-    }
     gpuAssert(
         cudaMemcpy(AHat, h_AHat, BATCHSIZE * n1 * n2 * sizeof(float), cudaMemcpyDeviceToHost));
+    gpuAssert(
+        cudaMemcpy(tau, h_Tau, BATCHSIZE * ltau * ltau * sizeof(float), cudaMemcpyDeviceToHost));
 
-    
-
+    for (int b = 0; b < BATCHSIZE; b++) {
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                if (i > j) {
+                    R[b * n2 * n2 + i * n2 + j] = 0;
+                } else {
+                    R[b * n2 * n2 + i * n2 + j] = AHat[b * n1 * n2 + i * n1 + j];
+                }
+            }
+        }
+    }
+    printf("print R\n");
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2; j++) {
+            printf("%f ", R[i * n2 + j]);
+        }
+        printf("\n");
+    }
     // // copy d_AHat to h_AHat
     // devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
     // printf("after devicePointerToDeviceKernel\n");
