@@ -72,6 +72,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
+    int n1T = n1;
     const size_t tauMemSize = n1T * n1T * BATCHSIZE * sizeof(float);
     const size_t tauPointerMemSize = BATCHSIZE * n1T * sizeof(float*);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
