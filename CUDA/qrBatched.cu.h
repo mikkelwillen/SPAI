@@ -118,18 +118,50 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         cudaMemcpy(AHat, h_AHat, BATCHSIZE * n1 * n2 * sizeof(float), cudaMemcpyDeviceToHost));
     gpuAssert(
         cudaMemcpy(tau, h_Tau, BATCHSIZE * ltau * ltau * sizeof(float), cudaMemcpyDeviceToHost));
+    
+    for (int j = 0; j < ltau; j++) {
+        // compute v * v^T
+        float vvt = 0;
+        for (int i = 0; i < ltau; i++) {
+            vvt += tau[j * ltau + i] * tau[j * ltau + i];
+        }
 
-    for (int b = 0; b < BATCHSIZE; b++) {
-        for (int i = 0; i < n2; i++) {
-            for (int j = 0; j < n2; j++) {
-                if (i > j) {
-                    R[b * n2 * n2 + i * n2 + j] = 0;
+        // malloc H_j
+        float* H = (float*) malloc(ltau * ltau * sizeof(float));
+        // compute H_j
+        for (int i = 0; i < ltau; i++) {
+            for (int k = 0; k < ltau; k++) {
+                if (i == k) {
+                    H[i * ltau + k] = 1 - 2 * tau[j * ltau * ltau + i] * tau[j * ltau * ltau + k] / vvt;
                 } else {
-                    R[b * n2 * n2 + i * n2 + j] = AHat[b * n1 * n2 + i * n1 + j];
+                    H[i * ltau + k] = -2 * tau[j * ltau * ltau + i] * tau[j * ltau * ltau + k] / vvt;
+                }
+            }
+        }
+        if (j == 0) {
+            for (int i = 0; i < ltau; i++) {
+                for (int k = 0; k < ltau; k++) {
+                    Q[i * ltau + k] = H[i * ltau + k];
+                }
+            }
+        } else {
+            float* QH = (float*) malloc(ltau * ltau * sizeof(float));
+            for (int i = 0; i < ltau; i++) {
+                for (int k = 0; k < ltau; k++) {
+                    QH[i * ltau + k] = 0;
+                    for (int m = 0; m < ltau; m++) {
+                        QH[i * ltau + k] += Q[i * ltau + m] * H[m * ltau + k];
+                    }
+                }
+            }
+            for (int i = 0; i < ltau; i++) {
+                for (int k = 0; k < ltau; k++) {
+                    Q[i * ltau + k] = QH[i * ltau + k];
                 }
             }
         }
     }
+
     printf("print R\n");
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2; j++) {
@@ -137,52 +169,14 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
         printf("\n");
     }
-    // // copy d_AHat to h_AHat
-    // devicePointerToDeviceKernel <<< 1, BATCHSIZE * n1 * n2 >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
-    // printf("after devicePointerToDeviceKernel\n");
-    // printDeviceArrayKernel <<< 1, BATCHSIZE * n1 * n2 >>> (h_AHat, BATCHSIZE * n1 * n2);
-    // copy d_Tau to h_Tau
-    // devicePointerToDeviceKernel <<< 1, BATCHSIZE * ltau * ltau >>> (d_Tau, h_Tau, BATCHSIZE, ltau);
-    // printf("after devicePointerToDeviceKernel\n");
-    // printDeviceArrayKernel <<< 1, BATCHSIZE * ltau * ltau >>> (h_Tau, BATCHSIZE * ltau * ltau);
-    // printf("after printDeviceArrayKernel\n");
-    // gpuAssert(
-    //     cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
-    // printf("after cudaMemcpy\n");
-    
-    // // print tau
-    // printf("\nTau: ");
-    // for (int i = 0; i < ltau * BATCHSIZE; i++) {
-    //     printf("\nith vector: ");
-    //     for (int j = 0; j < ltau; j++) {
-    //         printf("%f ", tau[i * ltau + j]);
-    //     }
-    // }
-    // printf("after tau print\n");
 
-    // // for (int i = 0; i < ltau * ltau; i++) {
-    // //     gpuAssert(
-    // //         cudaMemcpy(h_Tau + i, d_Tau[i], sizeof(float), cudaMemcpyDeviceToHost));
-    // // }
-    // printf("after cublasSgeqrfBatched\n");
-    // int numberOfBlocks = (n1 * n2 + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    // printKernel <<< numberOfBlocks,  BLOCK_SIZE >>> (n1 * n2);
-    // gpuAssert(
-    //     cudaDeviceSynchronize());
-    // printf("after printKernel\n");
-    // gpuAssert(
-    //     cudaMemcpy(h_Tau, d_Tau, tauMemSize, cudaMemcpyDeviceToHost));
-    // printf("copy d_Tau to h_Tau\n");
-
-    // printf("\nh_Tau: ");
-    // for (int i = 0; i < ltau * BATCHSIZE; i++) {
-    //     printf("\nith vector: ");
-    //     for (int j = 0; j < ltau; j++) {
-    //         printf("%f ", h_Tau[i * ltau + j]);
-    //     }
-    // }
-    // printf("\nh_Tau: %f", h_Tau[0]);
-
+    printf("print Q\n");
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            printf("%f ", Q[i * n2 + j]);
+        }
+        printf("\n");
+    }
 
     // // free and destroy
     // gpuAssert(
