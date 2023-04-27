@@ -157,9 +157,9 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         for (int i = 0; i < ltau; i++) {
             for (int k = 0; k < ltau; k++) {
                 if (i == k) {
-                    H[i * ltau + k] = 1 - 2 * tau[j * ltau * ltau + i] * tau[j * ltau * ltau + k] / vvt;
+                    H[i * ltau + k] = 1 - 2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
                 } else {
-                    H[i * ltau + k] = -2 * tau[j * ltau * ltau + i] * tau[j * ltau * ltau + k] / vvt;
+                    H[i * ltau + k] = -2 * tau[j * ltau + i] * tau[j * ltau + k] / vvt;
                 }
             }
         }
@@ -196,7 +196,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                 }
                 printf("\n");
             }
-            
+
             for (int i = 0; i < ltau; i++) {
                 for (int k = 0; k < ltau; k++) {
                     Q[i * ltau + k] = QH[i * ltau + k];
