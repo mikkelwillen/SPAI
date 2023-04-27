@@ -147,7 +147,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         // compute v * v^T
         float vvt = 0;
         for (int i = 0; i < ltau; i++) {
-            vvt += tau[j * ltau + i] * tau[j * ltau + i];
+            vvt += tau[i * ltau + j] * tau[i * ltau + j];
         }
         printf("vvt: %f\n", vvt);
 
