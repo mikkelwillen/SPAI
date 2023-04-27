@@ -163,6 +163,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                 }
             }
         }
+        // print H_j
+        printf("H_%d:\n", j);
+        for (int i = 0; i < ltau; i++) {
+            for (int k = 0; k < ltau; k++) {
+                printf("%f ", H[i * ltau + k]);
+            }
+            printf("\n");
+        }
+
         if (j == 0) {
             for (int i = 0; i < ltau; i++) {
                 for (int k = 0; k < ltau; k++) {
@@ -179,6 +188,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                     }
                 }
             }
+            // print QH
+            printf("QH_%d:\n", j);
+            for (int i = 0; i < ltau; i++) {
+                for (int k = 0; k < ltau; k++) {
+                    printf("%f ", QH[i * ltau + k]);
+                }
+                printf("\n");
+            }
+            
             for (int i = 0; i < ltau; i++) {
                 for (int k = 0; k < ltau; k++) {
                     Q[i * ltau + k] = QH[i * ltau + k];
