@@ -130,6 +130,18 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
 
+    // print tau
+    for (int i = 0; i < BATCHSIZE; i++) {
+        printf("tau %d:\n", i);
+        for (int j = 0; j < ltau; j++) {
+            for (int k = 0; k < ltau; k++) {
+                printf("%f ", tau[i * ltau * ltau + j * ltau + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
     // make Q
     for (int j = 0; j < ltau; j++) {
         // compute v * v^T
