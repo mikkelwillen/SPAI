@@ -377,6 +377,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
     }
     
+    printCSC(M);
     return M;
 }
 
