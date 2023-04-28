@@ -102,54 +102,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("%f ", AHat[i]);
         }
 
-        // // d) do QR decomposition of AHat
-        // set variables
-        // int lda = MAX(1, n1);
-        // int lWork;
+        // d) do QR decomposition of AHat
+        float* Q = (float*) malloc(sizeof(float) * n1 * n1);
+        float* R = (float*) malloc(sizeof(float) * n1 * n2);
 
-        // stat = cusolverDnSgeqrf_bufferSize(cHandle, 
-        //                                    n1, 
-        //                                    n2, 
-        //                                    AHat, 
-        //                                    lda, 
-        //                                    &lWork);
-
-        // if (stat != CUSOLVER_STATUS_SUCCESS) {
-        //     printf("Workspace buffersize failed\n");
-        //     printf("cusovler error: %d\n", stat);
-        // }
-
-        // printf("lWork: %d\n", lWork);
-        // int sizeTau = MIN(n1, n2);
-        // float* tau = (float*) malloc(sizeTau * sizeof(float));
-        // float* workspace = (float*) malloc(lWork * sizeof(float));
-        // int devInfo = 0;
-
-        // stat = cusolverDnSgeqrf(cHandle, 
-        //                         n1, 
-        //                         n2, 
-        //                         AHat, 
-        //                         lda, 
-        //                         tau, 
-        //                         workspace, 
-        //                         lWork, 
-        //                         &devInfo);
-
-        // if (stat != CUSOLVER_STATUS_SUCCESS) {
-        //     printf("QR decomposition failed\n");
-        //     printf("cusovler error: %d\n", stat);
-        // }
-
-        // printf("devInfo: %d\n", devInfo);
-
-        // // print AHat
-        // printf("Tau: ");
-        // int temp = MIN(n1, n2);
-        // for (int i = 0; i < temp; i++) {
-        //     printf("%f ", tau[i]);
-        // }
-
-
+        qrBatched(AHat, n1, n2, Q, R);
 
 
         // // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
@@ -170,33 +127,33 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     printf("%f ", Q[i]);
         // }
 
-        // // e) compute ĉ = Q^T ê_k
-        // // make e_k and set index k to 1.0
-        // printf("\nk: %d", k);
-        // float* e_k = (float*) calloc(n1, sizeof(float));
-        // for (int i = 0; i < n1; i++) {
-        //     if (k == I[i]) {
-        //         e_k[i] = 1.0;
-        //     } else {
-        //         e_k[i] = 0.0;
-        //     }
-        // }
-        // printf("\ne_k: ");
-        // for (int i = 0; i < n1; i++) {
-        //     printf("%f ", e_k[i]);
-        // }
+        // e) compute ĉ = Q^T ê_k
+        // make e_k and set index k to 1.0
+        printf("\nk: %d", k);
+        float* e_k = (float*) calloc(n1, sizeof(float));
+        for (int i = 0; i < n1; i++) {
+            if (k == I[i]) {
+                e_k[i] = 1.0;
+            } else {
+                e_k[i] = 0.0;
+            }
+        }
+        printf("\ne_k: ");
+        for (int i = 0; i < n1; i++) {
+            printf("%f ", e_k[i]);
+        }
 
-        // // malloc size for cHat and do matrix multiplication
-        // float* cHat = (float*) calloc(n2, sizeof(float));
-        // for (int i = 0; i < n1; i++) {
-        //     for (int j = 0; j < n2; j++) {
-        //         cHat[j] += Q[j * n1 + i] * e_k[i];
-        //     }
-        // }
-        // printf("\ncHat: ");
-        // for (int i = 0; i < n2; i++) {
-        //     printf("%f ", cHat[i]);
-        // }
+        // malloc size for cHat and do matrix multiplication
+        float* cHat = (float*) calloc(n2, sizeof(float));
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n2; j++) {
+                cHat[j] += Q[j * n1 + i] * e_k[i];
+            }
+        }
+        printf("\ncHat: ");
+        for (int i = 0; i < n2; i++) {
+            printf("%f ", cHat[i]);
+        }
 
         // // Placeholder R. R is n2 x n2
         // float* R1 = (float*) malloc(sizeof(float) * n2 * n2);
@@ -215,13 +172,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     printf("%f ", R1[i]);
         // }
 
-        // // f) compute mHat_k = R^-1 cHat
-        // // Malloc space for mHat_k
-        // float* mHat_k = (float*) malloc(sizeof(float) * n2);
+        // f) compute mHat_k = R^-1 cHat
+        // Malloc space for mHat_k
+        float* mHat_k = (float*) malloc(sizeof(float) * n2);
         
-        // // Make the inverse
-        // // Placeholder InvR. R is n2 x n2
-        // // Malloc space for the inverse of R
+        // Make the inverse
+        // Placeholder InvR. R is n2 x n2
+        // Malloc space for the inverse of R
         // float* invR1 = (float*) malloc(sizeof(float) * n2 * n2);
 
         // if (k == 0) {
@@ -238,180 +195,180 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     printf("%f ", invR1[i]);
         // }
 
-        // // Matrix multiplication
-        // for (int i = 0; i < n2; i++) {
-        //     for (int j = 0; j < n2; j++) {
-        //         mHat_k[i] = invR1[i * n2 + j] * cHat[i];
-        //     }
-        // }
-        // printf("\nmHat_k: ");
-        // for (int i = 0; i < n2; i++) {
-        //     printf("%f ", mHat_k[i]);
-        // }
+        // Matrix multiplication
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                mHat_k[i] = R[i * n2 + j] * cHat[i];
+            }
+        }
+        printf("\nmHat_k: ");
+        for (int i = 0; i < n2; i++) {
+            printf("%f ", mHat_k[i]);
+        }
 
-        // // g) set m_k(J) = ^m_k
-        // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
-        // M = updateKthColumnCSC(M, mHat_k, k, J, n2);
+        // g) set m_k(J) = ^m_k
+        // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
+        M = updateKthColumnCSC(M, mHat_k, k, J, n2);
 
-        // // print M
-        // printCSC(M);
-        // // h) compute residual
-        // // residual = A * mHat_k - e_k
-        // // Malloc space for residual
-        // float* residual = (float*) calloc(A->m, sizeof(float));
+        // print M
+        printCSC(M);
+        // h) compute residual
+        // residual = A * mHat_k - e_k
+        // Malloc space for residual
+        float* residual = (float*) calloc(A->m, sizeof(float));
 
-        // // Matrix multiplication
-        // for (int i = 0; i < A->m; i++) {
-        //     for (int j = 0; j < n2; j++) {
-        //         for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
-        //             if (i == A->flatRowIndex[h]) {
-        //                residual[i] += A->flatData[h] * mHat_k[j];
-        //             }
-        //         }
-        //         if (i == k) {
-        //             residual[i] -= 1.0;
-        //         }
-        //     }
-        // }
-        // printf("\nresidual: ");
-        // for (int i = 0; i < A->m; i++) {
-        //     printf("%f ", residual[i]);
-        // }
+        // Matrix multiplication
+        for (int i = 0; i < A->m; i++) {
+            for (int j = 0; j < n2; j++) {
+                for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
+                    if (i == A->flatRowIndex[h]) {
+                       residual[i] += A->flatData[h] * mHat_k[j];
+                    }
+                }
+                if (i == k) {
+                    residual[i] -= 1.0;
+                }
+            }
+        }
+        printf("\nresidual: ");
+        for (int i = 0; i < A->m; i++) {
+            printf("%f ", residual[i]);
+        }
         
-        // // compute the norm of the residual
-        // float residualNorm = 0.0;
-        // for (int i = 0; i < A->m; i++) {
-        //     residualNorm += residual[i] * residual[i];
-        // }
-        // residualNorm = sqrt(residualNorm);
-        // printf("\nnorm: %f", residualNorm);
+        // compute the norm of the residual
+        float residualNorm = 0.0;
+        for (int i = 0; i < A->m; i++) {
+            residualNorm += residual[i] * residual[i];
+        }
+        residualNorm = sqrt(residualNorm);
+        printf("\nnorm: %f", residualNorm);
         
-        // int iteration = 0;
-        // // while norm of residual > tolerance do
-        // while (residualNorm > tolerance && maxIteration + 1 > iteration) {
-        //     printf("\n\n------Iteration: %d------", iteration);
-        //     iteration++;
+        int iteration = 0;
+        // while norm of residual > tolerance do
+        while (residualNorm > tolerance && maxIteration + 1 > iteration) {
+            printf("\n\n------Iteration: %d------", iteration);
+            iteration++;
 
-        //     // a) Set L to the set of indices where r(l) != 0
-        //     // count the numbers of nonzeros in residual
-        //     int l = 0;
-        //     for (int i = 0; i < A->m; i++) {
-        //         if (residual[i] != 0.0) {
-        //             l++;
-        //         }
-        //     }
+            // a) Set L to the set of indices where r(l) != 0
+            // count the numbers of nonzeros in residual
+            int l = 0;
+            for (int i = 0; i < A->m; i++) {
+                if (residual[i] != 0.0) {
+                    l++;
+                }
+            }
 
-        //     // malloc space for L and fill it with the indices
-        //     int* L = (int*) malloc(sizeof(int) * l);
-        //     int index = 0;
+            // malloc space for L and fill it with the indices
+            int* L = (int*) malloc(sizeof(int) * l);
+            int index = 0;
 
-        //     // check if k is in I
-        //     int kNotInI = 1;
-        //     for (int i = 0; i < n1; i++) {
-        //         if (k == I[i]) {
-        //             kNotInI = 0;
-        //         }
-        //     }
+            // check if k is in I
+            int kNotInI = 1;
+            for (int i = 0; i < n1; i++) {
+                if (k == I[i]) {
+                    kNotInI = 0;
+                }
+            }
 
-        //     for (int i = 0; i < A->m; i++) {
-        //         if (residual[i] != 0.0 || (kNotInI && i == k)) {
-        //             L[index] = i;
-        //             index++;
-        //         }
-        //     }
+            for (int i = 0; i < A->m; i++) {
+                if (residual[i] != 0.0 || (kNotInI && i == k)) {
+                    L[index] = i;
+                    index++;
+                }
+            }
 
-        //     // print L
-        //     printf("\nL: ");
-        //     for (int i = 0; i < l; i++) {
-        //         printf("%d ", L[i]);
-        //     }
+            // print L
+            printf("\nL: ");
+            for (int i = 0; i < l; i++) {
+                printf("%d ", L[i]);
+            }
 
-        //     // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
-        //     // check what indeces we should keep
-        //     int* keepArray = (int*) calloc(A->n, sizeof(int));
-        //     for (int i = 0; i < l; i++) {
-        //         for (int j = 0; j < A->n; j++) {
-        //             for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
-        //                 keepArray[h] = 1;
-        //             }
-        //         }
-        //     }
+            // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
+            // check what indeces we should keep
+            int* keepArray = (int*) calloc(A->n, sizeof(int));
+            for (int i = 0; i < l; i++) {
+                for (int j = 0; j < A->n; j++) {
+                    for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
+                        keepArray[h] = 1;
+                    }
+                }
+            }
 
-        //     // remove the indeces that are already in J
-        //     for (int i = 0; i < n2; i++) {
-        //         keepArray[J[i]] = 0;
-        //     }
+            // remove the indeces that are already in J
+            for (int i = 0; i < n2; i++) {
+                keepArray[J[i]] = 0;
+            }
 
-        //     // compute the length of JTilde
-        //     int n2Tilde = 0;
-        //     for (int i = 0; i < A->n; i++) {
-        //         if (keepArray[i] == 1) {
-        //             n2Tilde++;
-        //         }
-        //     }
+            // compute the length of JTilde
+            int n2Tilde = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    n2Tilde++;
+                }
+            }
 
-        //     // malloc space for JTilde
-        //     int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+            // malloc space for JTilde
+            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
 
-        //     // fill JTilde
-        //     index = 0;
-        //     for (int i = 0; i < A->n; i++) {
-        //         if (keepArray[i] == 1) {
-        //             JTilde[index] = i;
-        //             index++;
-        //         }
-        //     }
+            // fill JTilde
+            index = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    JTilde[index] = i;
+                    index++;
+                }
+            }
 
-        //     printf("\nJ: ");
-        //     for(int i = 0; i < n2; i++) {
-        //         printf("%d ", J[i]);
-        //     }
-        //     printf("\nJTilde: ");
-        //     for (int i = 0; i < n2Tilde; i++) {
-        //         printf("%d ", JTilde[i]);
-        //     }
+            printf("\nJ: ");
+            for(int i = 0; i < n2; i++) {
+                printf("%d ", J[i]);
+            }
+            printf("\nJTilde: ");
+            for (int i = 0; i < n2Tilde; i++) {
+                printf("%d ", JTilde[i]);
+            }
 
-        //     // c) for each j in JTilde, solve the minimization problem
-        //     // Malloc space for rhoSq
-        //     float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
-        //     for (int i = 0; i < n2Tilde; i++) {
-        //         float rTAe_j = 0.0; // r^T * A(.,j)
-        //         for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
-        //             rTAe_j += A->flatData[j] * residual[A->flatRowIndex[j]];
-        //         }
+            // c) for each j in JTilde, solve the minimization problem
+            // Malloc space for rhoSq
+            float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
+            for (int i = 0; i < n2Tilde; i++) {
+                float rTAe_j = 0.0; // r^T * A(.,j)
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    rTAe_j += A->flatData[j] * residual[A->flatRowIndex[j]];
+                }
 
-        //         float Ae_jNorm = 0.0;
-        //         for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
-        //             Ae_jNorm += A->flatData[j] * A->flatData[j];
-        //         }
-        //         Ae_jNorm = sqrt(Ae_jNorm);
+                float Ae_jNorm = 0.0;
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    Ae_jNorm += A->flatData[j] * A->flatData[j];
+                }
+                Ae_jNorm = sqrt(Ae_jNorm);
 
-        //         rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
-        //     }
+                rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
+            }
 
-        //     // d) find the s indeces of the column with the smallest rhoSq
-        //     int newN2Tilde = MIN(s, n2Tilde);
-        //     int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
+            // d) find the s indeces of the column with the smallest rhoSq
+            int newN2Tilde = MIN(s, n2Tilde);
+            int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
 
-        //     for (int i = 0; i < newN2Tilde; i++) {
-        //         smallestIndices[i] = -1;
-        //     }
+            for (int i = 0; i < newN2Tilde; i++) {
+                smallestIndices[i] = -1;
+            }
 
-        //     for (int i = 0; i < n2Tilde; i++) {
-        //         for (int j = 0; j < newN2Tilde; j++) {
-        //             if (smallestIndices[j] == -1) {
-        //                 smallestIndices[j] = i;
-        //             } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
-        //                 for (int h = newN2Tilde - 1; h > j; h--) {
-        //                     smallestIndices[h] = smallestIndices[h - 1];
-        //                 }
-        //             }
-        //         }
-        //     }
+            for (int i = 0; i < n2Tilde; i++) {
+                for (int j = 0; j < newN2Tilde; j++) {
+                    if (smallestIndices[j] == -1) {
+                        smallestIndices[j] = i;
+                    } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
+                        for (int h = newN2Tilde - 1; h > j; h--) {
+                            smallestIndices[h] = smallestIndices[h - 1];
+                        }
+                    }
+                }
+            }
 
-        //     // e) determine the new indices Î
+            // e) determine the new indices Î
 
-        // }
+        }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
         // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
