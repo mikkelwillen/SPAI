@@ -154,61 +154,91 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         }
     }
 
-    // make Q
-    for (int i = 0; i < ltau; i++) {
-        // make vvt
+    // // make Q
+    // for (int i = 0; i < ltau; i++) {
+    //     // make vvt
+    //     float* v = (float*) malloc(n1 * sizeof(float));
+    //     for (int j = 0; j < n1; j++) {
+    //         if (i > j) {
+    //             v[j] = 0;
+    //         } else if (i == j) {
+    //             v[j] = 1;
+    //         } else {
+    //             v[j] = AHat[i * n1 + j];
+    //         }
+    //     }
+
+    //     // make H
+    //     float* H = (float*) malloc(n1 * n1 * sizeof(float));
+    //     // compute H
+    //     for (int j = 0; j < n1; j++) {
+    //         for (int k = 0; k < n1; k++) {
+    //             if (j == k) {
+    //                 H[j * n1 + k] = 1 - tau[i] * v[j] * v[k];
+    //             } else {
+    //                 H[j * n1 + k] = - tau[i] * v[j] * v[k];
+    //             }
+    //         }
+    //     }
+
+    //     // make Q
+    //     if (i == 0) {
+    //         for (int i = 0; i < n1; i++) {
+    //             for (int j = 0; j < n1; j++) {
+    //                 Q[i * n1 + j] = H[i * n1 + j];
+    //             }
+    //         }
+    //     } else {
+    //         float* QTemp = (float*) malloc(n1 * n1 * sizeof(float));
+    //         // compute QTemp
+    //         for (int j = 0; j < n1; j++) {
+    //             for (int k = 0; k < n1; k++) {
+    //                 QTemp[j * n1 + k] = 0;
+    //                 for (int l = 0; l < n1; l++) {
+    //                     QTemp[j * n1 + k] += Q[j * n1 + l] * H[l * n1 + k];
+    //                 }
+    //             }
+    //         }
+
+    //         // copy QTemp to Q
+    //         for (int j = 0; j < n1; j++) {
+    //             for (int k = 0; k < n1; k++) {
+    //                 Q[j * n1 + k] = QTemp[j * n1 + k];
+    //             }
+    //         }
+    //     }
+    // }
+
+    // make Q with Algorithm 1 from Kerr Campbell Richards QRD on GPUs
+    // set Q to I
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n1; j++) {
+            Q[i * n1 + j] = 0;
+        }
+        Q[i * n1 + i] = 1;
+    }
+
+    // do for loop
+    for (int k = 0; k < n2; k++) {
+        // make v
         float* v = (float*) malloc(n1 * sizeof(float));
-        for (int j = 0; j < n1; j++) {
-            if (i > j) {
-                v[j] = 0;
-            } else if (i == j) {
-                v[j] = 1;
+        for (int i = 0; i < n1; i++) {
+            if (k > i) {
+                v[i] = 0;
+            } else if (k == i) {
+                v[i] = 1;
             } else {
-                v[j] = AHat[i * n1 + j];
+                v[i] = AHat[k * n1 + i];
             }
         }
 
-        // make H
-        float* H = (float*) malloc(n1 * n1 * sizeof(float));
-        // compute H
-        for (int j = 0; j < n1; j++) {
-            for (int k = 0; k < n1; k++) {
-                if (j == k) {
-                    H[j * n1 + k] = 1 - tau[i] * v[j] * v[k];
-                } else {
-                    H[j * n1 + k] = - tau[i] * v[j] * v[k];
-                }
-            }
-        }
-
-        // make Q
-        if (i == 0) {
-            for (int i = 0; i < n1; i++) {
-                for (int j = 0; j < n1; j++) {
-                    Q[i * n1 + j] = H[i * n1 + j];
-                }
-            }
-        } else {
-            float* QTemp = (float*) malloc(n1 * n1 * sizeof(float));
-            // compute QTemp
-            for (int j = 0; j < n1; j++) {
-                for (int k = 0; k < n1; k++) {
-                    QTemp[j * n1 + k] = 0;
-                    for (int l = 0; l < n1; l++) {
-                        QTemp[j * n1 + k] += Q[j * n1 + l] * H[l * n1 + k];
-                    }
-                }
-            }
-
-            // copy QTemp to Q
-            for (int j = 0; j < n1; j++) {
-                for (int k = 0; k < n1; k++) {
-                    Q[j * n1 + k] = QTemp[j * n1 + k];
-                }
+        // update Q
+        for (int i = 0; i < n1; i++) {
+            for (int j = k; j < n1; j++) {
+                Q[i * n1 + j] -= tau[k] * Q[i * n1 + j] * v[i] * v[j];
             }
         }
     }
-
 
     // make Q
     // for (int j = 0; j < ltau; j++) {
@@ -295,7 +325,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         for (int j = 0; j < n1; j++) {
             QR[i * n1 + j] = 0;
             for (int k = 0; k < n1; k++) {
-                QR[i * n1 + j] += Q[i * n1 + k] * R[k * n2 + i];
+                QR[i * n1 + j] += Q[j * n1 + k] * R[i * n2 + i];
             }
         }
     }
