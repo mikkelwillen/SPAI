@@ -238,6 +238,13 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                 Q[i * n1 + j] -= tau[k] * Q[i * n1 + j] * v[i] * v[j];
             }
         }
+        printf("Q_%d:\n", k);
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n1; j++) {
+                printf("%f ", Q[i * n1 + j]);
+            }
+            printf("\n");
+        }
     }
 
     // make Q
