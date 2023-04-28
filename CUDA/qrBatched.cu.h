@@ -145,11 +145,11 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     
     // make R
     for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
+        for (int j = 0; j < n1; j++) {
             if (i <= j) {
-                R[i * n2 + j] = AHat[i * n2 + j];
+                R[i * n1 + j] = AHat[i * n1 + j];
             } else {
-                R[i * n2 + j] = 0;
+                R[i * n1 + j] = 0;
             }
         }
     }
@@ -275,8 +275,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("print R\n");
     for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", R[i * n2 + j]);
+        for (int j = 0; j < n1; j++) {
+            printf("%f ", R[i * n1 + j]);
         }
         printf("\n");
     }
