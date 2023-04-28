@@ -232,12 +232,29 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
             }
         }
 
-        // update Q
+        // compute Q * v
+        float* Qv = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
-            for (int j = k; j < n1; j++) {
-                Q[i * n1 + j] -= tau[k] * Q[i * n1 + j] * v[i] * v[j];
+            Qv[i] = 0;
+            for (int j = 0; j < n1; j++) {
+                Qv[i] += Q[i * n1 + j] * v[j];
             }
         }
+
+        // compute Qv * v^T
+        float* Qvvt = (float*) malloc(n1 * n1 * sizeof(float));
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n1; j++) {
+                Qvvt[i * n1 + j] = tau[k] * Qv[i] * v[j];
+            }
+        }
+        // compute Q - Qv * v^T
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n1; j++) {
+                Q[i * n1 + j] -= Qvvt[i * n1 + j];
+            }
+        }
+        
         printf("Q_%d:\n", k);
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
