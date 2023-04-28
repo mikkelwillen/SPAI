@@ -55,7 +55,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     // Set constants
-    int lda = n1;
+    int lda = MAX(n1, n2);
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
     const size_t tauMemSize = ltau * BATCHSIZE * sizeof(float);
