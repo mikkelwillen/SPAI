@@ -40,7 +40,7 @@ int main() {
 
     // sequentialTest(cscB);
 
-    float* Q = (float*) calloc(m * n, sizeof(float));
+    float* Q = (float*) malloc(m * m * sizeof(float));
     float* R = (float*) malloc(sizeof(float) * n * n);
 
     qrBatched(A, m, n, Q, R);

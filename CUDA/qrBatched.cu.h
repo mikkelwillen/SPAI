@@ -155,31 +155,58 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     }
 
     // make Q
-    for (int j = 0; j < n1T; j++) {
-        // compute v * v^T
+    for (int i = 0; i < ltau; i++) {
+        // make vvt
         float* v = (float*) malloc(n1 * sizeof(float));
-        for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n1; j++) {
             if (i > j) {
-                v[i] = 0;
+                v[j] = 0;
             } else if (i == j) {
-                v[i] = 1;
-            }
-            else {
-                v[i] = AHat[i * n2 + j];
+                v[j] = 1;
+            } else {
+                v[j] = AHat[i * n1 + j];
             }
         }
 
-        float* vvt = (float*) malloc(n1 * n1 * sizeof(float));
-        for (int i = 0; i < n1; i++) {
+        // make H
+        float* H = (float*) malloc(n1 * n1 * sizeof(float));
+        // compute H
+        for (int j = 0; j < n1; j++) {
             for (int k = 0; k < n1; k++) {
-                vvt[i * n1 + k] = v[i] * v[k];
+                if (j == k) {
+                    H[j * n1 + k] = 1 - tau[i] * v[j] * v[k];
+                } else {
+                    H[j * n1 + k] = - tau[i] * v[j] * v[k];
+                }
             }
         }
 
-        // malloc H_j
-        float* H = (float*) malloc(n1T * n1T * sizeof(float));
-        // compute H_j
-        
+        // make Q
+        if (i == 0) {
+            for (int i = 0; i < n1; i++) {
+                for (int j = 0; j < n1; j++) {
+                    Q[i * n1 + j] = H[i * n1 + j];
+                }
+            }
+        } else {
+            float* QTemp = (float*) malloc(n1 * n1 * sizeof(float));
+            // compute QTemp
+            for (int j = 0; j < n1; j++) {
+                for (int k = 0; k < n1; k++) {
+                    QTemp[j * n1 + k] = 0;
+                    for (int l = 0; l < n1; l++) {
+                        QTemp[j * n1 + k] += Q[j * n1 + l] * H[l * n1 + k];
+                    }
+                }
+            }
+            
+            // copy QTemp to Q
+            for (int j = 0; j < n1; j++) {
+                for (int k = 0; k < n1; k++) {
+                    Q[j * n1 + k] = QTemp[j * n1 + k];
+                }
+            }
+        }
     }
 
 
