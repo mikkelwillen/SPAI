@@ -199,7 +199,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
                     }
                 }
             }
-            
+
             // copy QTemp to Q
             for (int j = 0; j < n1; j++) {
                 for (int k = 0; k < n1; k++) {
@@ -283,8 +283,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     printf("print Q\n");
     for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", Q[i * n2 + j]);
+        for (int j = 0; j < n1; j++) {
+            printf("%f ", Q[i * n1 + j]);
         }
         printf("\n");
     }
