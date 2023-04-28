@@ -73,8 +73,8 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
     int n1T = n1;
-    const size_t tauMemSize = n1T * n1T * BATCHSIZE * sizeof(float);
-    const size_t tauPointerMemSize = BATCHSIZE * n1T * sizeof(float*);
+    const size_t tauMemSize = ltau * BATCHSIZE * sizeof(float);
+    const size_t tauPointerMemSize = BATCHSIZE * sizeof(float*);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
     const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
     float* tau = (float*) malloc(tauMemSize);
@@ -125,14 +125,12 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // print tau
     for (int i = 0; i < BATCHSIZE; i++) {
         printf("tau %d:\n", i);
-        for (int j = 0; j < n1T; j++) {
-            for (int k = 0; k < n1T; k++) {
-                printf("%f ", tau[i * n1T * n1T + j * n1T + k]);
-            }
-            printf("\n");
+        for (int k = 0; k < ltau; k++) {
+            printf("%f ", tau[i * ltau + k]);
         }
         printf("\n");
     }
+    
     // print AHat
     for (int i = 0; i < BATCHSIZE; i++) {
         printf("AHat %d:\n", i);
