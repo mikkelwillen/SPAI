@@ -349,7 +349,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         for (int j = 0; j < n1; j++) {
             QR[i * n1 + j] = 0;
             for (int k = 0; k < n1; k++) {
-                QR[i * n1 + j] += Q[j * n1 + k] * R[k * n2 + i];
+                QR[i * n1 + j] += Q[j * n1 + k] * R[i * n1 + k];
             }
         }
     }
