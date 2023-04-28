@@ -44,4 +44,24 @@ int main() {
     float* R = (float*) malloc(sizeof(float) * m * n);
 
     qrBatched(B, m, n, Q, R);
+
+    // compute QR
+    float* QR = (float*) malloc(sizeof(float) * m * n);
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            QR[i * n + j] = 0.0;
+            for (int k = 0; k < m; k++) {
+                QR[i * n + j] += Q[i * m + k] * R[k * n + j];
+            }
+        }
+    }
+    
+    // print QR
+    printf("QR:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", QR[i * n + j]);
+        }
+        printf("\n");
+    }
 }
