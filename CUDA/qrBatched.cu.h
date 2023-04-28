@@ -53,33 +53,33 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     const size_t tauPointerMemSize = BATCHSIZE * sizeof(float*);
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
     const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
-    float* tau = (float*) malloc(tauMemSize);
-    float* h_AHat;
-    float* h_Tau;
-    float** d_AHat;
-    float** d_Tau;
+    float* h_tau = (float*) malloc(tauMemSize);
+    float* d_AHat;
+    float* d_tau;
+    float** d_PointerAHat;
+    float** d_PointerTau;
     int info;
 
     gpuAssert(
-        cudaMalloc((void**) &h_AHat, AHatMemSize));
+        cudaMalloc((void**) &d_AHat, AHatMemSize));
     gpuAssert(
-        cudaMemcpy(h_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
+        cudaMemcpy(d_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
     gpuAssert(
-        cudaMalloc((void**) &d_AHat, AHatPointerMemSize));
-    AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_AHat, h_AHat, BATCHSIZE, n1, n2);
+        cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
+    AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
     
     gpuAssert(
-        cudaMalloc((void**) &h_Tau, tauMemSize));
+        cudaMalloc((void**) &d_tau, tauMemSize));
     gpuAssert(
-        cudaMalloc((void**) &d_Tau, tauPointerMemSize));
-    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * n1T >>> (d_Tau, h_Tau, BATCHSIZE, n1T);
+        cudaMalloc((void**) &d_PointerTau, tauPointerMemSize));
+    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * n1T >>> (d_PointerTau, d_tau, BATCHSIZE, n1T);
 
     stat = cublasSgeqrfBatched(cHandle,
                                 n1,
                                 n2,
-                                d_AHat,
+                                d_PointerAHat,
                                 lda,
-                                d_Tau,
+                                d_PointerTau,
                                 &info,
                                 BATCHSIZE);
     
@@ -94,15 +94,15 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     printf("after cublasSgeqrfBatched\n");
 
     gpuAssert(
-        cudaMemcpy(AHat, h_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy(AHat, d_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
     gpuAssert(
-        cudaMemcpy(tau, h_Tau, tauMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_tau, d_tau, tauMemSize, cudaMemcpyDeviceToHost));
     
     // print tau
     for (int i = 0; i < BATCHSIZE; i++) {
         printf("tau %d:", i);
         for (int k = 0; k < ltau; k++) {
-            printf("%f ", tau[i * ltau + k]);
+            printf("%f ", h_tau[i * ltau + k]);
         }
         printf("\n");
     }
@@ -167,7 +167,7 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         float* Qvvt = (float*) malloc(n1 * n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
-                Qvvt[i * n1 + j] = tau[k] * Qv[i] * v[j];
+                Qvvt[i * n1 + j] = h_tau[k] * Qv[i] * v[j];
             }
         }
         // compute Q - Qv * v^T
@@ -222,14 +222,17 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
         printf("\n");
     }
 
-
-    // // free and destroy
-    // gpuAssert(
-    //     cudaFree(d_AHat));
-    // gpuAssert(
-    //     cudaFree(d_Tau));
-    // free(h_Tau);
-    // cublasDestroy(cHandle);
+    // free and destroy
+    free(h_tau);
+    gpuAssert(
+        cudaFree(d_AHat));
+    gpuAssert(
+        cudaFree(d_tau));
+    gpuAssert(
+        cudaFree(d_PointerAHat));
+    gpuAssert(
+        cudaFree(d_PointerTau));
+    cublasDestroy(cHandle);
     return 0;
 }
 
