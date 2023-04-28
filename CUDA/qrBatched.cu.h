@@ -173,15 +173,16 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
 
     // print various matrices
     {
-        printf("print R\n");
+        printf("R: \n");
         for (int j = 0; j < n1; j++) {
             for (int i = 0; i < n2; i++) {
                 printf("%f ", R[i * n1 + j]);
             }
             printf("\n");
         }
+        
 
-        printf("print Q\n");
+        printf("Q: \n");
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
                 printf("%f ", Q[i * n1 + j]);

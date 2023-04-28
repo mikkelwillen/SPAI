@@ -43,5 +43,5 @@ int main() {
     float* Q = (float*) malloc(m * m * sizeof(float));
     float* R = (float*) malloc(sizeof(float) * m * n);
 
-    qrBatched(A, m, n, Q, R);
+    qrBatched(B, m, n, Q, R);
 }
