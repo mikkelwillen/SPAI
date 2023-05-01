@@ -61,7 +61,7 @@ int main() {
     //     printf("\n");
     // }
     
-    sequentialSpai(cscA, 0.01, 5, 1);
+    sequentialSpai(cscC, 0.01, 5, 1);
 
 
 
