@@ -48,20 +48,20 @@ int main() {
 
     float* Q = (float*) malloc(m * m * sizeof(float));
     float* R = (float*) malloc(sizeof(float) * m * n);
-    float* invC = (float*) malloc(sizeof(float) * n * n);
+    // float* invC = (float*) malloc(sizeof(float) * n * n);
 
-    invBatched(C, n, invC);
+    // invBatched(C, n, invC);
 
-    // print invC
-    printf("invC:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++){
-            printf("%f ", invC[i * n + j]);
-        }
-        printf("\n");
-    }
+    // // print invC
+    // printf("invC:\n");
+    // for (int i = 0; i < n; i++) {
+    //     for (int j = 0; j < n; j++){
+    //         printf("%f ", invC[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
     
-    // sequentialSpai(cscB, 0.01, 5, 1);
+    sequentialSpai(cscB, 0.01, 5, 1);
 
 
 
