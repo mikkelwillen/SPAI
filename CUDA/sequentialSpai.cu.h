@@ -324,6 +324,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
+            printf("\nsmallestIndices: ");
+            for (int i = 0; i < newN2Tilde; i++) {
+                printf("%d ", smallestIndices[i]);
+            }
+
             // e) determine the new indices Î
 
         }
