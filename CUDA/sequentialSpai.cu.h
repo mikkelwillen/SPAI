@@ -339,6 +339,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < newN2Tilde; i++) {
                 printf("%d ", smallestJTilde[i]);
             }
+            printf("\n");
 
             // e) determine the new indices Î
             // Denote by ITilde teh new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
