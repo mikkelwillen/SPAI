@@ -344,7 +344,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // e) determine the new indices Î
             // Denote by ITilde teh new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
             int unionN2 = n2 + newN2Tilde;
+            printf("after unionN2\n");
             int* unionJ = (int*) malloc(sizeof(int) * unionN2);
+            printf("after unionJ\n");
             for (int i = 0; i < n2; i++) {
                 unionJ[i] = J[i];
             }
