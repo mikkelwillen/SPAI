@@ -56,14 +56,14 @@ int invBatched(float* A, int n, float* AInv) {
         cudaMemcpy(d_A, A, AMemSize, cudaMemcpyHostToDevice));
     gpuAssert(
         cudaMalloc((void**) &d_PointerA, APointerMemSize));
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerA, d_A, BATCHSIZE, n, n);
+    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerA, d_A, BATCHSIZE, n);
 
     // malloc space for AInv
     gpuAssert(
         cudaMalloc((void**) &d_AInv, AMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n, n);
+    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
