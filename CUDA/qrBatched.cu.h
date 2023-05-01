@@ -9,8 +9,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
-// vi skal have kigget på nogle forskellige størrelser
-// fx skal vi finde ud af, om vi vil kopiere alt data til GPU'en med det samme, eller om vi skal kopiere hver aHat separat og så lave en batch af dem
+// lige nu fungere functionen kun med batchsize = 1. Det skal lige fixes, når vi laver paralleliseringen
 
 // Kernel to copy d_AHat to d_PointerAHat
 // d_AHat is an array of batch matrices
@@ -90,13 +89,13 @@ int qrBatched(float* AHat, int n1, int n2, float* Q, float* R) {
     // run QR decomposition from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas
     stat = cublasSgeqrfBatched(cHandle,
-                                n1,
-                                n2,
-                                d_PointerAHat,
-                                lda,
-                                d_PointerTau,
-                                &info,
-                                BATCHSIZE);
+                               n1,
+                               n2,
+                               d_PointerAHat,
+                               lda,
+                               d_PointerTau,
+                               &info,
+                               BATCHSIZE);
     
     // error handling
     if (info != 0) {

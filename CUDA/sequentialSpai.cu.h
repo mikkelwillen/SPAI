@@ -9,6 +9,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 #include "qrBatched.cu.h"
+#include "invBatched.cu.h"
 
 
 // A = matrix we want to compute SPAI on
@@ -108,25 +109,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         qrBatched(AHat, n1, n2, Q, R);
 
-
-        // // Placeholder Q. Q is n1 x n2 (and Q1 is n2 x n2)
-        // float* Q = (float*) malloc(sizeof(float) * n1 * n2);
-
-        // if (k == 0) {
-        //     Q[0] = 1.0;
-        // }
-        // else if (k == 1) {
-        //     Q[0] = 0.6;
-        //     Q[1] = 0.8;
-        // }
-        // else if (k == 2) {
-        //     Q[0] = 1;
-        // }
-        // printf("\nQ: ");
-        // for (int i = 0; i < n1; i++) {
-        //     printf("%f ", Q[i]);
-        // }
-
         // e) compute ĉ = Q^T ê_k
         // make e_k and set index k to 1.0
         printf("\nk: %d", k);
@@ -134,8 +116,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         for (int i = 0; i < n1; i++) {
             if (k == I[i]) {
                 e_k[i] = 1.0;
-            } else {
-                e_k[i] = 0.0;
             }
         }
         printf("\ne_k: ");
@@ -155,23 +135,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("%f ", cHat[i]);
         }
 
-        // // Placeholder R. R is n2 x n2
-        // float* R1 = (float*) malloc(sizeof(float) * n2 * n2);
-
-        // if (k == 0) {
-        //     R1[0] = 20.0;
-        // }
-        // else if (k == 1) {
-        //     R1[0] = 50.0;
-        // }
-        // else if (k == 2) {
-        //     R1[0] = 10.0;
-        // }
-        // printf("\nR1: ");
-        // for (int i = 0; i < n2; i++) {
-        //     printf("%f ", R1[i]);
-        // }
-
         // f) compute mHat_k = R^-1 cHat
         // Malloc space for mHat_k
         float* mHat_k = (float*) malloc(sizeof(float) * n2);
@@ -179,21 +142,15 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // Make the inverse
         // Placeholder InvR. R is n2 x n2
         // Malloc space for the inverse of R
-        // float* invR1 = (float*) malloc(sizeof(float) * n2 * n2);
+        float* invR = (float*) malloc(sizeof(float) * n2 * n2);
 
-        // if (k == 0) {
-        //     invR1[0] = 0.05;
-        // }
-        // else if (k == 1) {
-        //     invR1[0] = 0.02;
-        // }
-        // else if (k == 2) {
-        //     invR1[0] = 0.1;
-        // }
-        // printf("\ninvR: ");
-        // for (int i = 0; i < n2; i++) {
-        //     printf("%f ", invR1[i]);
-        // }
+        invBatched(R, n2, invR);
+
+        // print invR
+        printf("\ninvR: ");
+        for (int i = 0; i < n2 * n2; i++) {
+            printf("%f ", invR[i]);
+        }
 
         // Matrix multiplication
         for (int i = 0; i < n2; i++) {
@@ -376,8 +333,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
 
     }
-    
-    printCSC(M);
+
     return M;
 }
 
