@@ -5,6 +5,7 @@
 #include "sequentialSpai.cu.h"
 #include "sequentialTest.cu.h"
 #include "qrBatched.cu.h"
+#include "invBatched.cu.h"
 
 
 int main() {
@@ -16,10 +17,17 @@ int main() {
 
     float* A = (float*) malloc(sizeof(float) * m * n);
     float* B = (float*) malloc(sizeof(float) * m * n);
+    float* C = (float*) malloc(sizeof(float) * n * n);
 
     for (int i = 0; i < m; i++) {
         for (int j = 0; j < n; j++) {
             A[i * n + j] = (float) i * n + j;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++){
+            inv[i * n + j] = (float) i * n + j;
         }
     }
 
@@ -42,8 +50,20 @@ int main() {
 
     float* Q = (float*) malloc(m * m * sizeof(float));
     float* R = (float*) malloc(sizeof(float) * m * n);
+    float* invC = (float*) malloc(sizeof(float) * n * n);
 
-    sequentialSpai(cscB, 0.01, 5, 1);
+    invBatched(C, n, invC);
+
+    // print invC
+    printf("invC:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", invC[i * n + j]);
+        }
+        printf("\n");
+    }
+    
+    // sequentialSpai(cscB, 0.01, 5, 1);
 
 
 
