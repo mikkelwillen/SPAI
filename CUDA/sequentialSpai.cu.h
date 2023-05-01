@@ -277,10 +277,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            printf("\nJ: ");
-            for(int i = 0; i < n2; i++) {
-                printf("%d ", J[i]);
-            }
+            // printf("\nJ: ");
+            // for(int i = 0; i < n2; i++) {
+            //     printf("%d ", J[i]);
+            // }
             printf("\nJTilde: ");
             for (int i = 0; i < n2Tilde; i++) {
                 printf("%d ", JTilde[i]);
