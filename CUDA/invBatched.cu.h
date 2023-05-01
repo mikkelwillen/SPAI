@@ -113,7 +113,8 @@ int invBatched(float* A, int n, float* AInv) {
     gpuAssert(
         cudaFree(d_PointerAInv));
     gpuAssert(
-        cudaFree(info));
+        cudaFree(d_info));
+    free(h_info);
 
     // destroy cublas handle
     cublasDestroy(cHandle);
