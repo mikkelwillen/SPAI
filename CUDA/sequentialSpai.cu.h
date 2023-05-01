@@ -366,15 +366,15 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                         }
                     }
                     if (keep == 1) {
-                        I[n1] = A->flatRowIndex[i];
-                        n1++;
+                        ITilde[n1Tilde] = A->flatRowIndex[i];
+                        n1Tilde++;
                     }
                 }
             }
 
             // printf ITilde
             printf("\nITilde: ");
-            for (int i = 0; i < A->m; i++) {
+            for (int i = 0; i < n1Tilde; i++) {
                 printf("%d ", ITilde[i]);
             }
 
