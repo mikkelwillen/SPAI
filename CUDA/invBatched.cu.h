@@ -47,7 +47,8 @@ int invBatched(float* A, int n, float* AInv) {
     float* d_AInv;
     float** d_PointerA;
     float** d_PointerAInv;
-    int* info;
+    int* h_info = (int*) malloc(BATCHSIZE * sizeof(int));
+    int* d_info;
 
     // malloc space and copy data for A
     gpuAssert(
@@ -68,7 +69,7 @@ int invBatched(float* A, int n, float* AInv) {
     printf("before info\n");
     // malloc space for info
     gpuAssert(
-        cudaMalloc((void**) &info, BATCHSIZE * sizeof(int)));
+        cudaMalloc((void**) &d_info, BATCHSIZE * sizeof(int)));
     printf("after info\n");
 
     // run batched inversion from cublas
@@ -80,7 +81,7 @@ int invBatched(float* A, int n, float* AInv) {
                                NULL,
                                d_PointerAInv,
                                ldc,
-                               info,
+                               d_info,
                                BATCHSIZE);
     
     // error handling
@@ -89,8 +90,11 @@ int invBatched(float* A, int n, float* AInv) {
         printf("\ncublas error: %d\n", stat);
     }
 
+    gpuAssert(
+        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    
     for (int i = 0; i < BATCHSIZE; i++) {
-        if (info[i] != 0) {
+        if (h_info[i] != 0) {
             printf("\nError: Matrix %d is singular\n", i);
         }
     }
