@@ -27,7 +27,7 @@ int main() {
 
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++){
-            inv[i * n + j] = (float) i * n + j;
+            C[i * n + j] = (float) i * n + j;
         }
     }
 
