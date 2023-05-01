@@ -78,11 +78,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
         }
 
-        // // print I
-        // printf("\nI: ");
-        // for (int i = 0; i < n1; i++) {
-        //     printf("%d ", I[i]);
-        // }
+        // print I
+        printf("\nI: ");
+        for (int i = 0; i < n1; i++) {
+            printf("%d ", I[i]);
+        }
 
         // c) Create Â = A(I, J)
         // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
