@@ -110,3 +110,5 @@ int invBatched(float* A, int n, float* AInv) {
 
     return 0;
 }
+
+#endif
