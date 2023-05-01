@@ -154,8 +154,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // Matrix multiplication
         for (int i = 0; i < n2; i++) {
+            mHat_k[i] = 0.0;
             for (int j = 0; j < n2; j++) {
-                mHat_k[i] = R[i * n2 + j] * cHat[i];
+                mHat_k[i] += invR[i * n2 + j] * cHat[i];
             }
         }
         printf("\nmHat_k: ");
