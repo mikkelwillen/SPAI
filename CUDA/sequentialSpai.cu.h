@@ -331,6 +331,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < newN2Tilde; i++) {
                 printf("%d ", smallestIndices[i]);
             }
+            printf("\n");
 
             int* smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
             for (int i = 0; i < newN2Tilde; i++) {
