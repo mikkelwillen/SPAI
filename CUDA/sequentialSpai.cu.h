@@ -109,6 +109,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* R = (float*) malloc(sizeof(float) * n1 * n2);
 
         qrBatched(cHandle, AHat, n1, n2, Q, R);
+        printf("after qrBatched\n");
 
         // e) compute ĉ = Q^T ê_k
         // make e_k and set index k to 1.0
