@@ -433,7 +433,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     // free(smallestIndices);
         //     // free(smallestJTilde);
         //     // free(rhoSq);
-            free(JTilde);
+        //        free(JTilde);
             free(keepArray);
         }
 
