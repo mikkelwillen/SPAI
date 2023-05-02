@@ -208,39 +208,39 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("\n\n------Iteration: %d------\n", iteration);
             iteration++;
 
-        //     // a) Set L to the set of indices where r(l) != 0
-        //     // count the numbers of nonzeros in residual
-        //     int l = 0;
-        //     for (int i = 0; i < A->m; i++) {
-        //         if (residual[i] != 0.0) {
-        //             l++;
-        //         }
-        //     }
+            // a) Set L to the set of indices where r(l) != 0
+            // count the numbers of nonzeros in residual
+            int l = 0;
+            for (int i = 0; i < A->m; i++) {
+                if (residual[i] != 0.0) {
+                    l++;
+                }
+            }
 
-        //     // malloc space for L and fill it with the indices
-        //     int* L = (int*) malloc(sizeof(int) * l);
-        //     int index = 0;
+            // malloc space for L and fill it with the indices
+            int* L = (int*) malloc(sizeof(int) * l);
+            int index = 0;
 
-        //     // check if k is in I
-        //     int kNotInI = 1;
-        //     for (int i = 0; i < n1; i++) {
-        //         if (k == I[i]) {
-        //             kNotInI = 0;
-        //         }
-        //     }
+            // check if k is in I
+            int kNotInI = 1;
+            for (int i = 0; i < n1; i++) {
+                if (k == I[i]) {
+                    kNotInI = 0;
+                }
+            }
 
-        //     for (int i = 0; i < A->m; i++) {
-        //         if (residual[i] != 0.0 || (kNotInI && i == k)) {
-        //             L[index] = i;
-        //             index++;
-        //         }
-        //     }
+            for (int i = 0; i < A->m; i++) {
+                if (residual[i] != 0.0 || (kNotInI && i == k)) {
+                    L[index] = i;
+                    index++;
+                }
+            }
 
-        //     // print L
-        //     printf("\nL: ");
-        //     for (int i = 0; i < l; i++) {
-        //         printf("%d ", L[i]);
-        //     }
+            // print L
+            printf("\nL: ");
+            for (int i = 0; i < l; i++) {
+                printf("%d ", L[i]);
+            }
 
         //     // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
         //     // check what indeces we should keep
@@ -420,7 +420,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     // }
             
         //     // free memory
-        //     free(L);
+            free(L);
         //     // free(unionI);
         //     // free(unionJ);
         //     // free(ITilde);
