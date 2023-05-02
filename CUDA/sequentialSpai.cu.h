@@ -203,10 +203,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("\nnorm: %f", residualNorm);
         printf("\n");
         int iteration = 0;
-        // // while norm of residual > tolerance do
-        // while (residualNorm > tolerance && maxIteration + 1 > iteration) {
-        //     printf("\n\n------Iteration: %d------\n", iteration);
-        //     iteration++;
+        // while norm of residual > tolerance do
+        while (residualNorm > tolerance && maxIteration + 1 > iteration) {
+            printf("\n\n------Iteration: %d------\n", iteration);
+            iteration++;
 
         //     // a) Set L to the set of indices where r(l) != 0
         //     // count the numbers of nonzeros in residual
@@ -428,7 +428,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     // free(smallestJTilde);
         //     // free(rhoSq);
         //     free(JTilde);
-        // }
+        }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
         // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
