@@ -461,8 +461,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(R);
         free(invR);
         free(e_k);
-        free(e_kTilde);
-        free(m_k);
         free(mHat_k);
     }
     printCSC(M);
