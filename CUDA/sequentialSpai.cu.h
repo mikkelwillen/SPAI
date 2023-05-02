@@ -386,11 +386,50 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 printf("%d ", ITilde[i]);
             }
 
+            // f) set unionI and unionJ
+            // make union of I and ITilde
+            int unionN1 = n1 + n1Tilde;
+            int* unionI = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
+            for (int i = 0; i < n1; i++) {
+                unionI[i] = I[i];
+            }
+            for (int i = 0; i < n1Tilde; i++) {
+                unionI[n1 + i] = ITilde[i];
+            }
+
+            // update values for the next iteration of the for loop
+            n1 = unionN1;
+            n2 = unionN2;
+            free(I);
+            free(J);
+            I = (int*) malloc(sizeof(int) * n1);
+            J = (int*) malloc(sizeof(int) * n2);
+            for (int i = 0; i < n1; i++) {
+                I[i] = unionI[i];
+            }
+            for (int i = 0; i < n2; i++) {
+                J[i] = unionJ[i];
+            }
+            
+            // free memory
+            free(L);
+            free(unionI);
+            free(unionJ);
+            free(ITilde);
+            free(smallestIndices);
+            free(smallestJTilde);
+            free(rhoSq);
+            free(JTilde);
         }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
         // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
         // vi skal teste om step d) giver det rigtige.
+
+        // free memory
+        free(residual);
+        free(I);
+        free(J);
 
 
     }
