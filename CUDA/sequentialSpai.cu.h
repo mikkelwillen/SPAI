@@ -253,17 +253,21 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     }
                 }
             }
+            printf("after keepArray\n");
+
 
             // remove the indeces that are already in J
             for (int i = 0; i < n2; i++) {
                 keepArray[J[i]] = 0;
             }
+            printf("after remove\n");
 
             // print keepArray
             printf("\nkeepArray: ");
             for (int i = 0; i < A->n; i++) {
                 printf("%d ", keepArray[i]);
             }
+            printf("\n");
 
             // // compute the length of JTilde
             // int n2Tilde = 0;
