@@ -212,16 +212,23 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // a) Set L to the set of indices where r(l) != 0
             // count the numbers of nonzeros in residual
             int l = 0;
+            int kNotInI = 0;
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0) {
                     l++;
+                } else if (k == i) {
+                    kNotInI = 1;
                 }
             }
 
             // check if k is in I
-            int kNotInI = 1;
             for (int i = 0; i < n1; i++) {
-                if (k == I[i] && residual[i] == 0.0) {
+                if (k == I[i]) {
+                    kNotInI = 0;
+                }
+            }
+            for (int i = 0; i < n1; i++) {
+                if (k == I[i]) {
                     kNotInI = 0;
                 }
             }
