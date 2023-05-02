@@ -241,6 +241,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < l; i++) {
                 printf("%d ", L[i]);
             }
+            printf("\n");
 
             // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
             // check what indeces we should keep
