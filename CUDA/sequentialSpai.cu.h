@@ -234,6 +234,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // malloc space for L and fill it with the indices
             int* L = (int*) malloc(sizeof(int) * l);
 
+            // set L to -1
+            for (int i = 0; i < l; i++) {
+                L[i] = -1;
+            }
+            
             int index = 0;
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0 || (kNotInI && i == k)) {
