@@ -246,6 +246,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
             // check what indeces we should keep
             int* keepArray = (int*) calloc(A->n, sizeof(int));
+            printf("after calloc\n");
             for (int i = 0; i < l; i++) {
                 for (int j = 0; j < A->n; j++) {
                     for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
