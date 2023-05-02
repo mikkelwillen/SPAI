@@ -410,8 +410,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // n2 = unionN2;
             free(I);
             free(J);
-            I = (int*) malloc(sizeof(int) * n1);
-            J = (int*) malloc(sizeof(int) * n2);
+            &I = (int*) malloc(sizeof(int) * n1);
+            &J = (int*) malloc(sizeof(int) * n2);
             // for (int i = 0; i < n1; i++) {
             //     I[i] = unionI[i];
             // }
