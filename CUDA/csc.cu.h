@@ -194,7 +194,8 @@ CSC* updateKthColumnCSC(CSC* A, float* newVaules, int k, int* J, int n2) {
         newA->flatData[i] = A->flatData[i - deltaNonzeros];
         newA->flatRowIndex[i] = A->flatRowIndex[i - deltaNonzeros];
     }
-
+    free(A);
+    
     return newA;
 }
 
