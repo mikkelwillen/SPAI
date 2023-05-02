@@ -286,6 +286,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n2Tilde; i++) {
                 printf("%d ", JTilde[i]);
             }
+            printf("\n");
 
             // c) for each j in JTilde, solve the minimization problem
             // Malloc space for rhoSq
