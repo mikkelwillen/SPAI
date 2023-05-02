@@ -258,35 +258,41 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 keepArray[J[i]] = 0;
             }
 
-            // compute the length of JTilde
-            int n2Tilde = 0;
+            // print keepArray
+            printf("\nkeepArray: ");
             for (int i = 0; i < A->n; i++) {
-                if (keepArray[i] == 1) {
-                    n2Tilde++;
-                }
+                printf("%d ", keepArray[i]);
             }
 
-            // malloc space for JTilde
-            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
-
-            // fill JTilde
-            index = 0;
-            for (int i = 0; i < A->n; i++) {
-                if (keepArray[i] == 1) {
-                    JTilde[index] = i;
-                    index++;
-                }
-            }
-
-            // printf("\nJ: ");
-            // for(int i = 0; i < n2; i++) {
-            //     printf("%d ", J[i]);
+            // // compute the length of JTilde
+            // int n2Tilde = 0;
+            // for (int i = 0; i < A->n; i++) {
+            //     if (keepArray[i] == 1) {
+            //         n2Tilde++;
+            //     }
             // }
-            printf("\nJTilde: ");
-            for (int i = 0; i < n2Tilde; i++) {
-                printf("%d ", JTilde[i]);
-            }
-            printf("\n");
+
+            // // malloc space for JTilde
+            // int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+
+            // // fill JTilde
+            // index = 0;
+            // for (int i = 0; i < A->n; i++) {
+            //     if (keepArray[i] == 1) {
+            //         JTilde[index] = i;
+            //         index++;
+            //     }
+            // }
+
+            // // printf("\nJ: ");
+            // // for(int i = 0; i < n2; i++) {
+            // //     printf("%d ", J[i]);
+            // // }
+            // printf("\nJTilde: ");
+            // for (int i = 0; i < n2Tilde; i++) {
+            //     printf("%d ", JTilde[i]);
+            // }
+            // printf("\n");
 
         //     // // c) for each j in JTilde, solve the minimization problem
         //     // // Malloc space for rhoSq
