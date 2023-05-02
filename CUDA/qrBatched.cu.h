@@ -62,6 +62,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     float** d_PointerAHat;
     float** d_PointerTau;
     int info;
+    printf("after creating input and output arrays\n");
 
     // malloc space and copy data for AHat
     gpuAssert(
@@ -71,6 +72,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     gpuAssert(
         cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
     AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
+    printf("after malloc space and copy data for AHat\n");
     
     // malloc space for tau
     gpuAssert(
