@@ -428,6 +428,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     // free(smallestJTilde);
         //     // free(rhoSq);
             free(JTilde);
+            free(keepArray);
         }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
