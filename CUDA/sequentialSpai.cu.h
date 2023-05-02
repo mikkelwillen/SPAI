@@ -435,9 +435,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // vi skal teste om step d) giver det rigtige.
 
         // free memory
-        free(residual);
-        free(I);
-        free(J);
+        // free(residual);
+        // free(I);
+        // free(J);
     }
 
     return M;
