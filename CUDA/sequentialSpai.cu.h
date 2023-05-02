@@ -41,9 +41,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // malloc space for the indeces from offset[k] to offset[k + 1]
         int n2 = M->offset[k + 1] - M->offset[k];
         int* J = (int*) malloc(sizeof(int) * n2);
-        if (J == NULL) {
-            printf("malloc memory for J failed\n");
-        }
 
         // iterate through row indeces from offset[k] to offset[k + 1] and take all elements from the flatRowIndex
         int h = 0;
@@ -61,10 +58,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
         int* I = (int*) malloc(sizeof(int) * A->m);
-        if (I == NULL) {
-            printf("malloc memory for I failed\n");
-        }
-
         for (int i = 0; i < A->m; i++) {
             I[i] = -1;
         }
@@ -94,10 +87,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // c) Create Â = A(I, J)
         // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
         float* AHat = (float*) calloc(n1 * n2, sizeof(float));
-        if (AHat == NULL) {
-            printf("calloc memory for AHat failed\n");
-        }
-        
+
         for(int j = 0; j < n2; j++) {
             for (int i = 0; i < n1; i++) {
                 for (int l = A->offset[J[j]]; l < A->offset[J[j] + 1]; l++) {
@@ -441,8 +431,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(residual);
         free(I);
         free(J);
-
-
     }
 
     return M;
