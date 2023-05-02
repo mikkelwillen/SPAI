@@ -242,51 +242,51 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 printf("%d ", L[i]);
             }
 
-        //     // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
-        //     // check what indeces we should keep
-        //     int* keepArray = (int*) calloc(A->n, sizeof(int));
-        //     for (int i = 0; i < l; i++) {
-        //         for (int j = 0; j < A->n; j++) {
-        //             for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
-        //                 keepArray[h] = 1;
-        //             }
-        //         }
-        //     }
+            // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
+            // check what indeces we should keep
+            int* keepArray = (int*) calloc(A->n, sizeof(int));
+            for (int i = 0; i < l; i++) {
+                for (int j = 0; j < A->n; j++) {
+                    for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
+                        keepArray[h] = 1;
+                    }
+                }
+            }
 
-        //     // remove the indeces that are already in J
-        //     for (int i = 0; i < n2; i++) {
-        //         keepArray[J[i]] = 0;
-        //     }
+            // remove the indeces that are already in J
+            for (int i = 0; i < n2; i++) {
+                keepArray[J[i]] = 0;
+            }
 
-        //     // compute the length of JTilde
-        //     int n2Tilde = 0;
-        //     for (int i = 0; i < A->n; i++) {
-        //         if (keepArray[i] == 1) {
-        //             n2Tilde++;
-        //         }
-        //     }
+            // compute the length of JTilde
+            int n2Tilde = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    n2Tilde++;
+                }
+            }
 
-        //     // malloc space for JTilde
-        //     int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+            // malloc space for JTilde
+            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
 
-        //     // fill JTilde
-        //     index = 0;
-        //     for (int i = 0; i < A->n; i++) {
-        //         if (keepArray[i] == 1) {
-        //             JTilde[index] = i;
-        //             index++;
-        //         }
-        //     }
+            // fill JTilde
+            index = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    JTilde[index] = i;
+                    index++;
+                }
+            }
 
-        //     // printf("\nJ: ");
-        //     // for(int i = 0; i < n2; i++) {
-        //     //     printf("%d ", J[i]);
-        //     // }
-        //     printf("\nJTilde: ");
-        //     for (int i = 0; i < n2Tilde; i++) {
-        //         printf("%d ", JTilde[i]);
-        //     }
-        //     printf("\n");
+            // printf("\nJ: ");
+            // for(int i = 0; i < n2; i++) {
+            //     printf("%d ", J[i]);
+            // }
+            printf("\nJTilde: ");
+            for (int i = 0; i < n2Tilde; i++) {
+                printf("%d ", JTilde[i]);
+            }
+            printf("\n");
 
         //     // // c) for each j in JTilde, solve the minimization problem
         //     // // Malloc space for rhoSq
@@ -427,7 +427,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         //     // free(smallestIndices);
         //     // free(smallestJTilde);
         //     // free(rhoSq);
-        //     free(JTilde);
+            free(JTilde);
         }
 
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
