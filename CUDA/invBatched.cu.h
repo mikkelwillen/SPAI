@@ -25,10 +25,11 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
 // A is an array of batch matrices
 // n is the max number of rows and columns of the matrices
 // AInv is an array of batch inverse matrices
-int invBatched(cublasHandle_t cHandle, cublasStatus_t stat, float* A, int n, float* AInv) {
+int invBatched(cublasHandle_t cHandle, float* A, int n, float* AInv) {
     printf("\nDo inversion of A\n");
 
     // Set constants
+    cublasStatus_t stat;
     int lda = n;
     int ldc = n;
     const size_t AMemSize = n * n * BATCHSIZE * sizeof(float);

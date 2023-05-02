@@ -42,10 +42,11 @@ __global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int 
 // n2 is the max number of columns of the matrices
 // Q is an array of batch Q matrices
 // R is an array of batch R matrices
-int qrBatched(cublasHandle_t cHandle, cublasStatus_t stat, float* AHat, int n1, int n2, float* Q, float* R) {
+int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, float* R) {
     printf("\nDo QR decomposition of AHat\n");
 
     // Set constants
+    cublasStatus_t stat;
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
