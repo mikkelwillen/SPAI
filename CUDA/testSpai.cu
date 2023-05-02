@@ -46,8 +46,8 @@ int main() {
 
     // sequentialTest(cscB);
 
-    float* Q = (float*) malloc(m * m * sizeof(float));
-    float* R = (float*) malloc(sizeof(float) * m * n);
+    // float* Q = (float*) malloc(m * m * sizeof(float));
+    // float* R = (float*) malloc(sizeof(float) * m * n);
     // float* invC = (float*) malloc(sizeof(float) * n * n);
 
     // invBatched(C, n, invC);
