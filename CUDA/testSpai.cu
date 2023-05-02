@@ -62,7 +62,7 @@ int main() {
     // }
     
     struct CSC* res = sequentialSpai(cscA, 0.01, 5, 1);
-
+    printf("hallo?\n");
 
 
 
