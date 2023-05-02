@@ -221,7 +221,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // check if k is in I
             int kNotInI = 1;
             for (int i = 0; i < n1; i++) {
-                if (k == I[i]) {
+                if (k == I[i] && residual[i] == 0.0) {
                     kNotInI = 0;
                 }
             }
@@ -238,7 +238,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < l; i++) {
                 L[i] = -1;
             }
-            
+
             int index = 0;
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0 || (kNotInI && i == k)) {
