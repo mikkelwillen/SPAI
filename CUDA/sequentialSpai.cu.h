@@ -107,7 +107,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* Q = (float*) malloc(sizeof(float) * n1 * n1);
         float* R = (float*) malloc(sizeof(float) * n1 * n2);
 
-        qrBatched(AHat, n1, n2, Q, R);
+        qrBatched(cHandle, stat, AHat, n1, n2, Q, R);
 
         // e) compute ĉ = Q^T ê_k
         // make e_k and set index k to 1.0
@@ -144,7 +144,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // Malloc space for the inverse of R
         float* invR = (float*) malloc(sizeof(float) * n2 * n2);
 
-        invBatched(R, n2, invR);
+        invBatched(cHandle, stat, R, n2, invR);
 
         // print invR
         printf("\ninvR: ");
