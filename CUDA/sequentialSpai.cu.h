@@ -220,7 +220,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // malloc space for L and fill it with the indices
             int* L = (int*) malloc(sizeof(int) * l);
-            int index = 0;
 
             // check if k is in I
             int kNotInI = 1;
@@ -230,6 +229,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
+            if (kNotInI) {
+                l++;
+            }
+
+            int index = 0;
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0 || (kNotInI && i == k)) {
                     L[index] = i;
