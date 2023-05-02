@@ -106,9 +106,6 @@ int invBatched(cublasHandle_t cHandle, cublasStatus_t stat, float* A, int n, flo
         cudaFree(d_info));
     free(h_info);
 
-    // destroy cublas handle
-    cublasDestroy(cHandle);
-
     return 0;
 }
 

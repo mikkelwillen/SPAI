@@ -213,7 +213,6 @@ int qrBatched(cublasHandle_t cHandle, cublasStatus_t stat, float* AHat, int n1, 
         cudaFree(d_PointerAHat));
     gpuAssert(
         cudaFree(d_PointerTau));
-    cublasDestroy(cHandle);
     return 0;
 }
 
