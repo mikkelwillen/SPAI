@@ -67,14 +67,14 @@ int main() {
     printf("hallo?\n");
 
     // free memory
-    free(A);
-    free(B);
-    free(C);
     freeCSC(cscA);
     freeCSC(cscB);
     freeCSC(cscC);
     freeCSC(res);
-    
+
+    free(A);
+    free(B);
+    free(C);
 
 
     // qrBatched(B, m, n, Q, R);
