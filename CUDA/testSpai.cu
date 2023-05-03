@@ -66,7 +66,15 @@ int main() {
     printCSC(res);
     printf("hallo?\n");
 
-
+    // free memory
+    free(A);
+    free(B);
+    free(C);
+    freeCSC(cscA);
+    freeCSC(cscB);
+    freeCSC(cscC);
+    freeCSC(res);
+    
 
 
     // qrBatched(B, m, n, Q, R);
