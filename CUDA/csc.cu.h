@@ -20,6 +20,14 @@ typedef struct CSC {
     int* flatRowIndex;
 } CSC;
 
+// Frees all the elements of a CSC struct
+// csc = The CSC struct to be freed
+void freeCSC(CSC* csc) {
+    free(csc->offset);
+    free(csc->flatData);
+    free(csc->flatRowIndex);
+}
+
 // Function for creating a compressed sparse column matrix
 // A = Dense matrix
 // m = number of rows
@@ -197,13 +205,6 @@ CSC* updateKthColumnCSC(CSC* A, float* newVaules, int k, int* J, int n2) {
     freeCSC(A);
 
     return newA;
-}
-
-// Frees all the elements of a CSC struct
-void freeCSC(CSC* csc) {
-    free(csc->offset);
-    free(csc->flatData);
-    free(csc->flatRowIndex);
 }
 
 // Prints all the elements of a CSC struct
