@@ -279,10 +279,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("after set to 0\n");
             for (int i = 0; i < l; i++) {
-                for (int j = 0; j < A->n; j++) {
-                    for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
-                        keepArray[h] = 1;
-                    }
+                for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
+                    keepArray[h] = 1;
                 }
             }
             printf("after keepArray\n");
