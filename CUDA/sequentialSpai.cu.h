@@ -19,6 +19,8 @@
 // s = number of rho_j - the most profitable indices
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printCSC(A);
+    // boolean for skipping to while loop
+    int skipToWhile = 0;
 
     // initialize cuBLAS
     cublasHandle_t cHandle;
@@ -49,6 +51,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             h++;
         }
 
+        if (n2 == 0) {
+            skipToWhile = 1;
+        }
+
         // // printJ
         // printf("\nJ: ");
         // for (int i = 0; i < n2; i++) {
@@ -76,6 +82,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     n1++;
                 }
             }
+        }
+
+        if (n1 == 0) {
+            skipToWhile = 1;
         }
 
         // print I
@@ -108,7 +118,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* Q = (float*) malloc(sizeof(float) * n1 * n1);
         float* R = (float*) malloc(sizeof(float) * n1 * n2);
 
-        qrBatched(cHandle, AHat, n1, n2, Q, R);
+        if (skipToWhile == 0) {
+            qrBatched(cHandle, AHat, n1, n2, Q, R);
+        }
         printf("after qrBatched\n");
 
         // e) compute ĉ = Q^T ê_k
@@ -145,8 +157,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // Placeholder InvR. R is n2 x n2
         // Malloc space for the inverse of R
         float* invR = (float*) malloc(sizeof(float) * n2 * n2);
-
-        invBatched(cHandle, R, n2, invR);
+        
+        if (skipToWhile == 0) {
+            invBatched(cHandle, R, n2, invR);
+        }
 
         // print invR
         printf("\ninvR: ");
@@ -166,9 +180,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("%f ", mHat_k[i]);
         }
 
-        // g) set m_k(J) = ^m_k
-        // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
-        M = updateKthColumnCSC(M, mHat_k, k, J, n2);
+        // vi venter sgu lige med det her til vi er færdige med m_k
+        // // g) set m_k(J) = ^m_k
+        // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
+        // M = updateKthColumnCSC(M, mHat_k, k, J, n2);
 
         // print M
         printCSC(M);
@@ -203,9 +218,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         residualNorm = sqrt(residualNorm);
         printf("\nnorm: %f", residualNorm);
         printf("\n");
+
+        // counter of the iteration and check if there is something to be done in the while loop
         int iteration = 0;
+        int somethingToBeDone = 1;
+        
         // while norm of residual > tolerance do
-        while (residualNorm > tolerance && maxIteration + 1 > iteration) {
+        while (residualNorm > tolerance && maxIteration + 1 > iteration && somethingToBeDone) {
             printf("\n\n------Iteration: %d------\n", iteration);
             iteration++;
 
@@ -227,11 +246,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     kNotInI = 0;
                 }
             }
-            for (int i = 0; i < n1; i++) {
-                if (k == I[i]) {
-                    kNotInI = 0;
-                }
-            }
 
             // increment l if k is not in I
             if (kNotInI) {
@@ -240,11 +254,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             
             // malloc space for L and fill it with the indices
             int* L = (int*) malloc(sizeof(int) * l);
-
-            // set L to -1
-            for (int i = 0; i < l; i++) {
-                L[i] = -1;
-            }
 
             int index = 0;
             for (int i = 0; i < A->m; i++) {
@@ -469,6 +478,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
         // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
         // vi skal teste om step d) giver det rigtige.
+
+        // update kth column of M
+        updateKthColumnCSC(M, mHat_k, k, J, n2);
 
         // free memory
         free(residual);
