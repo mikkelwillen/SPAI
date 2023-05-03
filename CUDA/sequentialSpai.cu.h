@@ -277,10 +277,16 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < A->n; i++) {
                 keepArray[i] = 0;
             }
+
+            // den er helt gal, vi skal lige gentænke den her!!!
+            // index fra 0 til A->n i keep array er en boolean for, om vi skal tilføje den til JTilde
+            // kig på repræsentationen af A
             printf("after set to 0\n");
             for (int i = 0; i < l; i++) {
-                for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
-                    keepArray[h] = 1;
+                for (int j = 0; j < A->n; j++) {
+                    for (int h = A->offset[L[i]]; h < A->offset[L[i] + 1]; h++) {
+                        keepArray[A->flatRowIndex[h]] = 1;
+                    }
                 }
             }
             printf("after keepArray\n");
