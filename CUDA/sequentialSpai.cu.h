@@ -185,8 +185,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
         // M = updateKthColumnCSC(M, mHat_k, k, J, n2);
 
-        // print M
-        printCSC(M);
+
         // h) compute residual
         // residual = A * mHat_k - e_k
         // Malloc space for residual
@@ -222,7 +221,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // counter of the iteration and check if there is something to be done in the while loop
         int iteration = 0;
         int somethingToBeDone = 1;
-        
+
         // while norm of residual > tolerance do
         while (residualNorm > tolerance && maxIteration + 1 > iteration && somethingToBeDone) {
             printf("\n\n------Iteration: %d------\n", iteration);
