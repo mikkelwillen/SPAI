@@ -111,6 +111,7 @@ void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTi
     free(ATildeTemp);
     free(ATilde);
     free(AIJTilde);
+    free(ABreve);
 
     printf("done with updateQR\n");
 }
