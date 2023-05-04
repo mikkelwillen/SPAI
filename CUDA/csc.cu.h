@@ -224,6 +224,8 @@ float* CSCToDense(CSC* csc, int* I, int* J, int n1, int n2) {
             }
         }
     }
+
+    return dense;
 }
 
 // Prints all the elements of a CSC struct
