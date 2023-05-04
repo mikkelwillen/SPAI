@@ -354,43 +354,50 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
             }
 
-        //     // // d) find the s indeces of the column with the smallest rhoSq
-        //     // int newN2Tilde = MIN(s, n2Tilde);
-        //     // int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
-        //     // printf("\nnewN2Tilde: %d", newN2Tilde);
+            //print rhoSq
+            printf("\nrhoSq: ");
+            for (int i = 0; i < n2Tilde; i++) {
+                printf("%f ", rhoSq[i]);
+            }
+            printf("\n");q
 
-        //     // for (int i = 0; i < newN2Tilde; i++) {
-        //     //     smallestIndices[i] = -1;
-        //     // }
+            // d) find the s indeces of the column with the smallest rhoSq
+            int newN2Tilde = MIN(s, n2Tilde);
+            int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
+            printf("\nnewN2Tilde: %d", newN2Tilde);
 
-        //     // for (int i = 0; i < n2Tilde; i++) {
-        //     //     for (int j = 0; j < newN2Tilde; j++) {
-        //     //         if (smallestIndices[j] == -1) {
-        //     //             smallestIndices[j] = i;
-        //     //         } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
-        //     //             for (int h = newN2Tilde - 1; h > j; h--) {
-        //     //                 smallestIndices[h] = smallestIndices[h - 1];
-        //     //             }
-        //     //         }
-        //     //     }
-        //     // }
+            for (int i = 0; i < newN2Tilde; i++) {
+                smallestIndices[i] = -1;
+            }
 
-        //     // printf("\nsmallestIndices: ");
-        //     // for (int i = 0; i < newN2Tilde; i++) {
-        //     //     printf("%d ", smallestIndices[i]);
-        //     // }
-        //     // printf("\n");
+            for (int i = 0; i < n2Tilde; i++) {
+                for (int j = 0; j < newN2Tilde; j++) {
+                    if (smallestIndices[j] == -1) {
+                        smallestIndices[j] = i;
+                    } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
+                        for (int h = newN2Tilde - 1; h > j; h--) {
+                            smallestIndices[h] = smallestIndices[h - 1];
+                        }
+                    }
+                }
+            }
 
-        //     // int* smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
-        //     // for (int i = 0; i < newN2Tilde; i++) {
-        //     //     smallestJTilde[i] = JTilde[smallestIndices[i]];
-        //     // }
+            printf("\nsmallestIndices: ");
+            for (int i = 0; i < newN2Tilde; i++) {
+                printf("%d ", smallestIndices[i]);
+            }
+            printf("\n");
+
+            int* smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
+            for (int i = 0; i < newN2Tilde; i++) {
+                smallestJTilde[i] = JTilde[smallestIndices[i]];
+            }
             
-        //     // printf("\nsmallestJTilde: ");
-        //     // for (int i = 0; i < newN2Tilde; i++) {
-        //     //     printf("%d ", smallestJTilde[i]);
-        //     // }
-        //     // printf("\n");
+            printf("\nsmallestJTilde: ");
+            for (int i = 0; i < newN2Tilde; i++) {
+                printf("%d ", smallestJTilde[i]);
+            }
+            printf("\n");
 
         //     // e) determine the new indices Î
         //     // Denote by ITilde teh new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
