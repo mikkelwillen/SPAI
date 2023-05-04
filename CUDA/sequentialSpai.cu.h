@@ -101,10 +101,14 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* AHat = CSCToDense(A, I, J, n1, n2);
 
         // print AHat
-        printf("\nAhat: ");
-        for (int i = 0; i < n1 * n2; i++) {
-            printf("%f ", AHat[i]);
+        printf("\nAhat:\n");
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n2; j++) {
+                printf("%f ", AHat[i * n2 + j]);
+            }
+            printf("\n");
         }
+        printf("\n");
 
         // d) do QR decomposition of AHat
         float* Q = (float*) malloc(sizeof(float) * n1 * n1);
