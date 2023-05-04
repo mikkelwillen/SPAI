@@ -336,23 +336,23 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("\n");
 
-        //     // // c) for each j in JTilde, solve the minimization problem
-        //     // // Malloc space for rhoSq
-        //     // float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
-        //     // for (int i = 0; i < n2Tilde; i++) {
-        //     //     float rTAe_j = 0.0; // r^T * A(.,j)
-        //     //     for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
-        //     //         rTAe_j += A->flatData[j] * residual[A->flatRowIndex[j]];
-        //     //     }
+            // c) for each j in JTilde, solve the minimization problem
+            // Malloc space for rhoSq
+            float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
+            for (int i = 0; i < n2Tilde; i++) {
+                float rTAe_j = 0.0; // r^T * A(.,j)
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    rTAe_j += A->flatData[j] * residual[A->flatRowIndex[j]];
+                }
 
-        //     //     float Ae_jNorm = 0.0;
-        //     //     for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
-        //     //         Ae_jNorm += A->flatData[j] * A->flatData[j];
-        //     //     }
-        //     //     Ae_jNorm = sqrt(Ae_jNorm);
+                float Ae_jNorm = 0.0;
+                for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
+                    Ae_jNorm += A->flatData[j] * A->flatData[j];
+                }
+                Ae_jNorm = sqrt(Ae_jNorm);
 
-        //     //     rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
-        //     // }
+                rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
+            }
 
         //     // // d) find the s indeces of the column with the smallest rhoSq
         //     // int newN2Tilde = MIN(s, n2Tilde);
