@@ -359,7 +359,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n2Tilde; i++) {
                 printf("%f ", rhoSq[i]);
             }
-            printf("\n");q
+            printf("\n");
 
             // d) find the s indeces of the column with the smallest rhoSq
             int newN2Tilde = MIN(s, n2Tilde);
