@@ -278,7 +278,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 keepArray[i] = 0;
             }
 
-            // den er helt gal, vi skal lige gentænke den her!!!
             // index fra 0 til A->n i keep array er en boolean for, om vi skal tilføje den til JTilde
             // kig på repræsentationen af A
             printf("after set to 0\n");
@@ -307,35 +306,35 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("\n");
 
-            // // compute the length of JTilde
-            // int n2Tilde = 0;
-            // for (int i = 0; i < A->n; i++) {
-            //     if (keepArray[i] == 1) {
-            //         n2Tilde++;
-            //     }
-            // }
+            // compute the length of JTilde
+            int n2Tilde = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    n2Tilde++;
+                }
+            }
 
-            // // malloc space for JTilde
-            // int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+            // malloc space for JTilde
+            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
 
-            // // fill JTilde
-            // index = 0;
-            // for (int i = 0; i < A->n; i++) {
-            //     if (keepArray[i] == 1) {
-            //         JTilde[index] = i;
-            //         index++;
-            //     }
-            // }
+            // fill JTilde
+            index = 0;
+            for (int i = 0; i < A->n; i++) {
+                if (keepArray[i] == 1) {
+                    JTilde[index] = i;
+                    index++;
+                }
+            }
 
-            // // printf("\nJ: ");
-            // // for(int i = 0; i < n2; i++) {
-            // //     printf("%d ", J[i]);
-            // // }
-            // printf("\nJTilde: ");
-            // for (int i = 0; i < n2Tilde; i++) {
-            //     printf("%d ", JTilde[i]);
-            // }
-            // printf("\n");
+            printf("\nJ: ");
+            for(int i = 0; i < n2; i++) {
+                printf("%d ", J[i]);
+            }
+            printf("\nJTilde: ");
+            for (int i = 0; i < n2Tilde; i++) {
+                printf("%d ", JTilde[i]);
+            }
+            printf("\n");
 
         //     // // c) for each j in JTilde, solve the minimization problem
         //     // // Malloc space for rhoSq
