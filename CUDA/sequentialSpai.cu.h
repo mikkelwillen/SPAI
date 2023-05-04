@@ -460,29 +460,30 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 unionI[n1 + i] = ITilde[i];
             }
 
-        //     // update values for the next iteration of the for loop
-        //     // n1 = unionN1;
-        //     // n2 = unionN2;
-        //     // free(I);
-        //     // free(J);
-        //     // I = (int*) malloc(sizeof(int) * n1);
-        //     // J = (int*) malloc(sizeof(int) * n2);
-        //     // for (int i = 0; i < n1; i++) {
-        //     //     I[i] = unionI[i];
-        //     // }
-        //     // for (int i = 0; i < n2; i++) {
-        //     //     J[i] = unionJ[i];
-        //     // }
+            // l) Set I = I U ITilde and J = J U JTilde to use in the next iteration
+            // update values for the next iteration of the for loop
+            n1 = unionN1;
+            n2 = unionN2;
+            free(I);
+            free(J);
+            I = (int*) malloc(sizeof(int) * n1);
+            J = (int*) malloc(sizeof(int) * n2);
+            for (int i = 0; i < n1; i++) {
+                I[i] = unionI[i];
+            }
+            for (int i = 0; i < n2; i++) {
+                J[i] = unionJ[i];
+            }
             
-        //     // free memory
+            // free memory
             free(L);
-        //     // free(unionI);
-        //     // free(unionJ);
-        //     // free(ITilde);
-        //     // free(smallestIndices);
-        //     // free(smallestJTilde);
-        //     // free(rhoSq);
-        //        free(JTilde);
+            free(unionI);
+            free(unionJ);
+            free(ITilde);
+            free(smallestIndices);
+            free(smallestJTilde);
+            free(rhoSq);
+            free(JTilde);
             free(keepArray);
         }
 
