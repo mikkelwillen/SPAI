@@ -92,7 +92,7 @@ void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTi
         for (int j = 0; j < n2Tilde; j++) {
             ABreve[i*n2Tilde + j] = 0;
             for (int k = 0; k < n1; k++) {
-                ABreve[i*n2Tilde + j] += Q[i*n1 + k] * AIJTilde[k*n2Tilde + j];
+                ABreve[i*n2Tilde + j] += Q[k*n1 + i] * AIJTilde[k*n2Tilde + j];
             }
         }
     }
