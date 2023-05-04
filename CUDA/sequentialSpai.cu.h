@@ -399,66 +399,66 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("\n");
 
-        //     // e) determine the new indices Î
-        //     // Denote by ITilde teh new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
-        //     // int unionN2 = n2 + newN2Tilde;
-        //     // printf("unionN2: %d\n", unionN2);
-        //     // int* unionJ = (int*) malloc(sizeof(int) * unionN2);
-        //     // printf("after unionJ\n");
-        //     // for (int i = 0; i < n2; i++) {
-        //     //     unionJ[i] = J[i];
-        //     // }
-        //     // for (int i = 0; i < newN2Tilde; i++) {
-        //     //     unionJ[n2 + i] = smallestJTilde[i];
-        //     // }
-        //     // // print unionJ
-        //     // printf("\nunionJ: ");
-        //     // for (int i = 0; i < unionN2; i++) {
-        //     //     printf("%d ", unionJ[i]);
-        //     // }
-        //     // printf("\n");
+            // e) determine the new indices Î
+            // Denote by ITilde the new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
+            int unionN2 = n2 + newN2Tilde;
+            printf("unionN2: %d\n", unionN2);
+            int* unionJ = (int*) malloc(sizeof(int) * unionN2);
+            printf("after unionJ\n");
+            for (int i = 0; i < n2; i++) {
+                unionJ[i] = J[i];
+            }
+            for (int i = 0; i < newN2Tilde; i++) {
+                unionJ[n2 + i] = smallestJTilde[i];
+            }
+            // print unionJ
+            printf("\nunionJ: ");
+            for (int i = 0; i < unionN2; i++) {
+                printf("%d ", unionJ[i]);
+            }
+            printf("\n");
 
-        //     // int* ITilde = (int*) malloc(sizeof(int) * A->m);
-        //     // for (int i = 0; i < A->m; i++) {
-        //     //     ITilde[i] = -1;
-        //     // }
+            int* ITilde = (int*) malloc(sizeof(int) * A->m);
+            for (int i = 0; i < A->m; i++) {
+                ITilde[i] = -1;
+            }
 
-        //     // int n1Tilde = 0;
-        //     // for (int j = 0; j < unionN2; j++) {
-        //     //     for (int i = A->offset[unionJ[j]]; i < A->offset[unionJ[j] + 1]; i++) {
-        //     //         int keep = 1;
-        //     //         for (int h = 0; h < A->m; h++) {
-        //     //             if (A->flatRowIndex[i] == I[h] || A->flatRowIndex[i] == ITilde[h]) {
-        //     //                 keep = 0;
-        //     //             }
-        //     //         }
-        //     //         if (keep == 1) {
-        //     //             ITilde[n1Tilde] = A->flatRowIndex[i];
-        //     //             n1Tilde++;
-        //     //         }
-        //     //     }
-        //     // }
-        //     // // print I
-        //     // printf("\nI: ");
-        //     // for (int i = 0; i < n1; i++) {
-        //     //     printf("%d ", I[i]);
-        //     // }
-        //     // // printf ITilde
-        //     // printf("\nITilde: ");
-        //     // for (int i = 0; i < n1Tilde; i++) {
-        //     //     printf("%d ", ITilde[i]);
-        //     // }
+            int n1Tilde = 0;
+            for (int j = 0; j < unionN2; j++) {
+                for (int i = A->offset[unionJ[j]]; i < A->offset[unionJ[j] + 1]; i++) {
+                    int keep = 1;
+                    for (int h = 0; h < A->m; h++) {
+                        if (A->flatRowIndex[i] == I[h] || A->flatRowIndex[i] == ITilde[h]) {
+                            keep = 0;
+                        }
+                    }
+                    if (keep == 1) {
+                        ITilde[n1Tilde] = A->flatRowIndex[i];
+                        n1Tilde++;
+                    }
+                }
+            }
+            // print I
+            printf("\nI: ");
+            for (int i = 0; i < n1; i++) {
+                printf("%d ", I[i]);
+            }
+            // printf ITilde
+            printf("\nITilde: ");
+            for (int i = 0; i < n1Tilde; i++) {
+                printf("%d ", ITilde[i]);
+            }
 
-        //     // // f) set unionI and unionJ
-        //     // // make union of I and ITilde
-        //     // int unionN1 = n1 + n1Tilde;
-        //     // int* unionI = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
-        //     // for (int i = 0; i < n1; i++) {
-        //     //     unionI[i] = I[i];
-        //     // }
-        //     // for (int i = 0; i < n1Tilde; i++) {
-        //     //     unionI[n1 + i] = ITilde[i];
-        //     // }
+            // f) set unionI and unionJ
+            // make union of I and ITilde
+            int unionN1 = n1 + n1Tilde;
+            int* unionI = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
+            for (int i = 0; i < n1; i++) {
+                unionI[i] = I[i];
+            }
+            for (int i = 0; i < n1Tilde; i++) {
+                unionI[n1 + i] = ITilde[i];
+            }
 
         //     // update values for the next iteration of the for loop
         //     // n1 = unionN1;
