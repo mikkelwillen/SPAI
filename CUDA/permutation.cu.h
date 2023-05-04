@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "cublas_v2.h"
-#include "csc.cu.h"
-#include "constants.cu.h"
 
 void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float* Pc) {
     // create row permutation matrix of size n1 x n1
