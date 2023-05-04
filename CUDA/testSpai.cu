@@ -115,7 +115,7 @@ int main() {
     freeCSC(cscA);
     freeCSC(cscB);
     freeCSC(cscC);
-    freeCSC(res);
+    // freeCSC(res);
 
     free(A);
     free(B);
