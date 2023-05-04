@@ -206,6 +206,26 @@ CSC* updateKthColumnCSC(CSC* A, float* newVaules, int k, int* J, int n2) {
     return newA;
 }
 
+// Function for tranforming a CSC matrix to a dense matrix with specific rows and columns
+// csc = The CSC matrix
+// I = The row indices of the dense matrix
+// J = The column indices of the dense matrix
+// n1 = The number of rows in the dense matrix
+// n2 = The number of columns in the dense matrix
+float* CSCToDense(CSC* csc, int* I, int* J, int n1, int n2) {
+    float* dense = (float*) calloc(n1 * n2, sizeof(float));
+
+    for(int j = 0; j < n2; j++) {
+        for (int i = 0; i < n1; i++) {
+            for (int l = csc->offset[J[j]]; l < csc->offset[J[j] + 1]; l++) {
+                if (I[i] == csc->flatRowIndex[l]) {
+                    dense[j * n2 + i] = csc->flatData[l];
+                }
+            }
+        }
+    }
+}
+
 // Prints all the elements of a CSC struct
 void printCSC(CSC* csc) {
     printf("\n\n--------Printing CSC data--------\n");

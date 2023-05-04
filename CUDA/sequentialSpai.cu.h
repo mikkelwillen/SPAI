@@ -95,18 +95,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
 
         // c) Create Â = A(I, J)
-        // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
-        float* AHat = (float*) calloc(n1 * n2, sizeof(float));
-
-        for(int j = 0; j < n2; j++) {
-            for (int i = 0; i < n1; i++) {
-                for (int l = A->offset[J[j]]; l < A->offset[J[j] + 1]; l++) {
-                    if (I[i] == A->flatRowIndex[l]) {
-                        AHat[j * n2 + i] = A->flatData[l];
-                    }
-                }
-            }
-        }
+        // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. 
+        // For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
+        float* AHat = CSCToDense(A, I, J, n1, n2);
 
         // print AHat
         printf("\nAhat: ");
@@ -401,20 +392,20 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // e) determine the new indices Î
             // Denote by ITilde the new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
-            int unionN2 = n2 + newN2Tilde;
-            printf("unionN2: %d\n", unionN2);
-            int* unionJ = (int*) malloc(sizeof(int) * unionN2);
-            printf("after unionJ\n");
+            int n2Union = n2 + newN2Tilde;
+            printf("n2Union: %d\n", n2Union);
+            int* JUnion = (int*) malloc(sizeof(int) * n2Union);
+            printf("after JUnion\n");
             for (int i = 0; i < n2; i++) {
-                unionJ[i] = J[i];
+                JUnion[i] = J[i];
             }
             for (int i = 0; i < newN2Tilde; i++) {
-                unionJ[n2 + i] = smallestJTilde[i];
+                JUnion[n2 + i] = smallestJTilde[i];
             }
-            // print unionJ
-            printf("\nunionJ: ");
-            for (int i = 0; i < unionN2; i++) {
-                printf("%d ", unionJ[i]);
+            // print JUnion
+            printf("\nJUnion: ");
+            for (int i = 0; i < n2Union; i++) {
+                printf("%d ", JUnion[i]);
             }
             printf("\n");
 
@@ -424,8 +415,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
 
             int n1Tilde = 0;
-            for (int j = 0; j < unionN2; j++) {
-                for (int i = A->offset[unionJ[j]]; i < A->offset[unionJ[j] + 1]; i++) {
+            for (int j = 0; j < n2Union; j++) {
+                for (int i = A->offset[JUnion[j]]; i < A->offset[JUnion[j] + 1]; i++) {
                     int keep = 1;
                     for (int h = 0; h < A->m; h++) {
                         if (A->flatRowIndex[i] == I[h] || A->flatRowIndex[i] == ITilde[h]) {
@@ -449,36 +440,41 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 printf("%d ", ITilde[i]);
             }
 
-            // f) set unionI and unionJ
+            // f) set IUnion and JUnion
             // make union of I and ITilde
-            int unionN1 = n1 + n1Tilde;
-            int* unionI = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
+            int n1Union = n1 + n1Tilde;
+            int* IUnion = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
             for (int i = 0; i < n1; i++) {
-                unionI[i] = I[i];
+                IUnion[i] = I[i];
             }
             for (int i = 0; i < n1Tilde; i++) {
-                unionI[n1 + i] = ITilde[i];
+                IUnion[n1 + i] = ITilde[i];
             }
+
+            // g) Update the QR factorization of A(IUnion, JUnion)
+
+
+
 
             // l) Set I = I U ITilde and J = J U JTilde to use in the next iteration
             // update values for the next iteration of the for loop
-            n1 = unionN1;
-            n2 = unionN2;
+            n1 = n1Union;
+            n2 = n2Union;
             free(I);
             free(J);
             I = (int*) malloc(sizeof(int) * n1);
             J = (int*) malloc(sizeof(int) * n2);
             for (int i = 0; i < n1; i++) {
-                I[i] = unionI[i];
+                I[i] = IUnion[i];
             }
             for (int i = 0; i < n2; i++) {
-                J[i] = unionJ[i];
+                J[i] = JUnion[i];
             }
             
             // free memory
             free(L);
-            free(unionI);
-            free(unionJ);
+            free(IUnion);
+            free(JUnion);
             free(ITilde);
             free(smallestIndices);
             free(smallestJTilde);

@@ -6,6 +6,7 @@
 #include "sequentialTest.cu.h"
 #include "qrBatched.cu.h"
 #include "invBatched.cu.h"
+#include "permutation.cu.h"
 
 
 int main() {
@@ -60,11 +61,55 @@ int main() {
     //     }
     //     printf("\n");
     // }
+
+    float* Pr = (float*) malloc(sizeof(float) * m * m);
+    float* Pc = (float*) malloc(sizeof(float) * n * n);
+    int* I = (int*) malloc(sizeof(int) * m);
+    I[0] = 1; I[1] = 0; I[2] = 2; I[3] = 3;
+    int* J = (int*) malloc(sizeof(int) * n);
+    J[0] = 1; J[1] = 0; J[2] = 2;
+    createPermutationMatrices(I, J, m, n, Pr, Pc);
+    float* switchRows = (float*) malloc(sizeof(float) * m * n);
+    float* switchCols = (float*) malloc(sizeof(float) * m * n);
+    // compute switchRows = Pr * A
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            switchRows[i * n + j] = 0.0;
+            for (int k = 0; k < m; k++) {
+                switchRows[i * n + j] += Pr[i * m + k] * A[k * n + j];
+            }
+        }
+    }
+    // compute switchCols = A * Pc
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            switchCols[i * n + j] = 0.0;
+            for (int k = 0; k < n; k++) {
+                switchCols[i * n + j] += A[i * n + k] * Pc[k * n + j];
+            }
+        }
+    }
+    //print switchRows
+    printf("switchRows:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", switchRows[i * n + j]);
+        }
+        printf("\n");
+    }
+    //print switchCols
+    printf("switchCols:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", switchCols[i * n + j]);
+        }
+        printf("\n");
+    }
     
-    struct CSC* res = sequentialSpai(cscA, 0.01, 5, 1);
-    printf("res\n");
-    printCSC(res);
-    printf("hallo?\n");
+
+    
+    // struct CSC* res = sequentialSpai(cscA, 0.01, 5, 1);
+    // printf("hallo?\n");
 
     // free memory
     freeCSC(cscA);
