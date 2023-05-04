@@ -2,7 +2,7 @@ COMPILER = nvcc -lcublas -lcusolver
 OPT_FLAGS = -O3 -arch=compute_35
 
 SOURCES = sequentialSpai.cu.h sequentialTest.cu.h
-HELPERS = csc.cu.h constants.cu.h qrBatched.cu.h invBatched.cu.h permutation.cu.h
+HELPERS = csc.cu.h constants.cu.h qrBatched.cu.h invBatched.cu.h permutation.cu.h updateQR.cu.h
 
 TEST1 = testSpai.cu
 EXECUTABLE1 = testSpai
