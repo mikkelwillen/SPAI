@@ -11,7 +11,7 @@
 #include "permutation.cu.h"
 
 void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
-    printf("------UPDATE QR------\n");
+    printf("\n------UPDATE QR------\n");
 
     // ABar = A(UnionI, UnionJ)
     float* ABar = CSCToDense(A, IUnion, JUnion, n1Union, n2Union);
@@ -44,6 +44,7 @@ void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTi
         printf("\n");
     }
 
+    // SKAL VI PERMUTERE???? ELLER ER DEN ALLEREDE PÅ DEN RIGTIGE FORM LIGESOM FIGUR 3.3 
     // ATilde = Pr * ABar * Pc
     // Compute Pr * ABar
     float* ATildeTemp = (float*)malloc(n1Union * n2Union * sizeof(float));
