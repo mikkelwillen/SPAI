@@ -186,7 +186,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
             secondMatrix[(n2 + i) * n1Union + n2 + j] = B2Q[i * (n1Union - n2) + j];
         }
     }
-    
+
     // print secondMatrix
     printf("secondMatrix:\n");
     for (int i = 0; i < n1Union; i++) {
@@ -215,6 +215,43 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         }
         printf("\n");
     }
+
+    // make newR with R in the top left corner, B1 in the top right corner and B2R under B1 of size n1Union x n2Union
+    float* newR = (float*) malloc(n1Union * n2Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n2Union; j++) {
+            newR[i*n2Union + j] = 0.0;
+        }
+    }
+
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            newR[i*n2Union + j] = R[i*n2 + j];
+        }
+    }
+
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            newR[i*n2Union + n2 + j] = B1[i*n2Tilde + j];
+        }
+    }
+
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            newR[(n2 + i)*n2Union + n2 + j] = B2R[i*n2Tilde + j];
+        }
+    }
+
+    // print newR
+    printf("newR:\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n2Union; j++) {
+            printf("%f ", newR[i*n2Union + j]);
+        }
+        printf("\n");
+    }
+    
+
 
 
     free(AIJTilde);
