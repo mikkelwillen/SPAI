@@ -395,9 +395,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // g) Update the QR factorization of A(IUnion, JUnion)
             updateQR(cHandle, A, AHat, Q, R, I, J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, mHat_k, residual, &residualNorm, k);
 
-
-
-
             // l) Set I = I U ITilde and J = J U JTilde to use in the next iteration
             // update values for the next iteration of the for loop
             n1 = n1Union;
@@ -439,6 +436,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(Q);
         free(R);
         free(mHat_k);
+        free(residual);
+        
     }
     printCSC(M);
 

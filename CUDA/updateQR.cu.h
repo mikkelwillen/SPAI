@@ -283,17 +283,52 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
     printf("\n");
 
+    // set Q to newQ
+    free(Q);
+    Q = (float*) malloc(n1Union * n1Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            Q[i*n1Union + j] = newQ[i*n1Union + j];
+        }
+    }
 
+    // set R to newR
+    free(R);
+    R = (float*) malloc(n1Union * n2Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n2Union; j++) {
+            R[i*n2Union + j] = newR[i*n2Union + j];
+        }
+    }
 
+    // set AHat to Q * R
+    free(AHat);
+    AHat = (float*) malloc(n1Union * n2Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n2Union; j++) {
+            AHat[i*n2Union + j] = 0.0;
+            for (int k = 0; k < n1Union; k++) {
+                AHat[i*n2Union + j] += Q[i*n1Union + k] * R[k*n2Union + j];
+            }
+        }
+    }
+
+    // free memory
     free(AIJTilde);
     free(AITildeJTilde);
     free(ABreve);
     free(ATilde);
     free(Pr);
     free(Pc);
+    free(B1);
     free(B2);
     free(B2Q);
     free(B2R);
+    free(firstMatrix);
+    free(secondMatrix);
+    free(newQ);
+    free(newR);
+    free(tempM_k);
 
     printf("done with updateQR\n");
 }
