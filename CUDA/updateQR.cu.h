@@ -10,7 +10,7 @@
 #include "constants.cu.h"
 #include "permutation.cu.h"
 
-void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
+void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -250,7 +250,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         }
         printf("\n");
     }
-    
+
     // print newR
     printf("newR:\n");
     for (int i = 0; i < n1Union; i++) {
@@ -260,6 +260,27 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         printf("\n");
     }
 
+    // compute the new solution m_k for the least squares problem
+    float* tempM_k = (float*) malloc(n2Union * sizeof(float));
+    LSProblem(cHandle, A, newQ, newR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
+
+    free(m_kOut);
+    m_kOut = (float*) malloc(n2Union * sizeof(float));
+
+    // compute m_KOut = Pc * tempM_k
+    for (int i = 0; i < n2Union; i++) {
+        m_kOut[i] = 0.0;
+        for (int j = 0; j < n2Union; j++) {
+            m_kOut[i] += Pc[i * n2Union + j] * tempM_k[j];
+        }
+    }
+    
+    // print m_kOut
+    printf("m_kOut:\n");
+    for (int i = 0; i < n1Union; i++) {
+        printf("%f ", m_kOut[i]);
+    }
+    printf("\n");
 
 
 

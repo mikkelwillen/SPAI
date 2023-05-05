@@ -10,6 +10,19 @@
 #include "sequentialSpai.cu.h"
 #include "invBatched.cu.h"
 
+// Function for computing the least squares problem
+// cHandle is the cublas handle
+// A is the orginal CSC matrix
+// Q is the Q matrix from the QR factorization of AHat
+// R is the R matrix from the QR factorization
+// mHat_k is the solution of the least squares problem
+// residual is the residual vector of the least squares problem
+// I is indeces of the rows of AHat
+// J is indeces of the columns of AHat
+// n1 is the number of rows of AHat
+// n2 is the number of columns of AHat
+// k is the index of the column of mHat
+// residualNorm is the norm of the residual vector
 void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
     // e) compute cHat = Q^T * ê_k
     // make e_k and set index k to 1.0

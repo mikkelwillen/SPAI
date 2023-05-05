@@ -6,6 +6,13 @@
 #include <string.h>
 #include <math.h>
 
+// Function to create permutation matrices
+// I is the row permutation vector
+// J is the column permutation vector
+// n1 is the number of rows in the original matrix
+// n2 is the number of columns in the original matrix
+// Pr is the row permutation matrix output
+// Pc is the column permutation matrix output
 void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float* Pc) {
     // create normalized index of I
     int* IIndex = (int*) malloc(n1 * sizeof(int));
