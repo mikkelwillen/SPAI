@@ -99,15 +99,15 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
 
     // B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
-    float* B2 = (float*)malloc((n1Union - n2Tilde) * n2Tilde * sizeof(float));
-    for (int i = 0; i < n1 - n2Tilde; i++) {
+    float* B2 = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
+    for (int i = 0; i < n1 - n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            B2[i*n2Tilde + j] = ABreve[(n2Tilde + i)*n2Tilde + j];
+            B2[i*n2Tilde + j] = ABreve[(n1 - n2 + i)*n2Tilde + j];
         }
     }
     for (int i = 0; i < n1Tilde; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            B2[(n1 - n2Tilde + i)*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
+            B2[(n1 - n2 + i)*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
         }
     }
 
@@ -121,9 +121,9 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
 
     // compute QR factorization of B2
-    float* B2Q = (float*)malloc((n1Union - n2Tilde) * (n1Union - n2Tilde) * sizeof(float));
-    float* B2R = (float*)malloc((n1Union - n2Tilde) * n2Tilde * sizeof(float));
-    qrBatched(cHandle, B2, n1Union - n2Tilde, n2Tilde, B2Q, B2R);
+    float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
+    float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
+    qrBatched(cHandle, B2, n1Union - n2, n2Tilde, B2Q, B2R);
 
     free(AIJTilde);
     free(AITildeJTilde);
