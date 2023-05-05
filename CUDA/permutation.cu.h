@@ -53,9 +53,9 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
     }
 
     // create column permutation matrix of size n2 x n2
-    for (int j = 0; j < n2; j++) {
-        for (int i = 0; i < n2; i++) {
-            if (J[i] == j) {
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2; j++) {
+            if (JIndex[j] == i) {
                 Pc[i*n2 + j] = 1;
             }
             else {
