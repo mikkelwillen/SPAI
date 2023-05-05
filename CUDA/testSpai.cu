@@ -110,7 +110,7 @@ int main() {
     
 
     
-    struct CSC* res = sequentialSpai(cscC, 0.01, 5, 1);
+    struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
     printf("hallo?\n");
 
     // free memory
