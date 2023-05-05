@@ -72,7 +72,7 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat
         for (int j = 0; j < n2; j++) {
             for (int h = A->offset[k]; h < A->offset[k+1]; h++) {
                 if (i == A->flatRowIndex[h]) {
-                    *residual[i] += A->flatData[h] * mHat_k[j];
+                    *residual[i] += A->flatData[h] * *mHat_k[j];
                 }
             }
         }
