@@ -10,7 +10,7 @@
 #include "constants.cu.h"
 #include "permutation.cu.h"
 
-void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
+void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -120,11 +120,18 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
         printf("\n");
     }
 
+    // compute QR factorization of B2
+    float* B2Q = (float*)malloc((n1Union - n2Tilde) * n2Tilde * sizeof(float));
+    float* B2R = (float*)malloc(n2Tilde * n2Tilde * sizeof(float));
+    qrBatched(cHandle, B2, n1Union - n2Tilde, n2Tilde, B2Q, B2R);
+
+    free(AIJTilde);
+    free(AITildeJTilde);
+    free(ABreve);
+    free(ATilde);
     free(Pr);
     free(Pc);
-    free(ATilde);
-    free(AIJTilde);
-    free(ABreve);
+    free(B2);
 
     printf("done with updateQR\n");
 }
