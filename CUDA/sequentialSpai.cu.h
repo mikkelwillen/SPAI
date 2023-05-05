@@ -11,6 +11,7 @@
 #include "qrBatched.cu.h"
 #include "invBatched.cu.h"
 #include "updateQR.cu.h"
+#include "LSproblem.cu.h"
 
 
 // A = matrix we want to compute SPAI on
@@ -133,100 +134,107 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(AHat);
         AHat = CSCToDense(A, I, J, n1, n2);
 
-        // e) compute ĉ = Q^T ê_k
-        // make e_k and set index k to 1.0
-        printf("\nk: %d", k);
-        float* e_k = (float*) calloc(n1, sizeof(float));
-        for (int i = 0; i < n1; i++) {
-            if (k == I[i]) {
-                e_k[i] = 1.0;
-            }
-        }
-        printf("\ne_k: ");
-        for (int i = 0; i < n1; i++) {
-            printf("%f ", e_k[i]);
-        }
+        // // e) compute ĉ = Q^T ê_k
+        // // make e_k and set index k to 1.0
+        // printf("\nk: %d", k);
+        // float* e_k = (float*) calloc(n1, sizeof(float));
+        // for (int i = 0; i < n1; i++) {
+        //     if (k == I[i]) {
+        //         e_k[i] = 1.0;
+        //     }
+        // }
+        // printf("\ne_k: ");
+        // for (int i = 0; i < n1; i++) {
+        //     printf("%f ", e_k[i]);
+        // }
 
-        // malloc size for cHat and do matrix multiplication
-        float* cHat = (float*) calloc(n2, sizeof(float));
-        for (int i = 0; i < n1; i++) {
-            for (int j = 0; j < n2; j++) {
-                cHat[j] += Q[j * n1 + i] * e_k[i];
-            }
-        }
-        printf("\ncHat: ");
-        for (int i = 0; i < n2; i++) {
-            printf("%f ", cHat[i]);
-        }
+        // // malloc size for cHat and do matrix multiplication
+        // float* cHat = (float*) calloc(n2, sizeof(float));
+        // for (int i = 0; i < n1; i++) {
+        //     for (int j = 0; j < n2; j++) {
+        //         cHat[j] += Q[j * n1 + i] * e_k[i];
+        //     }
+        // }
+        // printf("\ncHat: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", cHat[i]);
+        // }
 
-        // f) compute mHat_k = R^-1 cHat
-        // Malloc space for mHat_k
-        float* mHat_k = (float*) malloc(sizeof(float) * n2);
+        // // f) compute mHat_k = R^-1 cHat
+        // // Malloc space for mHat_k
+        // float* mHat_k = (float*) malloc(sizeof(float) * n2);
         
-        // Make the inverse
-        // Placeholder InvR. R is n2 x n2
-        // Malloc space for the inverse of R
-        float* invR = (float*) malloc(sizeof(float) * n2 * n2);
+        // // Make the inverse
+        // // Placeholder InvR. R is n2 x n2
+        // // Malloc space for the inverse of R
+        // float* invR = (float*) malloc(sizeof(float) * n2 * n2);
         
-        if (skipToWhile == 0) {
-            invBatched(cHandle, R, n2, invR);
-        } else {
-            printf("skip invBatched\n");
-        }
+        // if (skipToWhile == 0) {
+        //     invBatched(cHandle, R, n2, invR);
+        // } else {
+        //     printf("skip invBatched\n");
+        // }
 
-        // print invR
-        printf("\ninvR: ");
-        for (int i = 0; i < n2 * n2; i++) {
-            printf("%f ", invR[i]);
-        }
+        // // print invR
+        // printf("\ninvR: ");
+        // for (int i = 0; i < n2 * n2; i++) {
+        //     printf("%f ", invR[i]);
+        // }
 
-        // Matrix multiplication
-        for (int i = 0; i < n2; i++) {
-            mHat_k[i] = 0.0;
-            for (int j = 0; j < n2; j++) {
-                mHat_k[i] += invR[i * n2 + j] * cHat[i];
-            }
-        }
-        printf("\nmHat_k: ");
-        for (int i = 0; i < n2; i++) {
-            printf("%f ", mHat_k[i]);
-        }
+        // // Matrix multiplication
+        // for (int i = 0; i < n2; i++) {
+        //     mHat_k[i] = 0.0;
+        //     for (int j = 0; j < n2; j++) {
+        //         mHat_k[i] += invR[i * n2 + j] * cHat[i];
+        //     }
+        // }
+        // printf("\nmHat_k: ");
+        // for (int i = 0; i < n2; i++) {
+        //     printf("%f ", mHat_k[i]);
+        // }
 
-        // vi venter sgu lige med det her til vi er færdige med m_k
-        // // g) set m_k(J) = ^m_k
-        // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
-        // M = updateKthColumnCSC(M, mHat_k, k, J, n2);
+        // // vi venter sgu lige med det her til vi er færdige med m_k
+        // // // g) set m_k(J) = ^m_k
+        // // // ER DER en grund til at vi opdaterer m_k inden vi er helt færdige med mHat_k. Vi ved jo hvilke index mHat_k svarer til i m_k (pga J).
+        // // M = updateKthColumnCSC(M, mHat_k, k, J, n2);
 
 
-        // h) compute residual
-        // residual = A * mHat_k - e_k
-        // Malloc space for residual
-        float* residual = (float*) calloc(A->m, sizeof(float));
+        // // h) compute residual
+        // // residual = A * mHat_k - e_k
+        // // Malloc space for residual
+        // float* residual = (float*) calloc(A->m, sizeof(float));
 
-        // Matrix multiplication
-        for (int i = 0; i < A->m; i++) {
-            for (int j = 0; j < n2; j++) {
-                for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
-                    if (i == A->flatRowIndex[h]) {
-                       residual[i] += A->flatData[h] * mHat_k[j];
-                    }
-                }
-                if (i == k) {
-                    residual[i] -= 1.0;
-                }
-            }
-        }
-        printf("\nresidual: ");
-        for (int i = 0; i < A->m; i++) {
-            printf("%f ", residual[i]);
-        }
+        // // Matrix multiplication
+        // for (int i = 0; i < A->m; i++) {
+        //     for (int j = 0; j < n2; j++) {
+        //         for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
+        //             if (i == A->flatRowIndex[h]) {
+        //                residual[i] += A->flatData[h] * mHat_k[j];
+        //             }
+        //         }
+        //         if (i == k) {
+        //             residual[i] -= 1.0;
+        //         }
+        //     }
+        // }
+        // printf("\nresidual: ");
+        // for (int i = 0; i < A->m; i++) {
+        //     printf("%f ", residual[i]);
+        // }
         
-        // compute the norm of the residual
-        float residualNorm = 0.0;
-        for (int i = 0; i < A->m; i++) {
-            residualNorm += residual[i] * residual[i];
-        }
-        residualNorm = sqrt(residualNorm);
+        // // compute the norm of the residual
+        // float residualNorm = 0.0;
+        // for (int i = 0; i < A->m; i++) {
+        //     residualNorm += residual[i] * residual[i];
+        // }
+        // residualNorm = sqrt(residualNorm);
+
+        float* mHat_k;
+        float* residual;
+        float residualNorm;
+
+        LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
+        
         printf("\nnorm: %f", residualNorm);
         printf("\n");
 
