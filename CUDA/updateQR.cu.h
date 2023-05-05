@@ -113,7 +113,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
 
     // print B2
     printf("B2:\n");
-    for (int i = 0; i < n1Union - n2Tilde; i++) {
+    for (int i = 0; i < n1Union - n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
             printf("%f ", B2[i*n2Tilde + j]);
         }
