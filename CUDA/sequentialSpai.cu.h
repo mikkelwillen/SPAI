@@ -399,6 +399,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // update values for the next iteration of the for loop
             n1 = n1Union;
             n2 = n2Union;
+            printf("before free I and J\n");
             free(I);
             free(J);
             I = (int*) malloc(sizeof(int) * n1);
@@ -409,6 +410,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n2; i++) {
                 J[i] = JUnion[i];
             }
+            printf("after free I and J\n");
             
             // free memory
             free(L);
@@ -433,7 +435,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(R);
         free(mHat_k);
         free(residual);
-        printf("all freed");
+        printf("all freed\n");
 
     }
     printCSC(M);
