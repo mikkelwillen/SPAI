@@ -122,7 +122,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
 
     // compute QR factorization of B2
     float* B2Q = (float*)malloc((n1Union - n2Tilde) * (n1Union - n2Tilde) * sizeof(float));
-    float* B2R = (float*)malloc(n2Tilde * n2Tilde * sizeof(float));
+    float* B2R = (float*)malloc((n1Union - n2Tilde) * n2Tilde * sizeof(float));
     qrBatched(cHandle, B2, n1Union - n2Tilde, n2Tilde, B2Q, B2R);
 
     free(AIJTilde);
