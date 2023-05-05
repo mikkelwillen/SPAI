@@ -61,8 +61,8 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat
     }
     // g) compute residual = A * mHat_k - e_k
     // malloc space for residual
-    if (residual != NULL) {
-        free(residual);
+    if (*residual != NULL) {
+        free(*residual);
     }
     *residual = (float*) malloc(A->m * sizeof(float));
 
