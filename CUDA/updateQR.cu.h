@@ -98,6 +98,14 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         printf("\n");
     }
 
+    // B1 = ABreve[0 : n2, 0 : n2]
+    float* B1 = (float*) malloc(n2 * n2Tilde * sizeof(float));
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            B1[i*n2Tilde + j] = ABreve[i*n2Tilde + j];
+        }
+    }
+
     // B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
     float* B2;
     if (n1 - n2 < 0) {
@@ -135,7 +143,60 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
     qrBatched(cHandle, B2, n1Union - n2, n2Tilde, B2Q, B2R);
-    printf("after qrBatched in updateQR\n");
+    
+    
+    // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
+    float* firstMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            firstMatrix[i*n1Union + j] = 0.0;
+        }
+    }
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n1; j++) {
+            firstMatrix[i*n1 + j] = Q[i*n1 + j];
+        }
+    }
+    for (int i = n1 + 1; i < n1Union; i++) {
+        firstMatrix[i*n1Union + i] = 1.0;
+    }
+
+    // make second matrix with identity in the upper left corner and B2Q in the lower right corner of size n1Union x n1Union
+    float* secondMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            secondMatrix[i*n1Union + j] = 0.0;
+        }
+    }
+    for (int i = 0; i < n2; i++) {
+        secondMatrix[i*n1Union + i] = 1.0;
+    }
+    for (int i = n2; i < n1Union; i++) {
+        for (int j = n2; j < n1Union; j++) {
+            secondMatrix[i*n1Union + j] = B2Q[(i - n2)*n1Union + (j - n2)];
+        }
+    }
+
+    // compute newQ = firstMatrix * secondMatrix
+    float* newQ = (float*) malloc(n1Union * n1Union * sizeof(float));
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            newQ[i*n1Union + j] = 0.0;
+            for (int k = 0; k < n1Union; k++) {
+                newQ[i*n1Union + j] += firstMatrix[i*n1Union + k] * secondMatrix[k*n1Union + j];
+            }
+        }
+    }
+
+    // print newQ
+    printf("newQ:\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            printf("%f ", newQ[i*n1Union + j]);
+        }
+        printf("\n");
+    }
+    
 
     free(AIJTilde);
     free(AITildeJTilde);
