@@ -238,6 +238,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("\nnorm: %f", residualNorm);
         printf("\n");
 
+        // print residual
+        printf("\nresidual: ");
+        for (int i = 0; i < A->m; i++) {
+            printf("%f ", residual[i]);
+        }
+        
+
         // counter of the iteration and check if there is something to be done in the while loop
         int iteration = 0;
         int somethingToBeDone = 1;
