@@ -11,7 +11,7 @@
 #include "qrBatched.cu.h"
 #include "invBatched.cu.h"
 #include "updateQR.cu.h"
-#include "LSproblem.cu.h"
+#include "LSProblem.cu.h"
 
 
 // A = matrix we want to compute SPAI on
@@ -234,7 +234,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float residualNorm;
 
         LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
-        
+
         printf("\nnorm: %f", residualNorm);
         printf("\n");
 
