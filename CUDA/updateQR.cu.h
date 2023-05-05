@@ -21,9 +21,6 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
 
     // create ATilde of size n1Union x n2Union
     float* ATilde = (float*) malloc(n1Union * n2Union * sizeof(float));
-
-    // overwrite AHat
-    AHat = CSCToDense(A, I, J, n1, n2);
     
     // set upper left square to AHat of size n1 x n2
     for (int i = 0; i < n1; i++) {

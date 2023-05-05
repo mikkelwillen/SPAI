@@ -127,6 +127,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
         printf("after qrBatched\n");
 
+        // overwrite AHat
+        AHat = CSCToDense(A, I, J, n1, n2);
+        
         // e) compute ĉ = Q^T ê_k
         // make e_k and set index k to 1.0
         printf("\nk: %d", k);
