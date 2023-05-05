@@ -82,34 +82,16 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
     // SKAL VI PERMUTERE???? ELLER ER DEN ALLEREDE PÅ DEN RIGTIGE FORM LIGESOM FIGUR 3.3 
     // ATilde = Pr * ABar * Pc
     // Compute Pr * ABar
-    float* ATildeTemp = (float*)malloc(n1Union * n2Union * sizeof(float));
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            ATildeTemp[i*n2Union + j] = 0;
-            for (int k = 0; k < n1Union; k++) {
-                ATildeTemp[i*n2Union + j] += Pr[i*n1Union + k] * ABar[k*n2Union + j];
-            }
-        }
-    }
+    // float* ATildeTemp = (float*)malloc(n1Union * n2Union * sizeof(float));
+    // for (int i = 0; i < n1Union; i++) {
+    //     for (int j = 0; j < n2Union; j++) {
+    //         ATildeTemp[i*n2Union + j] = 0;
+    //         for (int k = 0; k < n1Union; k++) {
+    //             ATildeTemp[i*n2Union + j] += Pr[i*n1Union + k] * ABar[k*n2Union + j];
+    //         }
+    //     }
+    // }
 
-    // Compute ATilde = ATildeTemp * Pc
-    float* ATilde = (float*)malloc(n1Union * n2Union * sizeof(float));
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            ATilde[i*n2Union + j] = 0;
-            for (int k = 0; k < n2Union; k++) {
-                ATilde[i*n2Union + j] += ATildeTemp[i*n2Union + k] * Pc[k*n2Union + j];
-            }
-        }
-    }
-
-    printf("ATilde:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            printf("%f ", ATilde[i*n2Union + j]);
-        }
-        printf("\n");
-    }
 
 
     // ABreve = Q^T * AIJTilde (CHECK IF Q IS TRANSPOSED!!!)
@@ -131,10 +113,8 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
         printf("\n");
     }
 
-    free(ABar);
     free(Pr);
     free(Pc);
-    free(ATildeTemp);
     free(ATilde);
     free(AIJTilde);
     free(ABreve);
