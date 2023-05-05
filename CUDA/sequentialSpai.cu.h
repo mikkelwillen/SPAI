@@ -232,6 +232,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* mHat_k;
         float* residual;
         float residualNorm;
+        
 
         LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
 
@@ -527,14 +528,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         updateKthColumnCSC(M, mHat_k, k, J, n2);
 
         // free memory
-        free(residual);
         free(I);
         free(J);
         free(AHat);
         free(Q);
         free(R);
-        free(invR);
-        free(e_k);
         free(mHat_k);
     }
     printCSC(M);
