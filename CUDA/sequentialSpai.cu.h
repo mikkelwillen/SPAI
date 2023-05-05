@@ -239,7 +239,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("\n");
 
         // print residual
-        printf("\nresidual: ");
+        printf("\nresidual: \n");
         for (int i = 0; i < A->m; i++) {
             printf("%f ", residual[i]);
         }
