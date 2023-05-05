@@ -424,7 +424,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // update kth column of M
         updateKthColumnCSC(M, mHat_k, k, J, n2);
-
+        printf("\nM after updateKthColumnCSC:\n");
         // free memory
         free(I);
         free(J);
@@ -433,6 +433,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(R);
         free(mHat_k);
         free(residual);
+        printf("all freed");
 
     }
     printCSC(M);
