@@ -56,6 +56,9 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
         }
     }
     printf("mHat_k:\n");
+    for (int i = 0; i < n2; i++) {
+        printf("%f ", mHat_k[i]);
+    }
     // g) compute residual = A * mHat_k - e_k
     // malloc space for residual
     if (residual != NULL) {
@@ -78,6 +81,9 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
         }
     }
     printf("residual:\n");
+    for (int i = 0; i < A->m; i++) {
+        printf("%f ", residual[i]);
+    }
 
     // compute the norm of the residual
     *residualNorm = 0.0;
