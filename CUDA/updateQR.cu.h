@@ -154,11 +154,11 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            firstMatrix[i*n1 + j] = Q[i*n1 + j];
+            firstMatrix[i*n1Union + j] = Q[i*n1 + j];
         }
     }
-    for (int i = n1 + 1; i < n1Union; i++) {
-        firstMatrix[i*n1Union + i] = 1.0;
+    for (int i = 0; i < n1Tilde; i++) {
+        firstMatrix[(n1 + i)*n1Union + n1 + i] = 1.0;
     }
 
     // print firstMatrix
@@ -181,11 +181,12 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     for (int i = 0; i < n2; i++) {
         secondMatrix[i*n1Union + i] = 1.0;
     }
-    for (int i = n2; i < n1Union; i++) {
-        for (int j = n2; j < n1Union; j++) {
-            secondMatrix[i*n1Union + j] = B2Q[(i - n2)*n1Union + (j - n2)];
+    for (int i = 0; i < n1Union - n2; i++) {
+        for (int j = 0; j < n1Union - n2; j++) {
+            secondMatrix[(n2 + i) * n1Union + n2 + j] = B2Q[i * (n1Union - n2) + j];
         }
     }
+    
     // print secondMatrix
     printf("secondMatrix:\n");
     for (int i = 0; i < n1Union; i++) {
@@ -194,7 +195,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         }
         printf("\n");
     }
-    
+
     // compute newQ = firstMatrix * secondMatrix
     float* newQ = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
