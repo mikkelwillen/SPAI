@@ -52,6 +52,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             h++;
         }
 
+        // print J
+        printf("\nJ: ");
+        for (int i = 0; i < n2; i++) {
+            printf("%d ", J[i]);
+        }
+
         if (n2 == 0) {
             skipToWhile = 1;
             printf("\n\n------SKIP TO WHILE------\n");
