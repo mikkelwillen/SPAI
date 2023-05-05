@@ -53,21 +53,30 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
         }
         printf("\n");
     }
-    
 
-    // // set lower left square to zeros of size n1Tilde x n2
-    // for (int i = 0; i < n1Tilde; i++) {
-    //     for (int j = 0; j < n2; j++) {
-    //         ATilde[(n1 + i)*n2Union + j] = 0;
-    //     }
-    // }
 
-    // // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
-    // for (int i = 0; i < n1Tilde; i++) {
-    //     for (int j = 0; j < n2Tilde; j++) {
-    //         ATilde[(n1 + i)*n2Union + n2 + j] = AITildeJTilde[i*n2Tilde + j];
-    //     }
-    // }
+    // set lower left square to zeros of size n1Tilde x n2
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2; j++) {
+            ATilde[(n1 + i)*n2Union + j] = 0;
+        }
+    }
+
+    // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            ATilde[(n1 + i)*n2Union + n2 + j] = AITildeJTilde[i*n2Tilde + j];
+        }
+    }
+
+    // print AITildeJTilde
+    printf("AITildeJTilde: \n");
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            printf("%f ", AITildeJTilde[i*n2Tilde + j]);
+        }
+        printf("\n");
+    }
 
     // print ATilde
     printf("ATilde:\n");
