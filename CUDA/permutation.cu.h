@@ -18,6 +18,7 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
                 IIndex[j] = i;
             }
         }
+        prevLowest = currentLowest;
     }
     // print IIndex
     printf("IIndex:\n");
@@ -48,6 +49,7 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
                 JIndex[j] = i;
             }
         }
+        prevLowest = currentLowest;
     }
 
     // create column permutation matrix of size n2 x n2
