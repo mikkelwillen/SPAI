@@ -7,14 +7,40 @@
 #include <math.h>
 
 void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float* Pc) {
+    // create normalized index of I
+    int* IIndex = (int*) malloc(n1 * sizeof(int));
+    int prevLowest = -1;
+    for (int i = 0; i < n1; i++) {
+        int currentLowest = INT_MAX;
+        for (int j = 0; j < n1; j++) {
+            if (I[j] > prevLowest && I[j] < currentLowest) {
+                currentLowest = I[j];
+                IIndex[j] = i;
+            }
+        }
+    }
+
     // create row permutation matrix of size n1 x n1
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            if (I[j] == i) {
+            if (IIndex[j] == i) {
                 Pr[i*n1 + j] = 1;
             }
             else {
                 Pr[i*n1 + j] = 0;
+            }
+        }
+    }
+
+    // create normalized index of J
+    int* JIndex = (int*) malloc(n2 * sizeof(int));
+    prevLowest = -1;
+    for (int i = 0; i < n2; i++) {
+        int currentLowest = INT_MAX;
+        for (int j = 0; j < n2; j++) {
+            if (J[j] > prevLowest && J[j] < currentLowest) {
+                currentLowest = J[j];
+                JIndex[j] = i;
             }
         }
     }
@@ -31,8 +57,5 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
         }
     }
 }
-
-
-
 
 #endif
