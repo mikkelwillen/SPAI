@@ -422,10 +422,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             free(keepArray);
         }
 
-        // Husk kun at bruge de s mindste residuals. Kig på hvordan man laver L igen
-        // vi skal have lavet en ny testmatrice, som har flere ikke nuller, så der er mulighed for at finde flere s indeces
-        // vi skal teste om step d) giver det rigtige.
-
         // update kth column of M
         updateKthColumnCSC(M, mHat_k, k, J, n2);
 
@@ -437,7 +433,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(R);
         free(mHat_k);
         free(residual);
-        
+
     }
     printCSC(M);
 
