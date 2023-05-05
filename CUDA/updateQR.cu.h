@@ -10,16 +10,51 @@
 #include "constants.cu.h"
 #include "permutation.cu.h"
 
-void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
+void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut) {
     printf("\n------UPDATE QR------\n");
 
-    // ABar = A(UnionI, UnionJ)
-    float* ABar = CSCToDense(A, IUnion, JUnion, n1Union, n2Union);
-    
-    printf("ABar:\n");
+    // create AIJTilde
+    float* AIJTilde = CSCToDense(A, I, JTilde, n1, n2Tilde);
+
+    // create AITildeJTilde of size n1Tilde x n2Tilde
+    float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
+
+    // create ATilde of size n1Union x n2Union
+    float* ATilde = (float*) malloc(n1Union * n2Union * sizeof(float));
+
+    // set upper left square to AHat of size n1 x n2
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            ATilde[i*n2Union + j] = AHat[i*n2 + j];
+        }
+    }
+
+    // set upper right square to AIJTilde of size n1 x n2Tilde
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            ATilde[i*n2Union + n2 + j] = AIJTilde[i*n2Tilde + j];
+        }
+    }
+
+    // set lower left square to zeros of size n1Tilde x n2
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2; j++) {
+            ATilde[(n1 + i)*n2Union + j] = 0;
+        }
+    }
+
+    // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            ATilde[(n1 + i)*n2Union + n2 + j] = AITildeJTilde[i*n2Tilde + j];
+        }
+    }
+
+    // print ATilde
+    printf("ATilde:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            printf("%f ", ABar[i*n2Union + j]);
+            printf("%f ", ATilde[i*n2Union + j]);
         }
         printf("\n");
     }
@@ -76,16 +111,6 @@ void* updateQR(CSC* A, float* Q, float* R, int* I, int* J, int* ITilde, int* JTi
         printf("\n");
     }
 
-    // Create AIJTilde
-    float* AIJTilde = CSCToDense(A, I, JTilde, n1, n2Tilde);
-
-    printf("AIJTilde:\n");
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", AIJTilde[i*n2Tilde + j]);
-        }
-        printf("\n");
-    }
 
     // ABreve = Q^T * AIJTilde (CHECK IF Q IS TRANSPOSED!!!)
     float* ABreve = (float*)malloc(n1 * n2Tilde * sizeof(float));
