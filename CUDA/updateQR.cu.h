@@ -99,17 +99,28 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
 
     // B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
-    float* B2 = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
-    for (int i = 0; i < n1 - n2; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            B2[i*n2Tilde + j] = ABreve[(n1 - n2 + i)*n2Tilde + j];
+    float* B2;
+    if (n1 - n2 < 0) {
+        B2 = (float*) malloc(n1Tilde * n2Tilde * sizeof(float));
+        for (int i = 0; i < n1Tilde; i++) {
+            for (int j = 0; j < n2Tilde; j++) {
+                B2[i*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
+            }
+        }
+    } else {
+        B2 = (float*) malloc((n1Union - n2) * n2Tilde * sizeof(float));
+        for (int i = 0; i < n1 - n2; i++) {
+            for (int j = 0; j < n2Tilde; j++) {
+                B2[i*n2Tilde + j] = ABreve[(n1 - n2 + i)*n2Tilde + j];
+            }
+        }
+        for (int i = 0; i < n1Tilde; i++) {
+            for (int j = 0; j < n2Tilde; j++) {
+                B2[(n1 - n2 + i)*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
+            }
         }
     }
-    for (int i = 0; i < n1Tilde; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            B2[(n1 - n2 + i)*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
-        }
-    }
+    
 
     // print B2
     printf("B2:\n");
