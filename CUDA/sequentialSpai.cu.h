@@ -231,8 +231,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         float* mHat_k;
         float* residual;
-        float residualNorm;
-        
+        float residualNorm;        
 
         LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
 

@@ -35,10 +35,12 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
     invBatched(cHandle, R, n2, invR);
 
+    printf("invR:\n");
     // realloc mHat_k to size n2 and do matrix multiplication
     if (mHat_k != NULL) {
         free(mHat_k);
     }
+
     mHat_k = (float*) malloc(n2 * sizeof(float));
     for (int i = 0; i < n2; i++) {
         mHat_k[i] = 0.0;
@@ -46,7 +48,7 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
             mHat_k[i] += invR[i * n2 + j] * cHat[j];
         }
     }
-
+    printf("mHat_k:\n");
     // g) compute residual = A * mHat_k - e_k
     // malloc space for residual
     if (residual != NULL) {
@@ -68,6 +70,7 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
             residual[i] -= 1.0;
         }
     }
+    printf("residual:\n");
 
     // compute the norm of the residual
     *residualNorm = 0.0;
