@@ -6,27 +6,33 @@ s = number of rho_j - the most profitable indices (set to 5) (could think of a s
 
 
 For every column m_k of M
-(a) Find initial sparsity J-round of m_k
-(b) Compute the row indices I-round of the corresponding nonzero entries of A(i, J-rond)
-(c) Create Â = A(I-rond, J-rond) (all the rows not removed from the previous step)
-(d) Do QR decomposition of Â
-(e) Compute ĉ = Q^T ê_k
-(f) Compute ^m_k = R^-1 ĉ(1 : n_2)
-(g) set m_k(J-rond) = ^m_k
-(h) compute residual
+(a) Find initial sparsity J of m_k
+(b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
+(c) Create AHat = A(I, J)
+(d) Do QR decomposition of AHat
+(e) Compute the solution m_k for the least sqaures problem
+	(a) Compute cHat = Q^T * eHat_k
+	(b) Compute the inverse of R
+	(c) Compute mHat_k = R^-1 * cHat
+	(d) set m_k(J) = mHat_k
+(f) compute residual
 
 while residual > tolerance:
-	(a) Set L-rond set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
-	(b) Set J-rond_tilde to all new column indices of A that appear in all L-rond rows, but is not in J-rond yet
-	(c) For each j in J-rond_tilde compute:
+	(a) Set L set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
+	(b) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
+	(c) For each j in JTilde solve the minimisation problem by computing:
 		rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
-	(d) find the indices J_tilde corresponding to the smallest s elements of rho^2
+	(d) Find the indices JTilde corresponding to the smallest s elements of rho^2
 	(e) Determine the new indices I-rond_tilde
-	(f) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
+	(f) Make I U ITilde and J U JTilde
 	(g) Update the QR decomposition with:
-		A' (alg. 17)
-	(h) Compute ĉ = Q^T ê_k
-	(i) Compute ^m_k = R^-1 ĉ(1 : n_2)
-	(j) set m_k(J-rond) = ^m_k
+		(a) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
+		(b) Compute ABreve = Q^T * A(I, JTilde)
+		(c) Compute B1 = ABreve(0 : n2, 0 : n2)
+		(d) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
+		(f) Do QR decomposition of B2
+		(g) Compute Q_B and R_B from algorithm 17
+		(h) Solve the augmented LS problem for mHat_k
+		(i) Set M(J U JTilde) solve the LS problem = Pc * mHat_k
 	(k) compute the new residual
-		r = A' m_k - e_k
+	(l) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
