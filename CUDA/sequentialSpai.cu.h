@@ -20,8 +20,6 @@
 // s = number of rho_j - the most profitable indices
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printCSC(A);
-    // boolean for skipping to while loop
-    int skipToWhile = 0;
 
     // initialize cuBLAS
     cublasHandle_t cHandle;
@@ -39,6 +37,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     for (int k = 0; k < M->n; k++) {
 
         printf("\n\n------NEW COLUMN: %d------", k);
+        // boolean for skipping to while loop
+        int skipToWhile = 0;
 
         // a) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
