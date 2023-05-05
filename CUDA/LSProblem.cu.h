@@ -10,7 +10,7 @@
 #include "sequentialSpai.cu.h"
 #include "invBatched.cu.h"
 
-void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
+void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k, float** residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
     // e) compute cHat = Q^T * ê_k
     // make e_k and set index k to 1.0
     float* e_k = (float*) malloc(n1 * sizeof(float));
