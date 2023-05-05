@@ -124,6 +124,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
     qrBatched(cHandle, B2, n1Union - n2, n2Tilde, B2Q, B2R);
+    printf("after qrBatched in updateQR\n");
 
     free(AIJTilde);
     free(AITildeJTilde);
