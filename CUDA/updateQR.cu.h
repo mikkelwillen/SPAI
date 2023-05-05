@@ -32,7 +32,7 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
     // set upper right square to AIJTilde of size n1 x n2Tilde
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            ATilde[i*n2Union + n2 + j] = AIJTilde[i*n2Tilde + j];
+            ATilde[i*n2Union + n2 - 1 + j] = AIJTilde[i*n2Tilde + j];
         }
     }
 
