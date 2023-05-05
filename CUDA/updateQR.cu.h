@@ -79,22 +79,7 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
         printf("\n");
     }
 
-    // SKAL VI PERMUTERE???? ELLER ER DEN ALLEREDE PÅ DEN RIGTIGE FORM LIGESOM FIGUR 3.3 
-    // ATilde = Pr * ABar * Pc
-    // Compute Pr * ABar
-    // float* ATildeTemp = (float*)malloc(n1Union * n2Union * sizeof(float));
-    // for (int i = 0; i < n1Union; i++) {
-    //     for (int j = 0; j < n2Union; j++) {
-    //         ATildeTemp[i*n2Union + j] = 0;
-    //         for (int k = 0; k < n1Union; k++) {
-    //             ATildeTemp[i*n2Union + j] += Pr[i*n1Union + k] * ABar[k*n2Union + j];
-    //         }
-    //     }
-    // }
-
-
-
-    // ABreve = Q^T * AIJTilde (CHECK IF Q IS TRANSPOSED!!!)
+    // ABreve of size n2 x n2Tilde = Q^T * AIJTilde
     float* ABreve = (float*)malloc(n1 * n2Tilde * sizeof(float));
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
@@ -109,6 +94,28 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
             printf("%f ", ABreve[i*n2Tilde + j]);
+        }
+        printf("\n");
+    }
+
+    // B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
+    float* B2 = (float*)malloc((n1Union - n2Tilde) * n2Tilde * sizeof(float));
+    for (int i = 0; i < n1Union - n2Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            B2[i*n2Tilde + j] = ABreve[(n2Tilde + i)*n2Tilde + j];
+        }
+    }
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            B2[(n1Union - n2Tilde + i)*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
+        }
+    }
+
+    // print B2
+    printf("B2:\n");
+    for (int i = 0; i < n1Union - n2Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            printf("%f ", B2[i*n2Tilde + j]);
         }
         printf("\n");
     }
