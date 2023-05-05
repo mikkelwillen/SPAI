@@ -79,7 +79,7 @@ void* updateQR(CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITi
         printf("\n");
     }
 
-    // ABreve of size n2 x n2Tilde = Q^T * AIJTilde
+    // ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* ABreve = (float*)malloc(n1 * n2Tilde * sizeof(float));
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {

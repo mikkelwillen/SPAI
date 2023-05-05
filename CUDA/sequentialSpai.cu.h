@@ -124,6 +124,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         if (skipToWhile == 0) {
             qrBatched(cHandle, AHat, n1, n2, Q, R);
+        } else {
+            printf("skip qrBatched\n");
         }
         printf("after qrBatched\n");
 
@@ -168,6 +170,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         
         if (skipToWhile == 0) {
             invBatched(cHandle, R, n2, invR);
+        } else {
+            printf("skip invBatched\n");
         }
 
         // print invR
