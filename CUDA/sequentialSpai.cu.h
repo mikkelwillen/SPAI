@@ -229,7 +229,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // }
         // residualNorm = sqrt(residualNorm);
 
-        float* mHat_k;
+        float* mHat_k = NULL;
         float* residual;
         float residualNorm;        
 
