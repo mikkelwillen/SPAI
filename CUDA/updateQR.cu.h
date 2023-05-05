@@ -161,6 +161,16 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         firstMatrix[i*n1Union + i] = 1.0;
     }
 
+    // print firstMatrix
+    printf("firstMatrix:\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            printf("%f ", firstMatrix[i*n1Union + j]);
+        }
+        printf("\n");
+    }
+
+
     // make second matrix with identity in the upper left corner and B2Q in the lower right corner of size n1Union x n1Union
     float* secondMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
@@ -176,7 +186,15 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
             secondMatrix[i*n1Union + j] = B2Q[(i - n2)*n1Union + (j - n2)];
         }
     }
-
+    // print secondMatrix
+    printf("secondMatrix:\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            printf("%f ", secondMatrix[i*n1Union + j]);
+        }
+        printf("\n");
+    }
+    
     // compute newQ = firstMatrix * secondMatrix
     float* newQ = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
@@ -196,7 +214,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         }
         printf("\n");
     }
-    
+
 
     free(AIJTilde);
     free(AITildeJTilde);
