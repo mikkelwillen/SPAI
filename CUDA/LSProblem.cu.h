@@ -45,8 +45,9 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
     // realloc mHat_k to size n2 and do matrix multiplication
     if (mHat_k != NULL) {
         free(mHat_k);
+        printf("freeing mHat_k\n");
     }
-
+    printf("after possible free\n");
     mHat_k = (float*) malloc(n2 * sizeof(float));
     for (int i = 0; i < n2; i++) {
         mHat_k[i] = 0.0;
