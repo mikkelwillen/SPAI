@@ -36,6 +36,12 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
     invBatched(cHandle, R, n2, invR);
 
     printf("invR:\n");
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2; j++) {
+            printf("%f ", invR[i * n2 + j]);
+        }
+        printf("\n");
+    }
     // realloc mHat_k to size n2 and do matrix multiplication
     if (mHat_k != NULL) {
         free(mHat_k);
