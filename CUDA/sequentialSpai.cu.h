@@ -394,9 +394,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // print Q
             printf("\nQ before update: ");
-            for (int i = 0; i < n1Union; i++) {
-                for (int j = 0; j < n1Union; j++) {
-                    printf("%f ", Q[i * n1Union + j]);
+            for (int i = 0; i < n1; i++) {
+                for (int j = 0; j < n1; j++) {
+                    printf("%f ", Q[i * n1 + j]);
                 }
                 printf("\n");
             }
