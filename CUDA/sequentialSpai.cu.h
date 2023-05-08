@@ -139,7 +139,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* residual = (float*) malloc(A->m * sizeof(float));
         float residualNorm;        
 
-        LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
+        LSProblem(cHandle, A, Q, R, &mHat_k, residual, I, J, n1, n2, k, &residualNorm);
 
         printf("\nnorm: %f", residualNorm);
         printf("\n");
@@ -400,7 +400,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
                 printf("\n");
             }
-            
+
             // g) Update the QR factorization of A(IUnion, JUnion)
             updateQR(cHandle, A, &AHat, &Q, &R, I, J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
 
