@@ -88,6 +88,7 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
     for (int i = 0; i < A->m; i++) {
         printf("%f ", residual[i]);
     }
+    printf("\n");
 
     // compute the norm of the residual
     *residualNorm = 0.0;

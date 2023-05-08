@@ -323,12 +323,15 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
 
     // set Q to newQ
     free(*Q);
+    printf("after free\n");
     *Q = (float*) malloc(n1Union * n1Union * sizeof(float));
+    printf("after malloc\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
             *Q[i*n1Union + j] = newQ[i*n1Union + j];
         }
     }
+    printf("after set Q\n");
 
     // set R to newR
     free(*R);
