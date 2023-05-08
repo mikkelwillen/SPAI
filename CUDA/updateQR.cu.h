@@ -303,7 +303,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     LSProblem(cHandle, A, newQ, newR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
     
     float* tempM_k = (float*) malloc(n2Union * sizeof(float));
-    tempM_k = memcpy(tempM_k, (*m_kOut), n2Union * sizeof(float));
+    tempM_k = memcpy(tempM_k, m_kOut, n2Union * sizeof(float));
 
     free(*m_kOut);
     (*m_kOut) = (float*) malloc(n2Union * sizeof(float));
