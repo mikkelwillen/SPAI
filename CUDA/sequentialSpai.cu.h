@@ -139,7 +139,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* residual = (float*) malloc(A->m * sizeof(float));
         float residualNorm;        
 
-        LSProblem(cHandle, A, Q, R, mHat_k, &residual, I, J, n1, n2, k, &residualNorm);
+        LSProblem(cHandle, A, Q, R, mHat_k, residual, I, J, n1, n2, k, &residualNorm);
 
         printf("\nnorm: %f", residualNorm);
         printf("\n");

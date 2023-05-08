@@ -23,7 +23,7 @@
 // n2 is the number of columns of AHat
 // k is the index of the column of mHat
 // residualNorm is the norm of the residual vector
-void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_k, float** residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
+void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
     // e) compute cHat = Q^T * ê_k
     // make e_k and set index k to 1.0
     float* e_k = (float*) malloc(n1 * sizeof(float));
@@ -72,27 +72,27 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float* mHat_
     // malloc space for residual
     // do matrix multiplication
     for (int i = 0; i < A->m; i++) {
-        *residual[i] = 0.0;
+        residual[i] = 0.0;
         for (int j = 0; j < n2; j++) {
             for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
                 if (i == A->flatRowIndex[h]) {
-                    *residual[i] += A->flatData[h] * mHat_k[j];
+                    residual[i] += A->flatData[h] * mHat_k[j];
                 }
             }
         }
         if (i == k) {
-            *residual[i] -= 1.0;
+            residual[i] -= 1.0;
         }
     }
     printf("residual:\n");
     for (int i = 0; i < A->m; i++) {
-        printf("%f ", *residual[i]);
+        printf("%f ", residual[i]);
     }
 
     // compute the norm of the residual
     *residualNorm = 0.0;
     for (int i = 0; i < A->m; i++) {
-        *residualNorm += *residual[i] * *residual[i];
+        *residualNorm += residual[i] * residual[i];
     }
     *residualNorm = sqrt(*residualNorm);
 }
