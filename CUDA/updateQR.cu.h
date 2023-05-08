@@ -11,7 +11,7 @@
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
 
-void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float* m_kOut, float* residual, float* residualNorm, int k) {
+void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -30,7 +30,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     printf("Q:\n");
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            printf("%f ", Q[i*n1 + j]);
+            printf("%f ", *Q[i*n1 + j]);
         }
         printf("\n");
     }
@@ -45,7 +45,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     // set upper left square to AHat of size n1 x n2
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
-            ATilde[i*n2Union + j] = AHat[i*n2 + j];
+            ATilde[i*n2Union + j] = *AHat[i*n2 + j];
         }
     }
 
@@ -105,7 +105,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         for (int j = 0; j < n2Tilde; j++) {
             ABreve[i*n2Tilde + j] = 0;
             for (int k = 0; k < n1; k++) {
-                ABreve[i*n2Tilde + j] += Q[k*n1 + i] * AIJTilde[k*n2Tilde + j];
+                ABreve[i*n2Tilde + j] += *Q[k*n1 + i] * AIJTilde[k*n2Tilde + j];
             }
         }
     }
@@ -193,7 +193,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     }
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            firstMatrix[i*n1Union + j] = Q[i*n1 + j];
+            firstMatrix[i*n1Union + j] = *Q[i*n1 + j];
         }
     }
     for (int i = 0; i < n1Tilde; i++) {
@@ -265,7 +265,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
 
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
-            newR[i*n2Union + j] = R[i*n2 + j];
+            newR[i*n2Union + j] = *R[i*n2 + j];
         }
     }
 
@@ -301,41 +301,41 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
 
     // compute the new solution m_k for the least squares problem
     float* tempM_k = (float*) malloc(n2Union * sizeof(float));
-    LSProblem(cHandle, A, newQ, newR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
+    LSProblem(cHandle, A, newQ, newR, *m_kOut, &residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
 
-    free(m_kOut);
-    m_kOut = (float*) malloc(n2Union * sizeof(float));
+    free(*m_kOut);
+    *m_kOut = (float*) malloc(n2Union * sizeof(float));
 
     // compute m_KOut = Pc * tempM_k
     for (int i = 0; i < n2Union; i++) {
-        m_kOut[i] = 0.0;
+        *m_kOut[i] = 0.0;
         for (int j = 0; j < n2Union; j++) {
-            m_kOut[i] += Pc[i * n2Union + j] * tempM_k[j];
+            *m_kOut[i] += Pc[i * n2Union + j] * tempM_k[j];
         }
     }
 
     // print m_kOut
     printf("m_kOut:\n");
     for (int i = 0; i < n1Union; i++) {
-        printf("%f ", m_kOut[i]);
+        printf("%f ", *m_kOut[i]);
     }
     printf("\n");
 
     // set Q to newQ
-    free(Q);
-    Q = (float*) malloc(n1Union * n1Union * sizeof(float));
+    free(*Q);
+    *Q = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            Q[i*n1Union + j] = newQ[i*n1Union + j];
+            *Q[i*n1Union + j] = newQ[i*n1Union + j];
         }
     }
 
     // set R to newR
-    free(R);
-    R = (float*) malloc(n1Union * n2Union * sizeof(float));
+    free(*R);
+    *R = (float*) malloc(n1Union * n2Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            R[i*n2Union + j] = newR[i*n2Union + j];
+            *R[i*n2Union + j] = newR[i*n2Union + j];
         }
     }
 
@@ -343,20 +343,20 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     printf("Q after newQ:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            printf("%f ", Q[i*n1Union + j]);
+            printf("%f ", *Q[i*n1Union + j]);
         }
         printf("\n");
     }
 
 
     // set AHat to Q * R
-    free(AHat);
-    AHat = (float*) malloc(n1Union * n2Union * sizeof(float));
+    free(*AHat);
+    *AHat = (float*) malloc(n1Union * n2Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            AHat[i*n2Union + j] = 0.0;
+            *AHat[i*n2Union + j] = 0.0;
             for (int k = 0; k < n1Union; k++) {
-                AHat[i*n2Union + j] += Q[i*n1Union + k] * R[k*n2Union + j];
+                *AHat[i*n2Union + j] += *Q[i*n1Union + k] * *R[k*n2Union + j];
             }
         }
     }
