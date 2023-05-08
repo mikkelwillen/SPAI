@@ -17,6 +17,16 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     // create AIJTilde
     float* AIJTilde = CSCToDense(A, I, JTilde, n1, n2Tilde);
 
+    // print AIJTilde
+    printf("AIJTilde:\n");
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            printf("%f ", AIJTilde[i*n2Tilde + j]);
+        }
+        printf("\n");
+    }
+    
+
     // create AITildeJTilde of size n1Tilde x n2Tilde
     float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
 
@@ -162,7 +172,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
         }
         printf("\n");
     }
-    
+
     
     
     // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
