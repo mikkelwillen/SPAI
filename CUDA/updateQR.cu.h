@@ -328,7 +328,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     printf("after malloc\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            *Q[i*n1Union + j] = newQ[i*n1Union + j];
+            *Q[i * n1Union + j] = newQ[i * n1Union + j];
         }
     }
     printf("after set Q\n");
@@ -338,7 +338,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     *R = (float*) malloc(n1Union * n2Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            *R[i*n2Union + j] = newR[i*n2Union + j];
+            *R[i * n2Union + j] = newR[i * n2Union + j];
         }
     }
 
@@ -346,7 +346,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     printf("Q after newQ:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            printf("%f ", *Q[i*n1Union + j]);
+            printf("%f ", *Q[i * n1Union + j]);
         }
         printf("\n");
     }
