@@ -144,6 +144,25 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
     qrBatched(cHandle, B2, n1Union - n2, n2Tilde, B2Q, B2R);
+
+    // print B2Q
+    printf("B2Q:\n");
+    for (int i = 0; i < n1Union - n2; i++) {
+        for (int j = 0; j < n1Union - n2; j++) {
+            printf("%f ", B2Q[i*(n1Union - n2) + j]);
+        }
+        printf("\n");
+    }
+
+    // print B2R
+    printf("B2R:\n");
+    for (int i = 0; i < n1Union - n2; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            printf("%f ", B2R[i*n2Tilde + j]);
+        }
+        printf("\n");
+    }
+    
     
     
     // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
