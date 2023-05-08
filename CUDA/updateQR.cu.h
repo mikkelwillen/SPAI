@@ -315,20 +315,35 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float* AHat, float* Q, float* R, 
 
     // free memory
     free(AIJTilde);
+    printf("freed AIJTilde\n");
     free(AITildeJTilde);
+    printf("freed AITildeJTilde\n");
     free(ABreve);
+    printf("freed ABreve\n");
     free(ATilde);
+    printf("freed ATilde\n");
     free(Pr);
+    printf("freed Pr\n");
     free(Pc);
+    printf("freed Pc\n");
     free(B1);
+    printf("freed B1\n");
     free(B2);
+    printf("freed B2\n");
     free(B2Q);
+    printf("freed B2Q\n");
     free(B2R);
+    printf("freed B2R\n");
     free(firstMatrix);
+    printf("freed firstMatrix\n");
     free(secondMatrix);
+    printf("freed secondMatrix\n");
     free(newQ);
+    printf("freed newQ\n");
     free(newR);
+    printf("freed newR\n");
     free(tempM_k);
+    printf("freed tempM_k\n");
 
     printf("done with updateQR\n");
 }
