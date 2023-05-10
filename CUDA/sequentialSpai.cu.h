@@ -485,4 +485,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     return M;
 }
 
+// idéer:
+// - få batched funktionerne til at returnere 0 ved succes og 1 ved fejl
+// - brug denne retur værdi til at styre control flowet i resten af koden
+// - vi skal muligvis have sat en masse variabler op i toppen af funktionerne, så vi har adgang til dem i hele funktionen, og så opdatere dem, hvis vi er i det rigtige control flow
+// - måske skal vi også have lavet noget mere af vores kode om til funktioner, som vi også kan have returnere 0 ved succes og 1 ved fejl
+
 #endif

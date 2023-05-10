@@ -401,7 +401,4 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     printf("done with updateQR\n");
 }
 
-
-
-
 #endif
