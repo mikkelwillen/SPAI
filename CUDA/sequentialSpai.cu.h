@@ -29,6 +29,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cusolver initialization failed\n");
         printf("cusolver error: %d\n", stat);
+        return NULL;
     } 
 
     // initialize M and set to diagonal
@@ -38,13 +39,24 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     for (int k = 0; k < M->n; k++) {
 
         printf("\n\n------NEW COLUMN: %d------", k);
-        // boolean for skipping to while loop
-        int skipToWhile = 0;
+        // variables
+        int n1 = 0;
+        int n2 = 0;
+        int iteration = 0;
+        float residualNorm;
+
+        int* J;
+        int* I;
+        float* AHat;
+        float* Q;
+        float* R;
+        float* mHat_k;
+        float* residual;
 
         // a) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
-        int n2 = M->offset[k + 1] - M->offset[k];
-        int* J = (int*) malloc(sizeof(int) * n2);
+        n2 = M->offset[k + 1] - M->offset[k];
+        J = (int*) malloc(sizeof(int) * n2);
 
         // iterate through row indeces from offset[k] to offset[k + 1] and take all elements from the flatRowIndex
         int h = 0;
@@ -59,11 +71,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("%d ", J[i]);
         }
 
-        if (n2 == 0) {
-            skipToWhile = 1;
-            printf("\n\n------SKIP TO WHILE------\n");
-        }
-
         // // printJ
         // printf("\nJ: ");
         // for (int i = 0; i < n2; i++) {
@@ -72,12 +79,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-        int* I = (int*) malloc(sizeof(int) * A->m);
+        I = (int*) malloc(sizeof(int) * A->m);
         for (int i = 0; i < A->m; i++) {
             I[i] = -1;
         }
 
-        int n1 = 0;
+        n1 = 0;
         for (int j = 0; j < n2; j++) {
             for (int i = A->offset[J[j]]; i < A->offset[J[j] + 1]; i++) {
                 int keep = 1;
@@ -93,11 +100,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
         }
 
-        if (n1 == 0) {
-            skipToWhile = 1;
-            printf("\n\n------SKIP TO WHILE------\n");
-        }
-
         // print I
         printf("\nI: ");
         for (int i = 0; i < n1; i++) {
@@ -107,7 +109,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // c) Create Â = A(I, J)
         // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. 
         // For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
-        float* AHat = CSCToDense(A, I, J, n1, n2);
+        AHat = CSCToDense(A, I, J, n1, n2);
 
         // print AHat
         printf("\nAhat:\n");
@@ -120,14 +122,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("\n");
 
         // d) do QR decomposition of AHat
-        float* Q = (float*) malloc(sizeof(float) * n1 * n1);
-        float* R = (float*) malloc(sizeof(float) * n1 * n2);
+        Q = (float*) malloc(sizeof(float) * n1 * n1);
+        R = (float*) malloc(sizeof(float) * n1 * n2);
 
-        if (skipToWhile == 0) {
-            qrBatched(cHandle, AHat, n1, n2, Q, R);
-        } else {
-            printf("skip qrBatched\n");
-        }
+        qrBatched(cHandle, AHat, n1, n2, Q, R);
         printf("after qrBatched\n");
 
         // overwrite AHat
@@ -135,17 +133,14 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         AHat = CSCToDense(A, I, J, n1, n2);
 
         // e) Compute the solution m_k for the least squares problem
-        float* mHat_k = (float*) malloc(n2 * sizeof(float));
-        float* residual = (float*) malloc(A->m * sizeof(float));
-        float residualNorm;        
+        mHat_k = (float*) malloc(n2 * sizeof(float));
+        residual = (float*) malloc(A->m * sizeof(float));        
 
         LSProblem(cHandle, A, Q, R, &mHat_k, residual, I, J, n1, n2, k, &residualNorm);
 
         printf("\nnorm: %f", residualNorm);
         printf("\n");
 
-        // counter of the iteration and check if there is something to be done in the while loop
-        int iteration = 0;
         int somethingToBeDone = 1;
 
         // while norm of residual > tolerance do
@@ -155,8 +150,27 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // a) Set L to the set of indices where r(l) != 0
             // count the numbers of nonzeros in residual
+
+            // variables
+            int n1Tilde = 0;
+            int n2Tilde = 0;
+            int n1Union = 0;
+            int n2Union = 0;
             int l = 0;
             int kNotInI = 0;
+            
+            int* L;
+            int* keepArray;
+            int* JTilde;
+            int* ITilde;
+            int* IUnion;
+            int* JUnion;
+            float* rhoSq;
+            int* smallestIndices;
+            int* smallestJTilde;
+            float* ITilde;
+            float* JTilde;
+
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0) {
                     l++;
@@ -178,7 +192,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             
             // malloc space for L and fill it with the indices
-            int* L = (int*) malloc(sizeof(int) * l);
+            L = (int*) malloc(sizeof(int) * l);
 
             int index = 0;
             for (int i = 0; i < A->m; i++) {
@@ -197,7 +211,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // b) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
             // check what indeces we should keep
-            int* keepArray = (int*) malloc(A->n * sizeof(int));
+            keepArray = (int*) malloc(A->n * sizeof(int));
             printf("after malloc\n");
             // set all to 0
             for (int i = 0; i < A->n; i++) {
@@ -233,7 +247,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("\n");
 
             // compute the length of JTilde
-            int n2Tilde = 0;
+            n2Tilde = 0;
             for (int i = 0; i < A->n; i++) {
                 if (keepArray[i] == 1) {
                     n2Tilde++;
@@ -241,7 +255,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
 
             // malloc space for JTilde
-            int* JTilde = (int*) malloc(sizeof(int) * n2Tilde);
+            JTilde = (int*) malloc(sizeof(int) * n2Tilde);
 
             // fill JTilde
             index = 0;
@@ -264,7 +278,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // c) for each j in JTilde, solve the minimization problem
             // Malloc space for rhoSq
-            float* rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
+            rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
             for (int i = 0; i < n2Tilde; i++) {
                 float rTAe_j = 0.0; // r^T * A(.,j)
                 for (int j = A->offset[JTilde[i]]; j < A->offset[JTilde[i] + 1]; j++) {
@@ -289,7 +303,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // d) find the s indeces of the column with the smallest rhoSq
             int newN2Tilde = MIN(s, n2Tilde);
-            int* smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
+            smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
             printf("\nnewN2Tilde: %d", newN2Tilde);
 
             for (int i = 0; i < newN2Tilde; i++) {
@@ -314,7 +328,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("\n");
 
-            int* smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
+            smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
             for (int i = 0; i < newN2Tilde; i++) {
                 smallestJTilde[i] = JTilde[smallestIndices[i]];
             }
@@ -328,9 +342,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // e) determine the new indices Î
             // Denote by ITilde the new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
             n2Tilde = newN2Tilde;
-            int n2Union = n2 + n2Tilde;
+            n2Union = n2 + n2Tilde;
             printf("n2Union: %d\n", n2Union);
-            int* JUnion = (int*) malloc(sizeof(int) * n2Union);
+            JUnion = (int*) malloc(sizeof(int) * n2Union);
             printf("after JUnion\n");
             for (int i = 0; i < n2; i++) {
                 JUnion[i] = J[i];
@@ -345,12 +359,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
             printf("\n");
 
-            int* ITilde = (int*) malloc(sizeof(int) * A->m);
+            ITilde = (int*) malloc(sizeof(int) * A->m);
             for (int i = 0; i < A->m; i++) {
                 ITilde[i] = -1;
             }
 
-            int n1Tilde = 0;
+            n1Tilde = 0;
             for (int j = 0; j < n2Union; j++) {
                 for (int i = A->offset[JUnion[j]]; i < A->offset[JUnion[j] + 1]; i++) {
                     int keep = 1;
@@ -378,8 +392,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // f) set IUnion and JUnion
             // make union of I and ITilde
-            int n1Union = n1 + n1Tilde;
-            int* IUnion = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
+            n1Union = n1 + n1Tilde;
+            IUnion = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
             for (int i = 0; i < n1; i++) {
                 IUnion[i] = I[i];
             }
