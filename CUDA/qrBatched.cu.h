@@ -96,9 +96,12 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     if (info != 0) {
         printf("Parameter error %d in QR decomposition\n", info);
     }
+    
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cublasSgeqrfBatched failed\n");
         printf("cublas error: %d\n", stat);
+
+        return stat;
     }
 
     // copy AHat and tau back to host
@@ -216,6 +219,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
         cudaFree(d_PointerAHat));
     gpuAssert(
         cudaFree(d_PointerTau));
+    
     return 0;
 }
 

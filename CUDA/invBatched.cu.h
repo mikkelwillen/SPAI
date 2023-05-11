@@ -79,6 +79,8 @@ int invBatched(cublasHandle_t cHandle, float* A, int n, float* AInv) {
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgetriBatched failed");
         printf("\ncublas error: %d\n", stat);
+        
+        return stat;
     }
 
     gpuAssert(

@@ -23,7 +23,7 @@
 // n2 is the number of columns of AHat
 // k is the index of the column of mHat
 // residualNorm is the norm of the residual vector
-void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
+int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
     // e) compute cHat = Q^T * ê_k
     // make e_k and set index k to 1.0
     float* e_k = (float*) malloc(n1 * sizeof(float));
@@ -46,7 +46,7 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat
     // f) compute mHat_k = R^-1 * cHat
     // make the inverse of R of size n2 x n2
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
-    invBatched(cHandle, R, n2, invR);
+    int invSuccess = invBatched(cHandle, R, n2, invR);
 
     printf("invR:\n");
     for (int i = 0; i < n2; i++) {
@@ -96,6 +96,8 @@ void* LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat
         *residualNorm += residual[i] * residual[i];
     }
     *residualNorm = sqrt(*residualNorm);
+
+    return 0;
 }
 
 #endif

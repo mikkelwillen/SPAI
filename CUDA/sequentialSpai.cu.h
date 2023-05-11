@@ -125,7 +125,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         Q = (float*) malloc(sizeof(float) * n1 * n1);
         R = (float*) malloc(sizeof(float) * n1 * n2);
 
-        qrBatched(cHandle, AHat, n1, n2, Q, R);
+        int qrSuccess = qrBatched(cHandle, AHat, n1, n2, Q, R);
         printf("after qrBatched\n");
 
         // overwrite AHat
