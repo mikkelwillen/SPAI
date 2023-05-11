@@ -168,8 +168,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             float* rhoSq;
             int* smallestIndices;
             int* smallestJTilde;
-            float* ITilde;
-            float* JTilde;
 
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0) {
