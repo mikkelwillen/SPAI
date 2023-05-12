@@ -39,6 +39,7 @@ int main() {
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
     struct CSC* cscC = createRandomCSC(10, 10, 0.2);
+    struct CSC* cscD = createCSC(C, n, n);
 
 
 
@@ -150,33 +151,33 @@ int main() {
     
 
     
-    struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
+    struct CSC* res = sequentialSpai(cscD, 0.01, 2, 1);
     printf("hallo?\n");
 
-    int* I = (int*) malloc(sizeof(int) * 10);
-    int* J = (int*) malloc(sizeof(int) * 10);
-    for (int i = 0; i < 10; i++) {
+    int* I = (int*) malloc(sizeof(int) * 3);
+    int* J = (int*) malloc(sizeof(int) * 3);
+    for (int i = 0; i < 3; i++) {
         I[i] = i;
         J[i] = i;
     }
-    float* CDense = CSCToDense(cscC, I, J, 10, 10);
-    float* resDense = CSCToDense(res, I, J, 10, 10);
+    float* CDense = CSCToDense(cscC, I, J, 3, 3);
+    float* resDense = CSCToDense(res, I, J, 3, 3);
     
     // multiply CDense with resDense
-    float* identity = (float*) malloc(sizeof(float) * 10 * 10);
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10;j++) {
-            identity[i * 10 + j] = 0.0;
-            for (int k = 0; k < 10; k++) {
-                identity[i * 10 + j] += CDense[i * 10 + k] * resDense[k * 10 + j];
+    float* identity = (float*) malloc(sizeof(float) * 3 * 3);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3;j++) {
+            identity[i * 3 + j] = 0.0;
+            for (int k = 0; k < 3; k++) {
+                identity[i * 3 + j] += CDense[i * 3 + k] * resDense[k * 3 + j];
             }
         }
     }
 
     printf("identity:\n");
-    for (int i = 0; i < 10; i++) {
-        for (int j = 0; j < 10;j++) {
-            printf("%f ", identity[i * 10 + j]);
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3;j++) {
+            printf("%f ", identity[i * 3 + j]);
         }
         printf("\n");
     }
