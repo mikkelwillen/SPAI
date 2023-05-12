@@ -39,6 +39,41 @@ int main() {
     struct CSC* cscA = createCSC(A, m, n);
     struct CSC* cscB = createCSC(B, m, n);
     struct CSC* cscC = createRandomCSC(10, 10, 0.2);
+
+    // test of multiply
+    CSC* cscD = multiplyCSC(cscB, cscC);
+    float* denseB = CSCToDense(cscB);
+    float* denseC = CSCToDense(cscC);
+    float* denseD = (float*) malloc(sizeof(float) * m * n);
+    // multiply denseB with denseC
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            denseD[i * n + j] = 0.0;
+            for (int k = 0; k < n; k++) {
+                denseD[i * n + j] += denseB[i * n + k] * denseC[k * n + j];
+            }
+        }
+    }
+
+    float* CSCDdense = CSCToDense(cscD);
+    // print denseD
+    printf("denseD:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", denseD[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print CSCDdense
+    printf("CSCDdense:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++){
+            printf("%f ", CSCDdense[i * n + j]);
+        }
+        printf("\n");
+    }
+    
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);

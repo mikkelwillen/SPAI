@@ -228,6 +228,43 @@ float* CSCToDense(CSC* csc, int* I, int* J, int n1, int n2) {
     return dense;
 }
 
+// Function for multiplying 2 CSC matrices
+// A = The first CSC matrix
+// B = The second CSC matrix
+CSC* multiplyCSC(CSC* A, CSC* B) {
+    CSC* C = (CSC*) malloc(sizeof(CSC));
+    C->m = A->m;
+    C->n = B->n;
+    C->countNonZero = 0;
+    C->offset = (int*) malloc(sizeof(int) * (C->n + 1));
+    C->offset[0] = 0;
+    C->flatData = (float*) malloc(sizeof(float) * (A->countNonZero + B->countNonZero));
+    C->flatRowIndex = (int*) malloc(sizeof(int) * (A->countNonZero + B->countNonZero));
+
+    for (int j = 0; j < C->n; j++) {
+        int countNonZero = 0;
+        for (int i = 0; i < C->m; i++) {
+            float sum = 0.0;
+            for (int l = A->offset[i]; l < A->offset[i + 1]; l++) {
+                for (int k = B->offset[j]; k < B->offset[j + 1]; k++) {
+                    if (A->flatRowIndex[l] == B->flatRowIndex[k]) {
+                        sum += A->flatData[l] * B->flatData[k];
+                    }
+                }
+            }
+            if (sum != 0.0) {
+                C->flatData[C->countNonZero] = sum;
+                C->flatRowIndex[C->countNonZero] = i;
+                C->countNonZero++;
+                countNonZero++;
+            }
+        }
+        C->offset[j + 1] = C->offset[j] + countNonZero;
+    }
+
+    return C;
+}
+
 // Prints all the elements of a CSC struct
 void printCSC(CSC* csc) {
     printf("\n\n--------Printing CSC data--------\n");
