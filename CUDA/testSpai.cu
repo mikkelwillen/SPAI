@@ -153,8 +153,14 @@ int main() {
     struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
     printf("hallo?\n");
 
-    float* CDense = CSCToDense(cscC, 10, 10);
-    float* resDense = CSCToDense(res, 10, 10);
+    int* I = (int*) malloc(sizeof(int) * 10);
+    int* J = (int*) malloc(sizeof(int) * 10);
+    for (int i = 0; i < 10; i++) {
+        I[i] = i;
+        J[i] = i;
+    }
+    float* CDense = CSCToDense(cscC, I, J, 10, 10);
+    float* resDense = CSCToDense(res, I, J, 10, 10);
     
     // multiply CDense with resDense
     float* identity = (float*) malloc(sizeof(float) * 10 * 10);
@@ -174,7 +180,7 @@ int main() {
         }
         printf("\n");
     }
-    
+
     // free memory
     freeCSC(cscA);
     freeCSC(cscB);
