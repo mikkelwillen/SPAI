@@ -25,7 +25,7 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
 // A is an array of batch matrices
 // n is the max number of rows and columns of the matrices
 // AInv is an array of batch inverse matrices
-int invBatched(cublasHandle_t cHandle, float** A, int n, float* AInv) {
+int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     printf("\nDo inversion of A\n");
 
     // add noice to A
@@ -102,7 +102,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float* AInv) {
 
     // copy result back to host
     gpuAssert(
-        cudaMemcpy(AInv, d_AInv, AMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy((*AInv), d_AInv, AMemSize, cudaMemcpyDeviceToHost));
 
     // free memory
     gpuAssert(
