@@ -34,6 +34,7 @@ int invBatched(cublasHandle_t cHandle, float* A, int n, float* AInv) {
             A[i * n * n + j * n + j] += 0.0000000001;
         }
     }
+    printf("after noice\n");
 
     // Set constants
     cublasStatus_t stat;
