@@ -40,40 +40,45 @@ int main() {
     struct CSC* cscB = createCSC(B, m, n);
     struct CSC* cscC = createRandomCSC(10, 10, 0.2);
 
-    // test of multiply
-    CSC* cscD = multiplyCSC(cscB, cscC);
-    float* denseB = CSCToDense(cscB);
-    float* denseC = CSCToDense(cscC);
-    float* denseD = (float*) malloc(sizeof(float) * m * n);
-    // multiply denseB with denseC
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++){
-            denseD[i * n + j] = 0.0;
-            for (int k = 0; k < n; k++) {
-                denseD[i * n + j] += denseB[i * n + k] * denseC[k * n + j];
-            }
-        }
-    }
 
-    float* CSCDdense = CSCToDense(cscD);
-    // print denseD
-    printf("denseD:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++){
-            printf("%f ", denseD[i * n + j]);
-        }
-        printf("\n");
-    }
+
+
+
+
+    // // test of multiply
+    // CSC* cscD = multiplyCSC(cscB, cscC);
+    // float* denseB = CSCToDense(cscB);
+    // float* denseC = CSCToDense(cscC);
+    // float* denseD = (float*) malloc(sizeof(float) * m * n);
+    // // multiply denseB with denseC
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++){
+    //         denseD[i * n + j] = 0.0;
+    //         for (int k = 0; k < n; k++) {
+    //             denseD[i * n + j] += denseB[i * n + k] * denseC[k * n + j];
+    //         }
+    //     }
+    // }
+
+    // float* CSCDdense = CSCToDense(cscD);
+    // // print denseD
+    // printf("denseD:\n");
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++){
+    //         printf("%f ", denseD[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // print CSCDdense
-    printf("CSCDdense:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n; j++){
-            printf("%f ", CSCDdense[i * n + j]);
-        }
-        printf("\n");
-    }
-    
+    // printf("CSCDdense:\n");
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n; j++){
+    //         printf("%f ", CSCDdense[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
+
     // struct CSC* cscDia = createDiagonalCSC(m, n);
     // printCSC(cscA);
     // printCSC(cscB);
@@ -148,6 +153,28 @@ int main() {
     struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
     printf("hallo?\n");
 
+    float* CDense = CSCToDense(cscC, 10, 10);
+    float* resDense = CSCToDense(res, 10, 10);
+    
+    // multiply CDense with resDense
+    float* identity = (float*) malloc(sizeof(float) * 10 * 10);
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10;j++) {
+            identity[i * 10 + j] = 0.0;
+            for (int k = 0; k < 10; k++) {
+                identity[i * 10 + j] += CDense[i * 10 + k] * resDense[k * 10 + j];
+            }
+        }
+    }
+
+    printf("identity:\n");
+    for (int i = 0; i < 10; i++) {
+        for (int j = 0; j < 10;j++) {
+            printf("%f ", identity[i * 10 + j]);
+        }
+        printf("\n");
+    }
+    
     // free memory
     freeCSC(cscA);
     freeCSC(cscB);
