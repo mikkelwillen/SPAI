@@ -42,7 +42,7 @@ __global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int 
 // n2 is the max number of columns of the matrices
 // Q is an array of batch Q matrices
 // R is an array of batch R matrices
-int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, float* R) {
+int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, float** R) {
     printf("\nDo QR decomposition of AHat\n");
 
     // Set constants
@@ -68,7 +68,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     gpuAssert(
         cudaMalloc((void**) &d_AHat, AHatMemSize));
     gpuAssert(
-        cudaMemcpy(d_AHat, AHat, AHatMemSize, cudaMemcpyHostToDevice));
+        cudaMemcpy(d_AHat, (*AHat), AHatMemSize, cudaMemcpyHostToDevice));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
     AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
@@ -106,7 +106,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
 
     // copy AHat and tau back to host
     gpuAssert(
-        cudaMemcpy(AHat, d_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
+        cudaMemcpy((*AHat), d_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
     gpuAssert(
         cudaMemcpy(h_tau, d_tau, tauMemSize, cudaMemcpyDeviceToHost));
     
@@ -114,9 +114,9 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n1; j++) {
             if (i >= j) {
-                R[i * n1 + j] = AHat[i * n1 + j];
+                (*R)[i * n1 + j] = (*AHat)[i * n1 + j];
             } else {
-                R[i * n1 + j] = 0;
+                (*R)[i * n1 + j] = 0;
             }
         }
     }
@@ -125,9 +125,9 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
     // set Q to I
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            Q[i * n1 + j] = 0;
+            (*Q)[i * n1 + j] = 0;
         }
-        Q[i * n1 + i] = 1;
+        (*Q)[i * n1 + i] = 1;
     }
 
     // do for loop
@@ -140,7 +140,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
             } else if (k == i) {
                 v[i] = 1;
             } else {
-                v[i] = AHat[k * n1 + i];
+                v[i] = (*AHat)[k * n1 + i];
             }
         }
 
@@ -149,7 +149,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
         for (int i = 0; i < n1; i++) {
             Qv[i] = 0;
             for (int j = 0; j < n1; j++) {
-                Qv[i] += Q[i * n1 + j] * v[j];
+                Qv[i] += (*Q)[i * n1 + j] * v[j];
             }
         }
 
@@ -163,7 +163,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
         // compute Q - Qv * v^T
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
-                Q[i * n1 + j] -= Qvvt[i * n1 + j];
+                (*Q)[i * n1 + j] -= Qvvt[i * n1 + j];
             }
         }
     }
@@ -173,7 +173,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
         printf("R: \n");
         for (int j = 0; j < n1; j++) {
             for (int i = 0; i < n2; i++) {
-                printf("%f ", R[i * n1 + j]);
+                printf("%f ", (*R)[i * n1 + j]);
             }
             printf("\n");
         }
@@ -182,7 +182,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
         printf("Q: \n");
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
-                printf("%f ", Q[i * n1 + j]);
+                printf("%f ", (*Q)[i * n1 + j]);
             }
             printf("\n");
         }
@@ -201,7 +201,7 @@ int qrBatched(cublasHandle_t cHandle, float* AHat, int n1, int n2, float* Q, flo
             printf("AHat %d:\n", i);
             for (int j = 0; j < n1; j++) {
                 for (int k = 0; k < n2; k++) {
-                    printf("%f ", AHat[i * n1 * n2 + j * n2 + k]);
+                    printf("%f ", (*AHat)[i * n1 * n2 + j * n2 + k]);
                 }
                 printf("\n");
             }

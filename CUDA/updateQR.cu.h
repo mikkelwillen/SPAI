@@ -162,7 +162,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     // compute QR factorization of B2
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
-    int qrSuccess = qrBatched(cHandle, B2, n1Union - n2, n2Tilde, B2Q, B2R);
+    int qrSuccess = qrBatched(cHandle, &B2, n1Union - n2, n2Tilde, &B2Q, &B2R);
 
     // print B2Q
     printf("B2Q:\n");
