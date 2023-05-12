@@ -29,6 +29,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("cusolver initialization failed\n");
         printf("cusolver error: %d\n", stat);
+
         return NULL;
     } 
 
@@ -37,13 +38,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
     // m_k = column in M
     for (int k = 0; k < M->n; k++) {
-
         printf("\n\n------NEW COLUMN: %d------", k);
+        
         // variables
         int n1 = 0;
         int n2 = 0;
         int iteration = 0;
-        float residualNorm;
+        float residualNorm = 0.0;
 
         int* J;
         int* I;
@@ -148,9 +149,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("\n\n------Iteration: %d------\n", iteration);
             iteration++;
 
-            // a) Set L to the set of indices where r(l) != 0
-            // count the numbers of nonzeros in residual
-
             // variables
             int n1Tilde = 0;
             int n2Tilde = 0;
@@ -169,6 +167,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             int* smallestIndices;
             int* smallestJTilde;
 
+            // a) Set L to the set of indices where r(l) != 0
+            // count the numbers of nonzeros in residual
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0) {
                     l++;
@@ -350,6 +350,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n2Tilde; i++) {
                 JUnion[n2 + i] = smallestJTilde[i];
             }
+
             // print JUnion
             printf("\nJUnion: ");
             for (int i = 0; i < n2Union; i++) {
@@ -377,11 +378,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     }
                 }
             }
+
             // print I
             printf("\nI: ");
             for (int i = 0; i < n1; i++) {
                 printf("%d ", I[i]);
             }
+
             // printf ITilde
             printf("\nITilde: ");
             for (int i = 0; i < n1Tilde; i++) {
@@ -398,6 +401,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n1Tilde; i++) {
                 IUnion[n1 + i] = ITilde[i];
             }
+
             // print IUnion
             printf("\nIUnion: ");
             for (int i = 0; i < n1Union; i++) {
@@ -472,6 +476,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         M = updateKthColumnCSC(M, mHat_k, k, J, n2);
         printCSC(M);
         printf("\nM after updateKthColumnCSC:\n");
+
         // free memory
         free(I);
         printf("I freed\n");

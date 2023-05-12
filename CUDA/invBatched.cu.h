@@ -28,6 +28,13 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
 int invBatched(cublasHandle_t cHandle, float* A, int n, float* AInv) {
     printf("\nDo inversion of A\n");
 
+    // add noice to A
+    for (int i = 0; i < BATCHSIZE; i++) {
+        for (int j = 0; i < n; j++) {
+            A[i * n * n + j * n + j] += 0.0000000001;
+        }
+    }
+
     // Set constants
     cublasStatus_t stat;
     int lda = n;
