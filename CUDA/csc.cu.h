@@ -130,7 +130,7 @@ CSC* createRandomCSC(int m, int n, float sparsity){
         for (int j = 0; j < n; j++) {
             float x = ((float) rand() / (float) (RAND_MAX));
             if (x < sparsity) {
-                float y = ((float) rand() / (float) (RAND_MAX)) * 100.0;
+                float y = ((float) rand() / (float) (RAND_MAX)) * 100.0 + (float) rand() / (float) (RAND_MAX);
                 M[i * n + j] = y;
             } else {
                 M[i * n + j] = 0.0;
