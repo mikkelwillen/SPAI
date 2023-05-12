@@ -31,7 +31,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float* AInv) {
     // add noice to A
     for (int i = 0; i < BATCHSIZE; i++) {
         for (int j = 0; i < n; j++) {
-            (*A)[i * n * n + j * n + j] += 0.0000000001;
+            (*A)[i * n * n + j * n + j] += 1.0e-10f;
         }
     }
     printf("after noice\n");
