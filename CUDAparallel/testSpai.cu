@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(10, 10, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
 
-        parallelSpai(cscA, 0.1, 5, s, 2)
+        parallelSpai(cscA, 0.1, 5, 1, 2);
     } else if (argc == 8) {
         // read args
         printf("hallo?\n");
