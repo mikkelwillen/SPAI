@@ -101,9 +101,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
 
         // malloc space
         gpuAssert(
-            cudaMalloc((void**) &d_I, batchsize * sizeof(float*)));
+            cudaMalloc((void**) &d_I, batchsize * sizeof(int*)));
         gpuAssert(
-            cudaMalloc((void**) &d_J, batchsize * sizeof(float*)));
+            cudaMalloc((void**) &d_J, batchsize * sizeof(int*)));
         gpuAssert(
             cudaMalloc((void**) &d_n1, batchsize * sizeof(int)));
         gpuAssert(
