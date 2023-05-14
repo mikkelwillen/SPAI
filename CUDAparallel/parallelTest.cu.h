@@ -7,9 +7,9 @@
 #include <math.h>
 #include "csc.cu.h"
 #include "constants.cu.h"
-#include "sequentialSpai.cu.h"
+#include "parallelSpai.cu.h"
 
-int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
+int parallelTest(CSC* A, float tolerance, int maxIteration, int s) {
 
     double gigaBytesPerSec;
     unsigned long int elapsed;
@@ -19,7 +19,7 @@ int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            sequentialSpai(A, tolerance, maxIteration, s);
+            parallelSpai(A, tolerance, maxIteration, s);
         }
         
         cudaDeviceSynchronize();

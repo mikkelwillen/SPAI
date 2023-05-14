@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "csc.cu.h"
 #include "constants.cu.h"
-#include "sequentialSpai.cu.h"
-#include "sequentialTest.cu.h"
+#include "parallelSpai.cu.h"
+#include "parallelTest.cu.h"
 #include "qrBatched.cu.h"
 #include "invBatched.cu.h"
 #include "permutation.cu.h"
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
         
     
         
-        struct CSC* res = sequentialSpai(cscD, 0.01, 2, 1);
+        struct CSC* res = parallelSpai(cscD, 0.01, 2, 1);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * 3);
@@ -235,7 +235,7 @@ int main(int argc, char** argv) {
         for (int i = 0; i < numberOfTests; i++) {
             CSC* csc = createRandomCSC(sizeOfMatrix, sizeOfMatrix, sparsity);
 
-            sequentialTest(csc, tolerance, maxIterations, s);
+            parallelTest(csc, tolerance, maxIterations, s);
         }
     }
 
