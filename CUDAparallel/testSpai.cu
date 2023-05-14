@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
         struct CSC* cscB = createCSC(B, m, n);
         struct CSC* cscC = createRandomCSC(10, 10, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
-    } else if (argc == 7) {
+    } else if (argc == 8) {
         // read args
         printf("hallo?\n");
         int sizeOfMatrix = atoi(argv[1]);
@@ -50,6 +50,7 @@ int main(int argc, char** argv) {
         float tolerance = atof(argv[4]);
         int maxIterations = atoi(argv[5]);
         int s = atoi(argv[6]);
+        int batchsize = atoi(argv[7]);
 
         printf("sizeOfMatrix: %d\n", sizeOfMatrix);
         printf("numberOfTests: %d\n", numberOfTests);
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
         for (int i = 0; i < numberOfTests; i++) {
             CSC* csc = createRandomCSC(sizeOfMatrix, sizeOfMatrix, sparsity);
 
-            parallelTest(csc, tolerance, maxIterations, s);
+            parallelTest(csc, tolerance, maxIterations, s, batchsize);
         }
     }
 

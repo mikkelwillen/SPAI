@@ -9,7 +9,7 @@
 #include "constants.cu.h"
 #include "parallelSpai.cu.h"
 
-int parallelTest(CSC* A, float tolerance, int maxIteration, int s) {
+int parallelTest(CSC* A, float tolerance, int maxIteration, int s, int batchsize) {
 
     double gigaBytesPerSec;
     unsigned long int elapsed;
@@ -19,7 +19,7 @@ int parallelTest(CSC* A, float tolerance, int maxIteration, int s) {
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            parallelSpai(A, tolerance, maxIteration, s);
+            parallelSpai(A, tolerance, maxIteration, s, batchsize);
         }
         
         cudaDeviceSynchronize();
