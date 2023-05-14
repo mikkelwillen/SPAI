@@ -18,7 +18,7 @@
 // d_I = device pointer to I
 // d_J = device pointer to J
 // 
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, float** d_I, float** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
     int tid = batchnumber * batchsize + blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int n2 = d_M->offset[tid + 1] - d_M->offset[tid];
@@ -121,7 +121,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
             printf("%f ", n2[j]);
         }
         printf("\n");
-        
+
     }
 }
 
