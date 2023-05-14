@@ -22,7 +22,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, float** d_I, float** d_J, int* 
     int tid = batchnumber * batchsize + blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int n2 = d_M->offset[tid + 1] - d_M->offset[tid];
-        int* J = (int*) malloc(n2 * sizeof(int));
+        float* J = (int*) malloc(n2 * sizeof(int));
 
         // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
         int h = 0;
@@ -32,7 +32,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, float** d_I, float** d_J, int* 
         }
 
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-        int* I = (int*) malloc(d_A->m * sizeof(int));
+        float* I = (int*) malloc(d_A->m * sizeof(int));
         for (int i = 0; i < d_A->m; i++) {
             I[i] = -1;
         }
