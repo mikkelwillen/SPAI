@@ -85,10 +85,12 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
 
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
-
+    printf("after m");
     // copy A to device
     CSC* d_A = copyCSCFromHostToDevice(A);
+    printf("after d_A");
     CSC* d_M = copyCSCFromHostToDevice(M);
+    printf("after d_M");
     
     // compute the batchnumber 
     int batchnumber = (A->n + batchsize - 1) / batchsize;
