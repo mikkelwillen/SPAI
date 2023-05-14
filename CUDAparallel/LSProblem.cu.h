@@ -7,7 +7,7 @@
 #include <math.h>
 #include "csc.cu.h"
 #include "constants.cu.h"
-#include "sequentialSpai.cu.h"
+#include "parallelSpai.cu.h"
 #include "invBatched.cu.h"
 
 // Function for computing the least squares problem
