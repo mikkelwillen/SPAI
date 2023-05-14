@@ -267,9 +267,10 @@ CSC* copyCSCFromHostToDevice(CSC* A) {
 
     gpuAssert(
         cudaMalloc((void**) &d_A, sizeof(CSC)));
+    printf("malloc\n");
     gpuAssert(
         cudaMemcpy(d_A, A, sizeof(CSC), cudaMemcpyHostToDevice));
-
+    printf("copy\n");
     gpuAssert(
         cudaMalloc((void**) &d_A->offset, sizeof(int) * (A->n + 1)));
     gpuAssert(
