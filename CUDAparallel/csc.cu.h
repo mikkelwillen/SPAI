@@ -261,8 +261,9 @@ CSC* multiplyCSC(CSC* A, CSC* B) {
 // A = The CSC matrix to copy
 // returns a pointer to the copied CSC matrix
 CSC* copyCSCFromHostToDevice(CSC* A) {
-    CSC* d_A = (CSC*) malloc(sizeof(CSC));
-
+    CSC* d_A;
+    
+    cudaMalloc((void**) &d_A, sizeof(CSC));
     cudaMemcpy(d_A, A, sizeof(CSC), cudaMemcpyHostToDevice);
 
     cudaMalloc((void**) &d_A->offset, sizeof(int) * (A->n + 1));
@@ -318,7 +319,7 @@ void freeCSC(CSC* csc) {
 // Prints all the elements of a CSC struct
 void printCSC(CSC* csc) {
     printf("\n\n--------Printing CSC data--------\n");
-    
+
     printf("csc->m: %d\n", csc->m);
     printf("csc->n: %d\n", csc->n);
     printf("csc->countNonZero: %d\n", csc->countNonZero);
