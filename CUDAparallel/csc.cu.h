@@ -20,14 +20,6 @@ typedef struct CSC {
     int* flatRowIndex;
 } CSC;
 
-// Frees all the elements of a CSC struct
-// csc = The CSC struct to be freed
-void freeCSC(CSC* csc) {
-    free(csc->offset);
-    free(csc->flatData);
-    free(csc->flatRowIndex);
-}
-
 // Function for creating a compressed sparse column matrix
 // A = Dense matrix
 // m = number of rows
@@ -265,22 +257,84 @@ CSC* multiplyCSC(CSC* A, CSC* B) {
     return C;
 }
 
+// function for copying a CSC matrix from host to device memory
+// A = The CSC matrix to copy
+// returns a pointer to the copied CSC matrix
+CSC* copyCSCFromHostToDevice(CSC* A) {
+    CSC* d_A = (CSC*) malloc(sizeof(CSC));
+
+    cudaMemcpy(d_A, A, sizeof(CSC), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**) &d_A->offset, sizeof(int) * (A->n + 1));
+    cudaMemcpy(d_A->offset, A->offset, sizeof(int) * (A->n + 1), cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**) &d_A->flatData, sizeof(float) * A->countNonZero);
+    cudaMemcpy(d_A->flatData, A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyHostToDevice);
+
+    cudaMalloc((void**) &d_A->flatRowIndex, sizeof(int) * A->countNonZero);
+    cudaMemcpy(d_A->flatRowIndex, A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyHostToDevice);
+
+    return d_A;
+}
+
+// function for copying a CSC matrix from device to host memory
+// d_A = The CSC matrix to copy
+// returns a pointer to the copied CSC matrix
+CSC* copyCSCFromDeviceToHost(CSC* d_A) {
+    CSC* A = (CSC*) malloc(sizeof(CSC));
+
+    cudaMemcpy(A, d_A, sizeof(CSC), cudaMemcpyDeviceToHost);
+
+    A->offset = (int*) malloc(sizeof(int) * (A->n + 1));
+    cudaMemcpy(A->offset, d_A->offset, sizeof(int) * (A->n + 1), cudaMemcpyDeviceToHost);
+
+    A->flatData = (float*) malloc(sizeof(float) * A->countNonZero);
+    cudaMemcpy(A->flatData, d_A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyDeviceToHost);
+
+    A->flatRowIndex = (int*) malloc(sizeof(int) * A->countNonZero);
+    cudaMemcpy(A->flatRowIndex, d_A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyDeviceToHost);
+
+    return A;
+}
+
+// function for freeing the memory of a device CSC matrix
+// A = The CSC matrix to free
+void freeDeviceCSC(CSC* A) {
+    cudaFree(A->offset);
+    cudaFree(A->flatData);
+    cudaFree(A->flatRowIndex);
+    cudaFree(A);
+}
+
+// Frees all the elements of a CSC struct
+// csc = The CSC struct to be freed
+void freeCSC(CSC* csc) {
+    free(csc->offset);
+    free(csc->flatData);
+    free(csc->flatRowIndex);
+    free(csc);
+}
+
 // Prints all the elements of a CSC struct
 void printCSC(CSC* csc) {
     printf("\n\n--------Printing CSC data--------\n");
+    
     printf("csc->m: %d\n", csc->m);
     printf("csc->n: %d\n", csc->n);
     printf("csc->countNonZero: %d\n", csc->countNonZero);
+
     printf("csc->offset: ");
     for (int i = 0; i < csc->n + 1; i++){
         printf("%d ", csc->offset[i]);
     }
     printf("\n");
+
     printf("csc->flatData: ");
     for (int i = 0; i < csc->countNonZero; i++) {
         printf("%f ", csc->flatData[i]);
     }
     printf("\n");
+
     printf("csc->flatRowIndex: ");
     for (int i = 0; i < csc->countNonZero; i++) {
         printf("%d ", csc->flatRowIndex[i]);

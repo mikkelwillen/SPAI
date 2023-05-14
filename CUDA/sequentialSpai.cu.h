@@ -27,8 +27,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     cublasStatus_t stat;
     stat = cublasCreate(&cHandle);
     if (stat != CUBLAS_STATUS_SUCCESS) {
-        printf("cusolver initialization failed\n");
-        printf("cusolver error: %d\n", stat);
+        printf("cublas initialization failed\n");
+        printf("cublas error: %d\n", stat);
 
         return NULL;
     } 
