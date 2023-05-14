@@ -87,6 +87,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
     // copy A to device
+    // de her skal lige fixes
     CSC* d_A = copyCSCFromHostToDevice(A);
     printf("after d_A\n");
     CSC* d_M = copyCSCFromHostToDevice(M);
