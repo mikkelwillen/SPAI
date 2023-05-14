@@ -18,11 +18,11 @@
 // d_I = device pointer to I
 // d_J = device pointer to J
 // 
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, float** d_I, float** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
     int tid = batchnumber * batchsize + blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int n2 = d_M->offset[tid + 1] - d_M->offset[tid];
-        float* J = (int*) malloc(n2 * sizeof(int));
+        int* J = (int*) malloc(n2 * sizeof(int));
 
         // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
         int h = 0;
@@ -32,7 +32,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, float** d_I, float** d_J, int* 
         }
 
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-        float* I = (int*) malloc(d_A->m * sizeof(int));
+        int* I = (int*) malloc(d_A->m * sizeof(int));
         for (int i = 0; i < d_A->m; i++) {
             I[i] = -1;
         }
@@ -94,8 +94,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
     int batchnumber = (A->n + batchsize - 1) / batchsize;
 
     for (int i = 0; i < batchnumber; i++) {
-        float** d_I;
-        float** d_J;
+        int** d_I;
+        int** d_J;
         int* d_n1;
         int* d_n2;
 
@@ -111,7 +111,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         
         computeIandJ<<<1, batchsize>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize);
 
-        float* n2 = (float*) malloc(batchsize * sizeof(float));
+
+
+        int* n2 = (int*) malloc(batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(n2, d_n2, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         
