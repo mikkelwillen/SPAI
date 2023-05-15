@@ -82,19 +82,21 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 
         int* I = d_I[b];
         int* J = d_J[b];
-        // // print I
-        // printf("I: ");
-        // for (int k = 0; k < d_n1[b]; k++) {
-        //     printf("%d ", I[k]);
-        // } 
-        // printf("\n");
+        if (tid < 0) {
+            // print I
+            printf("I: ");
+            for (int k = 0; k < d_n1[b]; k++) {
+                printf("%d ", I[k]);
+            } 
+            printf("\n");
 
-        // print J
-        printf("J: ");
-        for (int k = 0; k < d_n2[b]; k++) {
-            printf("%d ", J[k]);
+            // print J
+            printf("J: ");
+            for (int k = 0; k < d_n2[b]; k++) {
+                printf("%d ", J[k]);
+            }
+            printf("\n");
         }
-        printf("\n");
 
         float* AHat = d_AHat[b];
 
@@ -102,6 +104,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
             AHat[i * maxn2 + j] = 0.0;
         }
         __syncthreads();
+
         int offset = d_A->offset[J[j]];
         int offsetDiff = d_A->offset[J[j] + 1] - offset;
         if (i < maxn1 && j < maxn2 && l < offsetDiff) {
