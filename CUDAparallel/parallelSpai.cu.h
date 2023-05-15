@@ -82,7 +82,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 
         int* I = d_I[b];
         int* J = d_J[b];
-        float* AHat = d_AHat[b];
+        float* AHat = d_AHat[b * maxn1 * maxn2];
 
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
