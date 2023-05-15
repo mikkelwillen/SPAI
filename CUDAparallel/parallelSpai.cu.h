@@ -15,9 +15,13 @@
 
 // kernel for computing I, J n1 and n2
 // d_A = device pointer to A
-// d_I = device pointer to I
-// d_J = device pointer to J
-// 
+// d_M = device pointer to M
+// d_I = device pointer pointer to I
+// d_J = device pointer pointer to J
+// d_n1 = device pointer to n1
+// d_n2 = device pointer to n2
+// batchnumber = the current batchnumber
+// batchsize = the size of the batch
 __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -61,6 +65,33 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
         d_J[tid] = &J[0];
         d_n1[tid] = n1;
         d_n2[tid] = n2;
+    }
+}
+
+// kernel for computing Ahat
+__global__ void computeAHat(CSC* d_A, float* d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1 * maxn2 * cscOffset) {
+        int b = tid / (maxn1 * maxn2 * cscOffset);
+        int i = (tid % (maxn1 * maxn2 * cscOffset)) / (maxn2 * cscOffset);
+        int j = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) / cscOffset;
+        int l = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) % cscOffset;
+
+        int n1 = d_n1[b];
+        int n2 = d_n2[b];
+
+        int* I = d_I[b];
+        float* AHat = d_AHat[b];
+
+        if (l == 0) {
+            AHat[i * maxn2 + j] = 0.0;
+        }
+
+        if (i < maxn1 && j < maxn2 && l < csc->offset[J[j] + 1] - csc->offset[J[j]]) {
+            if (I[i] == d_A->flatRowIndex[l]) {
+                AHat[i * maxn2 + j] += d_A->flatData[l];
+            }
+        }
     }
 }
 
@@ -115,12 +146,59 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         
         computeIandJ<<<1, batchsize>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize);
 
-
-
+        // find the max value of n1 and n2
+        int* n1 = (int*) malloc(batchsize * sizeof(float));
         int* n2 = (int*) malloc(batchsize * sizeof(float));
+
+        gpuAssert(
+            cudaMemcpy(n1, d_n1, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         gpuAssert(
             cudaMemcpy(n2, d_n2, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+
+        int maxn1 = 0;
+        int maxn2 = 0;
+        for (int j = 0; j < batchsize; j++) {
+            if (n1[j] > maxn1) {
+                maxn1 = n1[j];
+            }
+            if (n2[j] > maxn2) {
+                maxn2 = n2[j];
+            }
+        }
+
+        // create d_AHat
+        float** d_AHat;
+        gpuAssert(
+            cudaMalloc((void**) &d_AHat, batchsize * sizeof(float)));
+
+        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->n>>>(d_A, d_AHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
         
+        printf("--printing AHat--\n");
+        for (int b = 0; b < batchsize; b++) {
+            float* AHat = (float*) malloc(maxn1 * maxn2 * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(AHat, d_AHat[b], maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+            // print AHat[i]
+            printf("AHat[%d]: ", b);
+            for (int i = 0; i < maxn1; i++) {
+                for (int j = 0; j < maxn2; j++) {
+                    printf("%f ", AHat[i * maxn2 + j]);
+                }
+                printf("\n");
+            }
+        }
+
+        // initialize d_Q and d_R
+        float** d_Q;
+        float** d_R;
+
+        gpuAssert(
+            cudaMalloc((void**) &d_Q, batchsize * sizeof(float)));
+        gpuAssert(
+            cudaMalloc((void**) &d_R, batchsize * sizeof(float)));
+        
+
+
         // print n2
         printf("n2: ");
         for (int j = 0; j < batchsize; j++) {
