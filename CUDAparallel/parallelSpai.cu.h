@@ -123,7 +123,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         // print n2
         printf("n2: ");
         for (int j = 0; j < batchsize; j++) {
-            printf("%f ", n2[j]);
+            printf("%d ", n2[j]);
         }
         printf("\n");
 
