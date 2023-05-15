@@ -97,6 +97,13 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
     }
 }
 
+__global__ void deviceToDevicePointerKernel(float** d_PointerAHat, float* d_AHat, int batchsize, int maxn1, int maxn2) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        d_PointerAHat[tid] = &d_AHat[tid * maxn1 * maxn2];
+    }
+}
+
 // A = matrix we want to compute SPAI on
 // m, n = size of array
 // tolerance = tolerance
@@ -169,27 +176,20 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         }
 
         // create d_AHat
-        float** d_AHat;
-        gpuAssert(
-            cudaMalloc((void**) &d_AHat, batchsize * sizeof(float)));
+        float* d_AHat;
+        float** d_PointerAHat;
 
-        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->n>>>(d_A, d_AHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
+        gpuAssert(
+            cudaMalloc((void**) &d_AHat, batchsize * maxn1 * maxn2 * sizeof(float)));
+        gpuAssert(
+            cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float)));
+
+        deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
+
+        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->n>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
         
-        printf("--printing AHat--\n");
-        for (int b = 0; b < batchsize; b++) {
-            float* AHat = (float*) malloc(maxn1 * maxn2 * sizeof(float));
-            gpuAssert(
-                cudaMemcpy(AHat, d_AHat[b], maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
-            
-            // print AHat[i]
-            printf("AHat[%d]: ", b);
-            for (int i = 0; i < maxn1; i++) {
-                for (int j = 0; j < maxn2; j++) {
-                    printf("%f ", AHat[i * maxn2 + j]);
-                }
-                printf("\n");
-            }
-        }
+        float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+
 
         // initialize d_Q and d_R
         float** d_Q;
