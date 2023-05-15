@@ -20,12 +20,12 @@
 // d_J = device pointer pointer to J
 // d_n1 = device pointer to n1
 // d_n2 = device pointer to n2
-// batchnumber = the current batchnumber
+// currentBatch = the current batch
 // batchsize = the size of the batch
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int currentBatch, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
-        int index = batchnumber * batchsize + tid;
+        int index = currentBatch * batchsize + tid;
         int n2 = d_M->offset[index + 1] - d_M->offset[index];
         int* J = (int*) malloc(n2 * sizeof(int));
 
@@ -69,13 +69,24 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 }
 
 // kernel for computing Ahat
-__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
+// d_A = device pointer to A
+// d_AHat = device pointer pointer to AHat
+// d_I = device pointer pointer to I
+// d_J = device pointer pointer to J
+// d_n1 = device pointer to n1
+// d_n2 = device pointer to n2
+// maxn1 = the maximum value of n1
+// maxn2 = the maximum value of n2
+// maxOffset = the maximum value of offset
+// currentBatch = the current batch
+// batchsize = the size of the batch
+__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int currentBatch, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < batchsize * maxn1 * maxn2 * cscOffset) {
-        int b = (tid / (maxn1 * maxn2 * cscOffset));
-        int i = (tid % (maxn1 * maxn2 * cscOffset)) / (maxn2 * cscOffset);
-        int j = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) / cscOffset;
-        int l = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) % cscOffset;
+    if (tid < batchsize * maxn1 * maxn2 * maxOffset) {
+        int b = (tid / (maxn1 * maxn2 * maxOffset));
+        int i = (tid % (maxn1 * maxn2 * maxOffset)) / (maxn2 * maxOffset);
+        int j = ((tid % (maxn1 * maxn2 * maxOffset)) % (maxn2 * maxOffset)) / maxOffset;
+        int l = ((tid % (maxn1 * maxn2 * maxOffset)) % (maxn2 * maxOffset)) % maxOffset;
 
         int n1 = d_n1[b];
         int n2 = d_n2[b];
@@ -157,10 +168,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
     CSC* d_M = copyCSCFromHostToDevice(M);
     printf("after d_M\n");
     
-    // compute the batchnumber 
-    int batchnumber = (A->n + batchsize - 1) / batchsize;
+    // compute the currentBatch 
+    int currentBatch = (A->n + batchsize - 1) / batchsize;
 
-    for (int i = 0; i < batchnumber; i++) {
+    for (int i = 0; i < currentBatch; i++) {
         int** d_I;
         int** d_J;
         int* d_n1;
