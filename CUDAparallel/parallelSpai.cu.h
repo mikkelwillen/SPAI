@@ -189,7 +189,20 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         computeAHat<<<1, batchsize * maxn1 * maxn2 * A->n>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
         
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
+        printf("--printing h_AHat--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn1; j++) {
+                for (int k = 0; k < maxn2; k++) {
+                    printf("%f ", h_AHat[b * maxn1 * maxn2 + j * maxn2 + k]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
 
         // initialize d_Q and d_R
         float** d_Q;
