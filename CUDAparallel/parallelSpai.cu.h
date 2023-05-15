@@ -102,7 +102,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
             AHat[i * maxn2 + j] = 0.0;
         }
         __syncthreads();
-        int offset = d_A->offset[J[j] + 1] - d_A->offset[J[j]];
+        int offset = d_A->offset[J[j]];
         if (i < maxn1 && j < maxn2 && l < offset) {
             if (I[i] == d_A->flatRowIndex[l + offset]) {
                 AHat[i * maxn2 + j] += d_A->flatData[l + offset];
