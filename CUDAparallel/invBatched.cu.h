@@ -14,7 +14,7 @@
 // d_PointerA is an array of pointers to the start of each matrix in d_A
 // batch is the BATCHSIZE
 // n is the number of rows and columns in each matrix
-__global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int batch, int n) {
+__global__ void tdeviceToDevicePointerKernel(float** d_PointerA, float* d_A, int batch, int n) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < BATCHSIZE) {
         d_PointerA[tid] = &d_A[tid * n * n];
@@ -67,7 +67,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         cudaMalloc((void**) &d_AInv, AMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
+    tdeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
 
     // malloc space for info
     gpuAssert(

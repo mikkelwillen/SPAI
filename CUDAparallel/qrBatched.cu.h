@@ -255,7 +255,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     computeQtimesV <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
 
     // compute Qv * v^T
-    computeQvTimesVtransposed <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQv, d_PointerV, d_PointerQvvt, n1, n2, batchsize);
+    computeQvTimesVtransposed <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, n2, batchsize);
 
     // compute Q - Qvvt
     computeQminusQvvt <<<1, n1 * n1 * batchsize>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
