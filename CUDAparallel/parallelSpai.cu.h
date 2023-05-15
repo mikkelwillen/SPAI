@@ -108,7 +108,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         if (i < d_n1[b] && j < d_n2[b]) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
-            if (l < offsetDiff) {
+            if (l < offsetDiff + 1) {
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
                     AHat[i * d_n2[b] + j] += d_A->flatData[l + offset];
                 }
