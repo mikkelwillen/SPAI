@@ -96,16 +96,16 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         }
         printf("\n");
 
-        float* AHat = d_AHat[batchnumber * batchsize + b];
+        float* AHat = d_AHat[b];
 
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
         }
         __syncthreads();
-
-        if (i < maxn1 && j < maxn2 && l < d_A->offset[J[j] + 1] - d_A->offset[J[j]]) {
-            if (I[i] == d_A->flatRowIndex[l]) {
-                AHat[i * maxn2 + j] += d_A->flatData[l];
+        int offset = d_A->offset[J[j] + 1] - d_A->offset[J[j]];
+        if (i < maxn1 && j < maxn2 && l < offset) {
+            if (I[i] == d_A->flatRowIndex[l + offset]) {
+                AHat[i * maxn2 + j] += d_A->flatData[l + offset];
             }
         }
     }
