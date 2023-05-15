@@ -28,6 +28,18 @@ __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int*
     d_A->flatRowIndex = flatRowIndex;
 }
 
+__global__ void cscDataDeviceToHost(CSC* d_A, int* offset, float* flatData, int* flatRowIndex) {
+    offset = d_A->offset;
+    flatData = d_A->flatData;
+    flatRowIndex = d_A->flatRowIndex;
+}
+
+__global__ void cscDataFree(CSC* d_A) {
+    free(d_A->offset);
+    free(d_A->flatData);
+    free(d_A->flatRowIndex);
+}
+
 // Function for creating a compressed sparse column matrix
 // A = Dense matrix
 // m = number of rows
@@ -306,21 +318,27 @@ CSC* copyCSCFromHostToDevice(CSC* A) {
 // returns a pointer to the copied CSC matrix
 CSC* copyCSCFromDeviceToHost(CSC* d_A) {
     CSC* A = (CSC*) malloc(sizeof(CSC));
-
     gpuAssert(
         cudaMemcpy(A, d_A, sizeof(CSC), cudaMemcpyDeviceToHost));
 
-    A->offset = (int*) malloc(sizeof(int) * (A->n + 1));
+    int* offset = (int*) malloc(sizeof(int) * (A->n + 1));
+    float* flatData = (float*) malloc(sizeof(float) * A->countNonZero);
+    int* flatRowIndex = (int*) malloc(sizeof(int) * A->countNonZero);
+
     gpuAssert(
         cudaMemcpy(A->offset, d_A->offset, sizeof(int) * (A->n + 1), cudaMemcpyDeviceToHost));
 
-    A->flatData = (float*) malloc(sizeof(float) * A->countNonZero);
     gpuAssert(
         cudaMemcpy(A->flatData, d_A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyDeviceToHost));
 
-    A->flatRowIndex = (int*) malloc(sizeof(int) * A->countNonZero);
     gpuAssert(
         cudaMemcpy(A->flatRowIndex, d_A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyDeviceToHost));
+
+    cscDataDeviceToHost<<<1, 1>>>(d_A, offset, flatData, flatRowIndex);
+
+    A->offset = offset;
+    A->flatData = flatData;
+    A->flatRowIndex = flatRowIndex;
 
     return A;
 }
@@ -328,9 +346,7 @@ CSC* copyCSCFromDeviceToHost(CSC* d_A) {
 // function for freeing the memory of a device CSC matrix
 // A = The CSC matrix to free
 void freeDeviceCSC(CSC* A) {
-    cudaFree(A->offset);
-    cudaFree(A->flatData);
-    cudaFree(A->flatRowIndex);
+    cscDataFree<<<1, 1>>>(A);
     cudaFree(A);
 }
 
