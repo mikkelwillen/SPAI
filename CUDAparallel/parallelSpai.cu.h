@@ -112,6 +112,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
                 printf("offsetDiff: %d\n", offsetDiff);
             }
             if (l < offsetDiff) {
+                printf("går ind i if\n");
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
                     AHat[i * d_n2[b] + j] += d_A->flatData[l + offset];
                 }
