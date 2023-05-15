@@ -87,6 +87,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
         }
+        __syncthreads();
 
         if (i < maxn1 && j < maxn2 && l < d_A->offset[J[j] + 1] - d_A->offset[J[j]]) {
             if (I[i] == d_A->flatRowIndex[l]) {
@@ -179,6 +180,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
             float* AHat = (float*) malloc(maxn1 * maxn2 * sizeof(float));
             gpuAssert(
                 cudaMemcpy(AHat, d_AHat[b], maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+            
             // print AHat[i]
             printf("AHat[%d]: ", b);
             for (int i = 0; i < maxn1; i++) {
