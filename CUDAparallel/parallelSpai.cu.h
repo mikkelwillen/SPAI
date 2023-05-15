@@ -239,13 +239,15 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         }
 
         // initialize d_Q and d_R
-        float** d_Q;
-        float** d_R;
+        float* d_Q;
+        float* d_R;
 
         gpuAssert(
             cudaMalloc((void**) &d_Q, batchsize * sizeof(float)));
         gpuAssert(
             cudaMalloc((void**) &d_R, batchsize * sizeof(float)));
+
+        qrBatched(cHandle, d_PointerAHat, &d_Q, &d_R, batchsize, maxn1, maxn2);
         
 
     }

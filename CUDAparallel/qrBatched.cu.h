@@ -9,20 +9,54 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
-// lige nu fungere functionen kun med batchsize = 1. Det skal lige fixes, når vi laver paralleliseringen
-
-// Kernel to copy d_AHat to d_PointerAHat
-// d_AHat is an array of batch matrices
-// d_PointerAHat is an array of pointers to the start of each matrix in d_AHat
-// batch is the BATCHSIZE
-// n1 is the number of rows in each matrix
-// n2 is the number of columns in each matrix
-__global__ void AHatDeviceToDevicePointerKernel(float** d_AHat, float* h_AHat, int batch, int n1, int n2) {
+// kernel for copying R from AHat
+// d_PointerAHat = an array of pointers to the start of each AHat matrix in d_AHat
+// d_R = an array of pointers to the start of each R matrix in d_R
+// n1 = the max number of rows of the matrices
+// n2 = the max number of columns of the matrices
+// batchsize = the number of matrices in the batch
+__global__ void copyRFromAHat(float** d_PointerAHat, float** d_R, int n1, int n2, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < BATCHSIZE) {
-        d_AHat[tid] = &h_AHat[tid * n1 * n2];
+    if (tid < n1 * n2 * batchsize) {
+        int b = tid / (n1 * n2);
+        int i = (tid % (n1 * n2)) / n1;
+        int j = (tid % (n1 * n2)) % n1;
+
+        float* d_AHat = d_PointerAHat[b];
+
+        if (i >= j) {
+            (*d_R)[i * n1 + j] = d_AHat[i * n1 + j];
+        } else {
+            (*d_R)[tid] = 0.0;
+        }
     }
 }
+
+// kernel for setting Q to I
+// d_Q = an array of pointers to the start of each Q matrix in d_Q
+// n1 = the max number of rows of the matrices
+// batchsize = the number of matrices in the batch
+__global__ void setQToIdentity(float** d_PointerQ, int n1, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < n1 * n1 * batchsize) {
+        int b = tid / (n1 * n1);
+        int i = (tid % (n1 * n1)) / n1;
+        int j = (tid % (n1 * n1)) % n1;
+
+        float* d_Q = d_PointerQ[b];
+
+        if (i == j) {
+            d_Q[i * n1 + j] = 1.0;
+        } else {
+            d_Q[i * n1 + j] = 0.0;
+        }
+    }
+}
+
+// vi skal lave kernel/kernels for Kerr Campell algorithm 1
+
+
+
 
 // Kernel to copy d_tau to d_PointerTau
 // d_tau is an array of batch tau vectors
@@ -42,7 +76,7 @@ __global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int 
 // n2 is the max number of columns of the matrices
 // Q is an array of batch Q matrices
 // R is an array of batch R matrices
-int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, float** R) {
+int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_Q, float** d_R, int batchsize, int n1, int n2) {d
     printf("\nDo QR decomposition of AHat\n");
 
     // Set constants
@@ -50,36 +84,22 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     int lda = n1;
     int min = MIN(n1, n2);
     int ltau = MAX(1, min);
-    const size_t tauMemSize = ltau * BATCHSIZE * sizeof(float);
-    const size_t tauPointerMemSize = BATCHSIZE * sizeof(float*);
-    const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
-    const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
+    const size_t tauMemSize = ltau * batchsize * sizeof(float);
+    const size_t tauPointerMemSize = batchsize * sizeof(float*);
 
     // create input and output arrays
     float* h_tau = (float*) malloc(tauMemSize);
-    float* d_AHat;
     float* d_tau;
-    float** d_PointerAHat;
     float** d_PointerTau;
     int info;
     printf("after creating input and output arrays\n");
-
-    // malloc space and copy data for AHat
-    gpuAssert(
-        cudaMalloc((void**) &d_AHat, AHatMemSize));
-    gpuAssert(
-        cudaMemcpy(d_AHat, (*AHat), AHatMemSize, cudaMemcpyHostToDevice));
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
-    AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
-    printf("after malloc space and copy data for AHat\n");
     
     // malloc space for tau
     gpuAssert(
         cudaMalloc((void**) &d_tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerTau, tauPointerMemSize));
-    tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * ltau >>> (d_PointerTau, d_tau, BATCHSIZE, ltau);
+    tauDeviceToDevicePointerKernel <<< 1, batchsize * ltau >>> (d_PointerTau, d_tau, batchsize, ltau);
 
     // run QR decomposition from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas
@@ -90,7 +110,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
                                lda,
                                d_PointerTau,
                                &info,
-                               BATCHSIZE);
+                               batchsize);
     
     // error handling
     if (info != 0) {

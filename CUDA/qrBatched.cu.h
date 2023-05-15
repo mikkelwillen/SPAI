@@ -116,7 +116,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
             if (i >= j) {
                 (*R)[i * n1 + j] = (*AHat)[i * n1 + j];
             } else {
-                (*R)[i * n1 + j] = 0;
+                (*R)[i * n1 + j] = 0.0;
             }
         }
     }
@@ -125,9 +125,9 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     // set Q to I
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            (*Q)[i * n1 + j] = 0;
+            (*Q)[i * n1 + j] = 0.0;
         }
-        (*Q)[i * n1 + i] = 1;
+        (*Q)[i * n1 + i] = 1.0;
     }
 
     // do for loop
@@ -136,9 +136,9 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         float* v = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
             if (k > i) {
-                v[i] = 0;
+                v[i] = 0.0;
             } else if (k == i) {
-                v[i] = 1;
+                v[i] = 1.0;
             } else {
                 v[i] = (*AHat)[k * n1 + i];
             }
@@ -147,7 +147,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         // compute Q * v
         float* Qv = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
-            Qv[i] = 0;
+            Qv[i] = 0.0;
             for (int j = 0; j < n1; j++) {
                 Qv[i] += (*Q)[i * n1 + j] * v[j];
             }
