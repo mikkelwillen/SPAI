@@ -72,7 +72,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * cscOffset) {
-        int b = (tid / (maxn1 * maxn2 * cscOffset)) * batchsize;
+        int b = (tid / (maxn1 * maxn2 * cscOffset)):
         int i = (tid % (maxn1 * maxn2 * cscOffset)) / (maxn2 * cscOffset);
         int j = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) / cscOffset;
         int l = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) % cscOffset;
@@ -96,7 +96,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         }
         printf("\n");
 
-        float* AHat = d_AHat[b];
+        float* AHat = d_AHat[batchnumber * batchsize + b];
 
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
