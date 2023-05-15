@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda_runtime.h>
-#include <constants.cu.h>
+#include "constants.cu.h"
 
 // A struct representing a sparse matrix
 // int m;
@@ -21,6 +21,12 @@ typedef struct CSC {
     float* flatData;
     int* flatRowIndex;
 } CSC;
+
+__global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int* flatRowIndex) {
+    d_A->offset = offset;
+    d_A->flatData = flatData;
+    d_A->flatRowIndex = flatRowIndex;
+}
 
 // Function for creating a compressed sparse column matrix
 // A = Dense matrix
@@ -264,6 +270,9 @@ CSC* multiplyCSC(CSC* A, CSC* B) {
 // returns a pointer to the copied CSC matrix
 CSC* copyCSCFromHostToDevice(CSC* A) {
     CSC* d_A;
+    int* d_offset;
+    float* d_flatData;
+    int* d_flatRowIndex;
 
     gpuAssert(
         cudaMalloc((void**) &d_A, sizeof(CSC)));
@@ -271,20 +280,23 @@ CSC* copyCSCFromHostToDevice(CSC* A) {
     gpuAssert(
         cudaMemcpy(d_A, A, sizeof(CSC), cudaMemcpyHostToDevice));
     printf("copy\n");
-    gpuAssert(
-        cudaMalloc((void**) &d_A->offset, sizeof(int) * (A->n + 1)));
-    gpuAssert(
-        cudaMemcpy(d_A->offset, A->offset, sizeof(int) * (A->n + 1), cudaMemcpyHostToDevice));
 
     gpuAssert(
-        cudaMalloc((void**) &d_A->flatData, sizeof(float) * A->countNonZero));
+        cudaMalloc((void**) &d_offset, sizeof(int) * (A->n + 1)));
     gpuAssert(
-        cudaMemcpy(d_A->flatData, A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyHostToDevice));
+        cudaMemcpy(d_offset, A->offset, sizeof(int) * (A->n + 1), cudaMemcpyHostToDevice));
 
     gpuAssert(
-        cudaMalloc((void**) &d_A->flatRowIndex, sizeof(int) * A->countNonZero));
+        cudaMalloc((void**) &d_flatData, sizeof(float) * A->countNonZero));
     gpuAssert(
-        cudaMemcpy(d_A->flatRowIndex, A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyHostToDevice));
+        cudaMemcpy(d_flatData, A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyHostToDevice));
+
+    gpuAssert(
+        cudaMalloc((void**) &d_flatRowIndex, sizeof(int) * A->countNonZero));
+    gpuAssert(
+        cudaMemcpy(d_flatRowIndex, A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyHostToDevice));
+
+    cscDataHostToDevice<<<1, 1>>>(d_A, d_offset, d_flatData, d_flatRowIndex);
 
     return d_A;
 }
