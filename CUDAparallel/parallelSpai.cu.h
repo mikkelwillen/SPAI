@@ -82,7 +82,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 
         int* I = d_I[b];
         int* J = d_J[b];
-        if (tid < 0) {
+        if (tid == 0) {
             // print I
             printf("I: ");
             for (int k = 0; k < d_n1[b]; k++) {
