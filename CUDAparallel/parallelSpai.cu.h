@@ -72,7 +72,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * cscOffset) {
-        int b = tid / (maxn1 * maxn2 * cscOffset);
+        int b = (tid / (maxn1 * maxn2 * cscOffset)) * batchsize;
         int i = (tid % (maxn1 * maxn2 * cscOffset)) / (maxn2 * cscOffset);
         int j = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) / cscOffset;
         int l = ((tid % (maxn1 * maxn2 * cscOffset)) % (maxn2 * cscOffset)) % cscOffset;
@@ -111,11 +111,10 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
     }
 }
 
-__global__ void deviceToDevicePointerKernel(float** d_PointerAHat, float* d_AHat, int batchsize, int batchnumber, int maxn1, int maxn2) {
+__global__ void deviceToDevicePointerKernel(float** d_PointerAHat, float* d_AHat, int batchsize, int maxn1, int maxn2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
-        int index = tid + batchnumber;
-        d_PointerAHat[index] = &d_AHat[index * maxn1 * maxn2];
+        d_PointerAHat[tid] = &d_AHat[tid * maxn1 * maxn2];
     }
 }
 
@@ -199,7 +198,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         gpuAssert(
             cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float*)));
 
-        deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, batchnumber, maxn1, maxn2);
+        deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
 
         computeAHat<<<1, batchsize * maxn1 * maxn2 * A->n>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
         
