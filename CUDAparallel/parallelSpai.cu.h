@@ -19,14 +19,15 @@
 // d_J = device pointer to J
 // 
 __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int batchnumber, int batchsize) {
-    int tid = batchnumber * batchsize + blockIdx.x * blockDim.x + threadIdx.x;
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
-        int n2 = d_M->offset[tid + 1] - d_M->offset[tid];
+        int index = batchnumber * batchsize + tid;
+        int n2 = d_M->offset[index + 1] - d_M->offset[index];
         int* J = (int*) malloc(n2 * sizeof(int));
 
         // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
         int h = 0;
-        for (int i = d_M->offset[tid]; i < d_M->offset[tid + 1]; i++) {
+        for (int i = d_M->offset[index]; i < d_M->offset[index + 1]; i++) {
             J[h] = d_M->flatRowIndex[i];
             h++;
         }
