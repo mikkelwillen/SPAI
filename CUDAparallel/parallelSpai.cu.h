@@ -82,7 +82,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 
         int* I = d_I[b];
         int* J = d_J[b];
-        float* AHat = d_AHat[b * maxn1 * maxn2];
+        float* AHat = d_AHat[b];
 
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
@@ -182,7 +182,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         gpuAssert(
             cudaMalloc((void**) &d_AHat, batchsize * maxn1 * maxn2 * sizeof(float)));
         gpuAssert(
-            cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float)));
+            cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float*)));
 
         deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
 
