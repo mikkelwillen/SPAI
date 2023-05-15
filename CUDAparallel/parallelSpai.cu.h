@@ -84,18 +84,18 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         int* J = d_J[b];
         // print I
         printf("I: ");
-        for (int k = 0; k < d_n1; k++) {
+        for (int k = 0; k < d_n1[b]; k++) {
             printf("%d ", I[k]);
         } 
         printf("\n");
 
         // print J
         printf("J: ");
-        for (int k = 0; k < d_n2; k++) {
+        for (int k = 0; k < d_n2[b]; k++) {
             printf("%d ", J[k]);
         }
         printf("\n");
-        
+
         float* AHat = d_AHat[b];
 
         if (l == 0) {
