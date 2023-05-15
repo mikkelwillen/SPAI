@@ -209,7 +209,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
 
         deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
 
-        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->m>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->n, i, batchsize);
+        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->m>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->m, i, batchsize);
         
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
