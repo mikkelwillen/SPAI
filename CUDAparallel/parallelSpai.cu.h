@@ -69,7 +69,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 }
 
 // kernel for computing Ahat
-__global__ void computeAHat(CSC* d_A, float* d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
+__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int cscOffset, int batchnumber, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * cscOffset) {
         int b = tid / (maxn1 * maxn2 * cscOffset);
@@ -81,13 +81,14 @@ __global__ void computeAHat(CSC* d_A, float* d_AHat, int** d_I, int** d_J, int* 
         int n2 = d_n2[b];
 
         int* I = d_I[b];
+        int* J = d_J[b];
         float* AHat = d_AHat[b];
 
         if (l == 0) {
             AHat[i * maxn2 + j] = 0.0;
         }
 
-        if (i < maxn1 && j < maxn2 && l < csc->offset[J[j] + 1] - csc->offset[J[j]]) {
+        if (i < maxn1 && j < maxn2 && l < d_A->offset[J[j] + 1] - d_A->offset[J[j]]) {
             if (I[i] == d_A->flatRowIndex[l]) {
                 AHat[i * maxn2 + j] += d_A->flatData[l];
             }
