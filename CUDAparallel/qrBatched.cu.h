@@ -260,21 +260,49 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         // make v
         numBlocks = (n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         makeV <<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_PointerV, n1, k, batchsize);
+        float* h_v = (float*) malloc(n1 * batchsize * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_v, d_v, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("v: ");
+        for (int i = 0; i < n1; i++) {
+            printf("%f", h_v[i]);
+        }
+        printf("\n");
 
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, batchsize);
+        float* h_Qv = (float*) malloc(n1 * batchsize * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("Qv: ");
+        for (int i = 0; i < n1; i++) {
+            printf("%f", h_Qv[i]);
+        }
+        printf("\n");
         printf("after computeQtimesV\n");
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
+        float* h_Qvvt = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_Qvvt, d_Qvvt, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("Qvvt: \n");
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n1; j++) {
+                printf("%f", h_Qvvt[i * n1 + j]);
+            }
+            printf("\n");
+        }
         printf("after computeQvTimesVtransposed\n");
+
 
         // compute Q - Qvvt
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, batchsize);
         printf("after computeQminusQvvt\n");
+        
     }
 
     // free arrays and destroy cHandle
