@@ -138,7 +138,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 // maxIteration = constraint for the maximal number of iterations
 // s = number of rho_j - the most profitable indices
 // batchsize = number of matrices to be processed in parallel
-CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsize) {
+CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int batchsize) {
     printCSC(A);
 
     // initialize cublas
