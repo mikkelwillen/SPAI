@@ -252,6 +252,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     setQToIdentity <<<1, n1 * n1 * batchsize>>>(d_PointerQ, n1, batchsize);
 
     // compute Q * v
+    
     computeQtimesV <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
 
     // compute Qv * v^T
