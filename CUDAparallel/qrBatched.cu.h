@@ -60,22 +60,21 @@ __global__ void setQToIdentity(float** d_PointerQ, int n1, int batchsize) {
 // n1 = the max number of rows of the matrices
 // n2 = the max number of columns of the matrices
 // batchsize = the number of matrices in the batch
-__global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int n2, int batchsize) {
+__global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int k, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n2 * batchsize) {
-        int b = tid / (n1 * n2);
-        int k = (tid % (n1 * n2)) / n1;
-        int i = (tid % (n1 * n2)) % n1;
+        int b = tid / n1;
+        int i = (tid % n1);
 
         float* d_AHat = d_PointerAHat[b];
         float* d_v = d_PointerV[b];
 
         if (k > i) {
-            d_v[k * n1 + i] = 0.0;
+            d_v[i] = 0.0;
         } else if (k == i) {
-            d_v[k * n1 + i] = 1.0;
+            d_v[i] = 1.0;
         } else {
-            d_v[k * n1 + i] = d_AHat[k * n1 + i];
+            d_v[i] = d_AHat[k * n1 + i];
         }
     }
 }
@@ -87,24 +86,23 @@ __global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int n2,
 // n1 = the max number of rows of the matrices
 // n2 = the max number of columns of the matrices
 // batchsize = the number of matrices in the batch
-__global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d_PointerQv, int n1, int n2, int batchsize) {
+__global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d_PointerQv, int n1, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n1 * n2 * batchsize) {
-        int b = tid / (n1 * n1 * n2);
-        int k = (tid % (n1 * n1 * n2)) / (n1 * n1);
-        int i = ((tid % (n1 * n1 * n2)) % (n1 * n1)) / n1;
-        int j = ((tid % (n1 * n1 * n2)) % (n1 * n1)) % n1;
+        int b = tid / (n1 * n1);
+        int i = (tid % (n1 * n1)) / n1;
+        int j = (tid % (n1 * n1)) % n1;
 
         float* d_v = d_PointerV[b];
         float* d_Q = d_PointerQ[b];
         float* d_Qv = d_PointerQv[b];
 
         if (j == 0) {
-            d_Qv[k * n1 + i] = 0.0;
+            d_Qv[i] = 0.0;
         }
         __syncthreads();
         
-        d_Qv[k * n1 + i] += d_Q[i * n1 + j] * d_v[k * n1 + j];
+        d_Qv[i] += d_Q[i * n1 + j] * d_v[j];
     }
 }
 
@@ -116,20 +114,19 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
 // n1 = the max number of rows of the matrices
 // n2 = the max number of columns of the matrices
 // batchsize = the number of matrices in the batch
-__global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_PointerV, float** d_PointerQvvt, float** d_PointerTau, int n1, int n2, int batchsize) {
+__global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_PointerV, float** d_PointerQvvt, float** d_PointerTau, int n1, int k, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n1 * n2 * batchsize) {
-        int b = tid / (n1 * n1 * n2);
-        int k = (tid % (n1 * n1 * n2)) / (n1 * n1);
-        int i = ((tid % (n1 * n1 * n2)) % (n1 * n1)) / n1;
-        int j = ((tid % (n1 * n1 * n2)) % (n1 * n1)) % n1;
+        int b = tid / (n1 * n1);
+        int i = (tid % (n1 * n1)) / n1;
+        int j = (tid % (n1 * n1)) % n1;
 
         float* d_tau = d_PointerTau[b];
         float* d_v = d_PointerV[b];
         float* d_Qv = d_PointerQv[b];
         float* d_Qvvt = d_PointerQvvt[b];
         
-        d_Qvvt[k * n1 * n1 + i * n1 + j] = d_tau[k] * d_Qv[k * n1 + i] * d_v[k * n1 + j];
+        d_Qvvt[i * n1 + j] = d_tau[k] * d_Qv[i] * d_v[j];
     }
 }
 
@@ -139,18 +136,17 @@ __global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_Pointer
 // n1 = the max number of rows of the matrices
 // n2 = the max number of columns of the matrices
 // batchsize = the number of matrices in the batch
-__global__ void computeQminusQvvt(float** d_PointerQ, float** d_PointerQvvt, int n1, int n2, int batchsize) {
+__global__ void computeQminusQvvt(float** d_PointerQ, float** d_PointerQvvt, int n1, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n1 * batchsize) {
-        int b = tid / (n1 * n1 * n2);
-        int k = (tid % (n1 * n1 * n2)) / (n1 * n1);
-        int i = ((tid % (n1 * n1 * n2)) % (n1 * n1)) / n1;
-        int j = ((tid % (n1 * n1 * n2)) % (n1 * n1)) % n1;
+        int b = tid / (n1 * n1);
+        int i = (tid % (n1 * n1)) / n1;
+        int j = (tid % (n1 * n1)) % n1;
 
         float* d_Q = d_PointerQ[b];
         float* d_Qvvt = d_PointerQvvt[b];
         
-        d_Q[i * n1 + j] -= d_Qvvt[k * n1 * n1 + i * n1 + j];
+        d_Q[i * n1 + j] -= d_Qvvt[i * n1 + j];
     }
 }
 
@@ -224,30 +220,30 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     float** d_PointerQvvt;
 
     gpuAssert(
-        cudaMalloc((void**) &d_v, n1 * n2 * batchsize * sizeof(float)));
+        cudaMalloc((void**) &d_v, n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerV, batchsize * sizeof(float*)));
-    numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
+    numBlocks = (batchsize * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
     printf("after malloc space for d_v and d_PointerV\n");
-    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1 * n2);
+    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1);
     printf("after deviceToDevicePointerKernel\n");
 
     gpuAssert(
-        cudaMalloc((void**) &d_Qv, n1 * n2 * batchsize * sizeof(float)));
+        cudaMalloc((void**) &d_Qv, n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQv, batchsize * sizeof(float*)));
     printf("after malloc space for d_Qv and d_PointerQv\n");
-    numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
-    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1 * n2);
+    numBlocks = (batchsize * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1);
     printf("after deviceToDevicePointerKernel\n");
 
     gpuAssert(
-        cudaMalloc((void**) &d_Qvvt, n1 * n1 * n2 * batchsize * sizeof(float)));
+        cudaMalloc((void**) &d_Qvvt, n1 * n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
     printf("after malloc space for d_Qvvt and d_PointerQvvt\n");
-    numBlocks = (batchsize * n1 * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
-    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1 * n2);
+    numBlocks = (batchsize * n1 * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
     printf("after deviceToDevicePointerKernel\n");
 
     // copy R from AHat
@@ -259,25 +255,26 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
     printf("after setQToIdentity\n");
+    for (int k = 0; k < n2; k++) {
+        // make v
+        numBlocks = (n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        makeV <<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_PointerV, n1, k batchsize);
 
-    // make v
-    numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    makeV <<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_PointerV, n1, n2, batchsize);
+        // compute Q * v
+        numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, batchsize);
+        printf("after computeQtimesV\n");
 
-    // compute Q * v
-    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
-    printf("after computeQtimesV\n");
+        // compute Qv * v^T
+        numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
+        printf("after computeQvTimesVtransposed\n");
 
-    // compute Qv * v^T
-    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, n2, batchsize);
-    printf("after computeQvTimesVtransposed\n");
-
-    // compute Q - Qvvt
-    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
-    printf("after computeQminusQvvt\n");
+        // compute Q - Qvvt
+        numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, batchsize);
+        printf("after computeQminusQvvt\n");
+    }
 
     // free arrays and destroy cHandle
     gpuAssert(
