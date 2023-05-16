@@ -100,7 +100,8 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
         float* d_tempStorage = d_PointerTempStorage[b];
 
         d_tempStorage[i * n1 + j] = d_Q[i * n1 + j] * d_v[j];
-
+        __syncthreads();
+        
         if (j == 0) {
             d_Qv[i] = 0.0;
             for (int k = 0; k < n1; k++) {
