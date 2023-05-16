@@ -129,7 +129,7 @@ __global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_Pointer
         float* d_Qv = d_PointerQv[b];
         float* d_Qvvt = d_PointerQvvt[b];
         
-        d_Qvvt[i * n1 + j] = d_tau[k] * d_Qv[k * n1 + i] * d_v[k * n1 + j];
+        d_Qvvt[k * n1 * n1 + i * n1 + j] = d_tau[k] * d_Qv[k * n1 + i] * d_v[k * n1 + j];
     }
 }
 
@@ -142,14 +142,15 @@ __global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_Pointer
 __global__ void computeQminusQvvt(float** d_PointerQ, float** d_PointerQvvt, int n1, int n2, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n1 * batchsize) {
-        int b = tid / (n1 * n1);
-        int i = (tid % (n1 * n1)) / n1;
-        int j = (tid % (n1 * n1)) % n1;
+        int b = tid / (n1 * n1 * n2);
+        int k = (tid % (n1 * n1 * n2)) / (n1 * n1);
+        int i = ((tid % (n1 * n1 * n2)) % (n1 * n1)) / n1;
+        int j = ((tid % (n1 * n1 * n2)) % (n1 * n1)) % n1;
 
         float* d_Q = d_PointerQ[b];
         float* d_Qvvt = d_PointerQvvt[b];
         
-        d_Q[i * n1 + j] -= d_Qvvt[i * n1 + j];
+        d_Q[i * n1 + j] -= d_Qvvt[k * n1 * n1 + i * n1 + j];
     }
 }
 
@@ -241,12 +242,12 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     printf("after deviceToDevicePointerKernel\n");
 
     gpuAssert(
-        cudaMalloc((void**) &d_Qvvt, n1 * n1 * batchsize * sizeof(float)));
+        cudaMalloc((void**) &d_Qvvt, n1 * n1 * n2 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
     printf("after malloc space for d_Qvvt and d_PointerQvvt\n");
-    numBlocks = (batchsize * n1 * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
-    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
+    numBlocks = (batchsize * n1 * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1 * n2);
     printf("after deviceToDevicePointerKernel\n");
 
     // copy R from AHat
@@ -270,7 +271,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     printf("after computeQvTimesVtransposed\n");
 
     // compute Q - Qvvt
-    numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
     printf("after computeQminusQvvt\n");
 
