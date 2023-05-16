@@ -266,14 +266,22 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     computeQminusQvvt <<<1, n1 * n1 * batchsize>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
 
     // free arrays and destroy cHandle
-    cudaFree(d_tau);
-    cudaFree(d_PointerTau);
-    cudaFree(d_v);
-    cudaFree(d_PointerV);
-    cudaFree(d_Qv);
-    cudaFree(d_PointerQv);
-    cudaFree(d_Qvvt);
-    cudaFree(d_PointerQvvt);
+    gpuAssert(
+        cudaFree(d_tau));
+    gpuAssert(
+        cudaFree(d_PointerTau));
+    gpuAssert(
+        cudaFree(d_v));
+    gpuAssert(
+        cudaFree(d_PointerV));
+    gpuAssert(
+        cudaFree(d_Qv));
+    gpuAssert(
+        cudaFree(d_PointerQv));
+    gpuAssert(
+        cudaFree(d_Qvvt));
+    gpuAssert(
+        cudaFree(d_PointerQvvt));
     
     return 0;
 }
