@@ -139,6 +139,22 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
     }
 }
 
+// kernel for freeing I and J
+// d_I = device pointer pointer to I
+// d_J = device pointer pointer to J
+// batchsize = the size of the batch
+__global__ void freeIJ(int** d_I, int** d_J, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        if (d_I[tid] != NULL) {
+            free(d_I[tid]);
+        }
+        if (d_J[tid] != NULL) {
+            free(d_J[tid]);
+        }
+    }
+}
+
 // A = matrix we want to compute SPAI on
 // m, n = size of array
 // tolerance = tolerance
@@ -269,6 +285,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
         // free memory
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        freeIJ<<<numBlocks, BLOCKSIZE>>>(d_I, d_J, batchsize);
         gpuAssert(
             cudaFree(d_I));
         gpuAssert(
