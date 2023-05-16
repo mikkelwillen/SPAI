@@ -219,6 +219,8 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         return stat;
     }
 
+    printf("after cublasSgeqrfBatched\n");
+
     // malloc space for arrays and copy array start pointers to device
     float* d_v;
     float** d_PointerV;
