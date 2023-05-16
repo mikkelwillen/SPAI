@@ -259,7 +259,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_Q, batchsize * sizeof(float*)));
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
+        // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
 
         cudaDeviceSynchronize();
         // gpuAssert(
