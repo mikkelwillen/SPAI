@@ -62,7 +62,7 @@ __global__ void setQToIdentity(float** d_PointerQ, int n1, int batchsize) {
 // batchsize = the number of matrices in the batch
 __global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int k, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < n1 * n2 * batchsize) {
+    if (tid < n1 * batchsize) {
         int b = tid / n1;
         int i = (tid % n1);
 
@@ -88,7 +88,7 @@ __global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int k, 
 // batchsize = the number of matrices in the batch
 __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d_PointerQv, int n1, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < n1 * n1 * n2 * batchsize) {
+    if (tid < n1 * n1 * batchsize) {
         int b = tid / (n1 * n1);
         int i = (tid % (n1 * n1)) / n1;
         int j = (tid % (n1 * n1)) % n1;
@@ -116,7 +116,7 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
 // batchsize = the number of matrices in the batch
 __global__ void computeQvTimesVtransposed(float** d_PointerQv, float** d_PointerV, float** d_PointerQvvt, float** d_PointerTau, int n1, int k, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < n1 * n1 * n2 * batchsize) {
+    if (tid < n1 * n1 * batchsize) {
         int b = tid / (n1 * n1);
         int i = (tid % (n1 * n1)) / n1;
         int j = (tid % (n1 * n1)) % n1;
