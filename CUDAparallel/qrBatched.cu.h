@@ -93,8 +93,8 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
         int i = (tid % (n1 * n1)) / n1;
         int j = (tid % (n1 * n1)) % n1;
 
-        float* d_v = d_PointerV[b];
         float* d_Q = d_PointerQ[b];
+        float* d_v = d_PointerV[b];
         float* d_Qv = d_PointerQv[b];
 
         if (j == 0) {
@@ -271,7 +271,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, batchsize);
+        computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerV, d_PointerQv, n1, batchsize);
         float* h_Qv = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
