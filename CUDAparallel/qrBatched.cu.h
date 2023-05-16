@@ -265,7 +265,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             cudaMemcpy(h_v, d_v, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         printf("v: ");
         for (int i = 0; i < n1; i++) {
-            printf("%f", h_v[i]);
+            printf("%f ", h_v[i]);
         }
         printf("\n");
 
@@ -277,7 +277,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         printf("Qv: ");
         for (int i = 0; i < n1; i++) {
-            printf("%f", h_Qv[i]);
+            printf("%f ", h_Qv[i]);
         }
         printf("\n");
         printf("after computeQtimesV\n");
@@ -291,7 +291,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         printf("Qvvt: \n");
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
-                printf("%f", h_Qvvt[i * n1 + j]);
+                printf("%f ", h_Qvvt[i * n1 + j]);
             }
             printf("\n");
         }
@@ -302,7 +302,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, batchsize);
         printf("after computeQminusQvvt\n");
-        
+
     }
 
     // free arrays and destroy cHandle
