@@ -23,49 +23,51 @@
 // d_n2 = device pointer to n2
 // currentBatch = the current batch
 // batchsize = the size of the batch
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int currentBatch, int batchsize) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int index = currentBatch * batchsize + tid;
-        int n2 = d_M->offset[index + 1] - d_M->offset[index];
-        int* J = (int*) malloc(n2 * sizeof(int));
+        if (index < maxN2) {
+            int n2 = d_M->offset[index + 1] - d_M->offset[index];
+            int* J = (int*) malloc(n2 * sizeof(int));
 
-        // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
-        int h = 0;
-        for (int i = d_M->offset[index]; i < d_M->offset[index + 1]; i++) {
-            J[h] = d_M->flatRowIndex[i];
-            h++;
-        }
+            // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
+            int h = 0;
+            for (int i = d_M->offset[index]; i < d_M->offset[index + 1]; i++) {
+                J[h] = d_M->flatRowIndex[i];
+                h++;
+            }
 
-        // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-        int* I = (int*) malloc(d_A->m * sizeof(int));
-        for (int i = 0; i < d_A->m; i++) {
-            I[i] = -1;
-        }
+            // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
+            int* I = (int*) malloc(d_A->m * sizeof(int));
+            for (int i = 0; i < d_A->m; i++) {
+                I[i] = -1;
+            }
 
-        int n1 = 0;
-        for (int j = 0; j < n2; j++) {
-            for (int i = d_A->offset[J[j]]; i < d_A->offset[J[j] + 1]; i++) {
-                int keep = 1;
-                for (int k = 0; k < d_A->m; k++) {
-                    if (I[k] == d_A->flatRowIndex[i]) {
-                        keep = 0;
-                        break;
+            int n1 = 0;
+            for (int j = 0; j < n2; j++) {
+                for (int i = d_A->offset[J[j]]; i < d_A->offset[J[j] + 1]; i++) {
+                    int keep = 1;
+                    for (int k = 0; k < d_A->m; k++) {
+                        if (I[k] == d_A->flatRowIndex[i]) {
+                            keep = 0;
+                            break;
+                        }
+                    }
+                    if (keep) {
+                        I[n1] = d_A->flatRowIndex[i];
+                        n1++;
                     }
                 }
-                if (keep) {
-                    I[n1] = d_A->flatRowIndex[i];
-                    n1++;
-                }
             }
-        }
 
-        // set device values
-        // giver det mening at parallelisere dette?
-        d_I[tid] = &I[0];
-        d_J[tid] = &J[0];
-        d_n1[tid] = n1;
-        d_n2[tid] = n2;
+            // set device values
+            // giver det mening at parallelisere dette?
+            d_I[tid] = &I[0];
+            d_J[tid] = &J[0];
+            d_n1[tid] = n1;
+            d_n2[tid] = n2;
+        }
     }
 }
 
@@ -184,7 +186,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
         
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize);
+        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize, A->n);
 
         // find the max value of n1 and n2
         int* n1 = (int*) malloc(batchsize * sizeof(float));
