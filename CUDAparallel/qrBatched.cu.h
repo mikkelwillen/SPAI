@@ -101,7 +101,7 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
             d_Qv[i] = 0.0;
         }
         __syncthreads();
-        
+        printf("b: %d, i: %d, j: %d" b, i, j);
         d_Qv[i] += d_Q[i * n1 + j] * d_v[j];
     }
 }
