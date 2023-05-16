@@ -260,6 +260,10 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
     printf("after setQToIdentity\n");
 
+    // make v
+    numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    makeV <<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_PointerV, n1, n2, batchsize);
+
     // compute Q * v
     numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
