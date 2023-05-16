@@ -192,7 +192,9 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerTau, tauPointerMemSize));
+    printf("after malloc space for tau\n");
     deviceToDevicePointerKernel <<< 1, batchsize * ltau >>> (d_PointerTau, d_tau, batchsize * ltau, ltau);
+    printf("after deviceToDevicePointerKernel\n");
 
     // run QR decomposition from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas
