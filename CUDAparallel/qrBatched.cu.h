@@ -25,6 +25,7 @@ __global__ void copyRFromAHat(float** d_PointerAHat, float** d_PointerR, int n1,
 
         float* d_AHat = d_PointerAHat[b];
         float* d_R = d_PointerR[b];
+
         if (i >= j) {
             d_R[i * n1 + j] = d_AHat[i * n1 + j];
         } else {
@@ -86,7 +87,7 @@ __global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int k, 
 // n1 = the max number of rows of the matrices
 // n2 = the max number of columns of the matrices
 // batchsize = the number of matrices in the batch
-__global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d_PointerQv, int n1, int batchsize) {
+__global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d_PointerQv, float** d_PointerTempStorage, int n1, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n1 * batchsize) {
         int b = tid / (n1 * n1);
@@ -96,13 +97,16 @@ __global__ void computeQtimesV(float** d_PointerQ, float** d_PointerV, float** d
         float* d_Q = d_PointerQ[b];
         float* d_v = d_PointerV[b];
         float* d_Qv = d_PointerQv[b];
+        float* d_tempStorage = d_PointerTempStorage[b];
+
+        d_tempStorage[i * n1 + j] = d_Q[i * n1 + j] * d_v[j];
 
         if (j == 0) {
             d_Qv[i] = 0.0;
+            for (int k = 0; k < n1; k++) {
+                d_Qv[k] += d_tempStorage[k * n1 + j];
+            }
         }
-        __syncthreads();
-        printf("b: %d, i: %d, j: %d", b, i, j);
-        d_Qv[i] += d_Q[i * n1 + j] * d_v[j];
     }
 }
 
@@ -215,6 +219,9 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     float* d_Qvvt;
     float** d_PointerQvvt;
 
+    float* d_tempStorage;
+    flaot* d_PointerTempStorage;
+
     gpuAssert(
         cudaMalloc((void**) &d_v, n1 * batchsize * sizeof(float)));
     gpuAssert(
@@ -235,6 +242,13 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
+
+    gpuAssert(
+        cudaMalloc((void**) &d_tempStorage, n1 * n1 * batchsize * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerTempStorage, batchsize * sizeof(float*)));
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerTempStorage, d_tempStorage, batchsize, n1 * n1);
 
     // copy R from AHat
     numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -261,7 +275,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerV, d_PointerQv, n1, batchsize);
+        computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerV, d_PointerQv, d_PointerTempStorage, n1, batchsize);
         float* h_Qv = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
