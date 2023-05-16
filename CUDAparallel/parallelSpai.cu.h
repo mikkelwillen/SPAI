@@ -260,8 +260,36 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         // qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
-
+        // free memory
+        gpuAssert(
+            cudaFree(d_I));
+        gpuAssert(
+            cudaFree(d_J));
+        gpuAssert(
+            cudaFree(d_n1));
+        gpuAssert(
+            cudaFree(d_n2));
+        gpuAssert(
+            cudaFree(d_AHat));
+        gpuAssert(
+            cudaFree(d_PointerAHat));
+        gpuAssert(
+            cudaFree(d_Q));
+        gpuAssert(
+            cudaFree(d_PointerQ));
+        gpuAssert(
+            cudaFree(d_R));
+        gpuAssert(
+            cudaFree(d_PointerR));
+        
     }
+
+    // free memory
+    freeDeviceCSC(d_A);
+    freeDeviceCSC(d_M);
+    freeCSC(M);
+    
+    cublasDestroy(cHandle);
 }
 
 #endif
