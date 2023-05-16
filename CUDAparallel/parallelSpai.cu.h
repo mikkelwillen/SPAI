@@ -269,7 +269,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
-        // qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
+        qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
         // free memory
         gpuAssert(
