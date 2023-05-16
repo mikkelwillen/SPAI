@@ -12,6 +12,7 @@
 #include "invBatched.cu.h"
 #include "updateQR.cu.h"
 #include "LSProblem.cu.h"
+#include "helperKernels.cu.h"
 
 // kernel for computing I, J n1 and n2
 // d_A = device pointer to A
@@ -131,13 +132,6 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
     }
 }
 
-__global__ void deviceToDevicePointerKernel(float** d_PointerAHat, float* d_AHat, int batchsize, int maxn1, int maxn2) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < batchsize) {
-        d_PointerAHat[tid] = &d_AHat[tid * maxn1 * maxn2];
-    }
-}
-
 // A = matrix we want to compute SPAI on
 // m, n = size of array
 // tolerance = tolerance
@@ -222,7 +216,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
             cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float*)));
 
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
 
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->m, i, batchsize);
@@ -244,15 +238,26 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         // }
 
         // initialize d_Q and d_R
-        float** d_Q;
-        float** d_R;
+        float* d_Q;
+        float* d_R;
+        float** d_PointerQ;
+        float** d_PointerR;
 
+        gpuAssert(
+            cudaMalloc((void**) &d_Q, batchsize * maxn1 * maxn1 * sizeof(float)));
         gpuAssert(
             cudaMalloc((void**) &d_Q, batchsize * sizeof(float*)));
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
+
+        gpuAssert(
+            cudaMalloc((void**) &d_R, batchsize * maxn1 * maxn2 * sizeof(float)));
         gpuAssert(
             cudaMalloc((void**) &d_R, batchsize * sizeof(float*)));
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
-        qrBatched(cHandle, d_PointerAHat, d_Q, d_R, batchsize, maxn1, maxn2);
+        qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
 
     }

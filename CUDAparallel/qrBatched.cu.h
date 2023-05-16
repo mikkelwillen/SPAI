@@ -8,6 +8,7 @@
 #include "cublas_v2.h"
 #include "csc.cu.h"
 #include "constants.cu.h"
+#include "helperKernels.cu.h"
 
 // kernel for copying R from AHat
 // d_PointerAHat = an array of pointers to the start of each AHat matrix in d_AHat
@@ -149,18 +150,6 @@ __global__ void computeQminusQvvt(float** d_PointerQ, float** d_PointerQvvt, int
         float* d_Qvvt = d_PointerQvvt[b];
         
         d_Q[i * n1 + j] -= d_Qvvt[i * n1 + j];
-    }
-}
-
-// kernel to copy d_data to d_Pointer
-// d_Pointer = an array of pointers to the start of each matrix in d_data
-// d_data = an array of batch matrices
-// pointerArraySize = the size of d_Pointer
-// dataSize = the size of each matrix in d_data
-__global__ void deviceToDevicePointerKernel(float** d_Pointer, float* d_data, int pointerArraySize, int dataSize) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < pointerArraySize) {
-        d_Pointer[tid] = &d_data[tid * dataSize];
     }
 }
 
