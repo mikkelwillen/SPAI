@@ -67,6 +67,11 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
             d_J[tid] = &J[0];
             d_n1[tid] = n1;
             d_n2[tid] = n2;
+        } else {
+            d_I[tid] = NULL;
+            d_J[tid] = NULL;
+            d_n1[tid] = 0;
+            d_n2[tid] = 0;
         }
     }
 }
