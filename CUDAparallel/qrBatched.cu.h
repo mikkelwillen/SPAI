@@ -220,7 +220,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     float** d_PointerQvvt;
 
     float* d_tempStorage;
-    float* d_PointerTempStorage;
+    float** d_PointerTempStorage;
 
     gpuAssert(
         cudaMalloc((void**) &d_v, n1 * batchsize * sizeof(float)));
