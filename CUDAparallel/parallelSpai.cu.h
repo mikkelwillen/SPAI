@@ -186,10 +186,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     CSC* d_M = copyCSCFromHostToDevice(M);
     printf("after d_M\n");
     
-    // compute the currentBatch 
-    int currentBatch = (A->n + batchsize - 1) / batchsize;
+    // compute the number of batches
+    int numberOfBatches = (A->n + batchsize - 1) / batchsize;
 
-    for (int i = 0; i < currentBatch; i++) {
+    for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
         int** d_I;
         int** d_J;

@@ -223,7 +223,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_v, n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerV, batchsize * sizeof(float*)));
-    numBlocks = (batchsize * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     printf("after malloc space for d_v and d_PointerV\n");
     deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1);
     printf("after deviceToDevicePointerKernel\n");
@@ -233,7 +233,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     gpuAssert(
         cudaMalloc((void**) &d_PointerQv, batchsize * sizeof(float*)));
     printf("after malloc space for d_Qv and d_PointerQv\n");
-    numBlocks = (batchsize * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1);
     printf("after deviceToDevicePointerKernel\n");
 
@@ -242,7 +242,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     gpuAssert(
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
     printf("after malloc space for d_Qvvt and d_PointerQvvt\n");
-    numBlocks = (batchsize * n1 * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
     printf("after deviceToDevicePointerKernel\n");
 
