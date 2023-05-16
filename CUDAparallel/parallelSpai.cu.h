@@ -237,7 +237,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
             printf("\n");
         }
 
-        // // initialize d_Q and d_R
+        // initialize d_Q and d_R
         float* d_Q;
         float* d_R;
         float** d_PointerQ;
@@ -248,7 +248,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         gpuAssert(
             cudaMalloc((void**) &d_Q, batchsize * sizeof(float*)));
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
+        // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
 
         // gpuAssert(
         //     cudaMalloc((void**) &d_R, batchsize * maxn1 * maxn2 * sizeof(float)));
