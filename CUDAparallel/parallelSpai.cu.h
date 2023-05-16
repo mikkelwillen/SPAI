@@ -237,27 +237,27 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
             printf("\n");
         }
 
-        // initialize d_Q and d_R
-        float* d_Q;
-        float* d_R;
-        float** d_PointerQ;
-        float** d_PointerR;
+        // // initialize d_Q and d_R
+        // float* d_Q;
+        // float* d_R;
+        // float** d_PointerQ;
+        // float** d_PointerR;
 
-        gpuAssert(
-            cudaMalloc((void**) &d_Q, batchsize * maxn1 * maxn1 * sizeof(float)));
-        gpuAssert(
-            cudaMalloc((void**) &d_Q, batchsize * sizeof(float*)));
-        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
+        // gpuAssert(
+        //     cudaMalloc((void**) &d_Q, batchsize * maxn1 * maxn1 * sizeof(float)));
+        // gpuAssert(
+        //     cudaMalloc((void**) &d_Q, batchsize * sizeof(float*)));
+        // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
 
-        gpuAssert(
-            cudaMalloc((void**) &d_R, batchsize * maxn1 * maxn2 * sizeof(float)));
-        gpuAssert(
-            cudaMalloc((void**) &d_R, batchsize * sizeof(float*)));
-        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
+        // gpuAssert(
+        //     cudaMalloc((void**) &d_R, batchsize * maxn1 * maxn2 * sizeof(float)));
+        // gpuAssert(
+        //     cudaMalloc((void**) &d_R, batchsize * sizeof(float*)));
+        // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
-        qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
+        // qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
 
     }
