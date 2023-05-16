@@ -284,6 +284,41 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
         
+
+        float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
+        float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
+        gpuAssert(
+            cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+        
+        printf("--printing h_Q--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn1; j++) {
+                for (int k = 0; k < maxn1; k++) {
+                    printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+
+        printf("--printing h_R--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn1; j++) {
+                for (int k = 0; k < maxn2; k++) {
+                    printf("%f ", h_R[b * maxn1 * maxn2 + j * maxn2 + k]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+
+
+
+
         // free memory
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         freeIJ<<<numBlocks, BLOCKSIZE>>>(d_I, d_J, batchsize);
