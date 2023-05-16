@@ -238,41 +238,52 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     gpuAssert(
         cudaMalloc((void**) &d_PointerV, batchsize * sizeof(float*)));
     numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
+    printf("after malloc space for d_v and d_PointerV\n");
     deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1 * n2);
+    printf("after deviceToDevicePointerKernel\n");
 
     gpuAssert(
         cudaMalloc((void**) &d_Qv, n1 * n2 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQv, batchsize * sizeof(float*)));
+    printf("after malloc space for d_Qv and d_PointerQv\n");
     numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1 * n2);
+    printf("after deviceToDevicePointerKernel\n");
 
     gpuAssert(
         cudaMalloc((void**) &d_Qvvt, n1 * n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
+    printf("after malloc space for d_Qvvt and d_PointerQvvt\n");
     numBlocks = (batchsize * n1 * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
+    printf("after deviceToDevicePointerKernel\n");
 
     // copy R from AHat
     numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     copyRFromAHat <<<numBlocks, BLOCKSIZE >>> (d_PointerAHat, d_PointerR, n1, n2, batchsize);
+    printf("after copyRFromAHat\n");
 
     // set Q to I
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
+    printf("after setQToIdentity\n");
 
     // compute Q * v
     numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
+    printf("after computeQtimesV\n");
 
     // compute Qv * v^T
     numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, n2, batchsize);
+    printf("after computeQvTimesVtransposed\n");
 
     // compute Q - Qvvt
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
+    printf("after computeQminusQvvt\n");
 
     // free arrays and destroy cHandle
     gpuAssert(
