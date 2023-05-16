@@ -213,9 +213,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
-        maxn1 = MIN(maxn1, A->m);
-        maxn2 = 1;
-
         // create d_AHat
         float* d_AHat;
         float** d_PointerAHat;
