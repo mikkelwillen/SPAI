@@ -180,6 +180,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     int ltau = MAX(1, min);
     const size_t tauMemSize = ltau * batchsize * sizeof(float);
     const size_t tauPointerMemSize = batchsize * sizeof(float*);
+    int numBlocks;
 
     // create input and output arrays
     float* d_tau;
@@ -193,7 +194,8 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     gpuAssert(
         cudaMalloc((void**) &d_PointerTau, tauPointerMemSize));
     printf("after malloc space for tau\n");
-    deviceToDevicePointerKernel <<< 1, batchsize * ltau >>> (d_PointerTau, d_tau, batchsize * ltau, ltau);
+    numBlocks = (batchsize * ltau + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE>>> (d_PointerTau, d_tau, batchsize * ltau, ltau);
     printf("after deviceToDevicePointerKernel\n");
 
     // run QR decomposition from cublas
@@ -235,35 +237,42 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_v, n1 * n2 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerV, batchsize * sizeof(float*)));
-    deviceToDevicePointerKernel <<< 1, batchsize * n1 * n2 >>> (d_PointerV, d_v, batchsize, n1 * n2);
+    numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1 * n2);
 
     gpuAssert(
         cudaMalloc((void**) &d_Qv, n1 * n2 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQv, batchsize * sizeof(float*)));
-    deviceToDevicePointerKernel <<< 1, batchsize * n1 * n2 >>> (d_PointerQv, d_Qv, batchsize, n1 * n2);
+    numBlocks = (batchsize * n1 * n2 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1 * n2);
 
     gpuAssert(
         cudaMalloc((void**) &d_Qvvt, n1 * n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
-    deviceToDevicePointerKernel <<<1, batchsize * n1 * n1 >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
+    numBlocks = (batchsize * n1 * n1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
 
     // copy R from AHat
-    copyRFromAHat <<<1, n1 * n2 * batchsize >>> (d_PointerAHat, d_PointerR, n1, n2, batchsize);
+    numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    copyRFromAHat <<<numBlocks, BLOCKSIZE >>> (d_PointerAHat, d_PointerR, n1, n2, batchsize);
 
     // set Q to I
-    setQToIdentity <<<1, n1 * n1 * batchsize>>>(d_PointerQ, n1, batchsize);
+    numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
 
     // compute Q * v
-    
-    computeQtimesV <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
+    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAHat, d_PointerV, n1, n2, batchsize);
 
     // compute Qv * v^T
-    computeQvTimesVtransposed <<<1, n1 * n1 * n2 * batchsize>>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, n2, batchsize);
+    numBlocks = (n1 * n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, n2, batchsize);
 
     // compute Q - Qvvt
-    computeQminusQvvt <<<1, n1 * n1 * batchsize>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
+    numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, n2, batchsize);
 
     // free arrays and destroy cHandle
     gpuAssert(

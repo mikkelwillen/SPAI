@@ -158,6 +158,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         return NULL;
     }
 
+    int numBlocks;
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
@@ -187,7 +188,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         gpuAssert(
             cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
         
-        computeIandJ<<<1, batchsize>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize);
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize);
 
         // find the max value of n1 and n2
         int* n1 = (int*) malloc(batchsize * sizeof(float));
@@ -218,9 +220,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
         gpuAssert(
             cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float*)));
 
-        deviceToDevicePointerKernel<<<1, batchsize>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1, maxn2);
 
-        computeAHat<<<1, batchsize * maxn1 * maxn2 * A->m>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->m, i, batchsize);
+        numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->m, i, batchsize);
         
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
