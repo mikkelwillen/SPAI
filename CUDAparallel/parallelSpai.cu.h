@@ -173,6 +173,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, int batchsi
     int currentBatch = (A->n + batchsize - 1) / batchsize;
 
     for (int i = 0; i < currentBatch; i++) {
+        printf("---------BATCH: %d---------\n", i);
         int** d_I;
         int** d_J;
         int* d_n1;
