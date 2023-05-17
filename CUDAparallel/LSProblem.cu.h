@@ -88,7 +88,7 @@ __global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_P
         d_residual[i] = 0.0;
 
         for (int j = 0; j < maxn2; j++) {
-            for (int h = d_A->offset[k]; h < A->offset[k +1]; h++) {
+            for (int h = d_A->offset[k]; h < d_A->offset[k +1]; h++) {
                 if (i == d_A->flatRowIndex[h]) {
                     d_residual[i] += d_A->flatData[h] * d_mHat_k[j];
                 }
@@ -183,6 +183,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // compute residual vectors
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, maxn2, currentBatch, batchsize);
 
     
 
