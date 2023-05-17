@@ -8,82 +8,40 @@
 #include "cublas_v2.h"
 #include "csc.cu.h"
 #include "constants.cu.h"
+#include "helperKernels.cu.h"
 
-// Kernel to copy d_A to d_PointerA
-// d_A is an array of batch matrices
-// d_PointerA is an array of pointers to the start of each matrix in d_A
-// batch is the BATCHSIZE
-// n is the number of rows and columns in each matrix
-__global__ void tdeviceToDevicePointerKernel(float** d_PointerA, float* d_A, int batch, int n) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < BATCHSIZE) {
-        d_PointerA[tid] = &d_A[tid * n * n];
-    }
-}
 
 // Function to do inversion of batch matrices
 // A is an array of batch matrices
 // n is the max number of rows and columns of the matrices
 // AInv is an array of batch inverse matrices
-int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
-    printf("\nDo inversion of A\n");
-
-    // add noice to A
-    for (int i = 0; i < BATCHSIZE; i++) {
-        for (int j = 0; j < n; j++) {
-            if (((*A)[i * n * n + j * n + j] < 1.0e-3)) {
-                (*A)[i * n * n + j * n + j] += 1.0f;
-            }
-        }
-    }
-    printf("after noice\n");
+int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR, int maxn2, int batchsize) {
+    printf("\nDo inversion of R\n");
 
     // Set constants
     cublasStatus_t stat;
-    int lda = n;
-    int ldc = n;
-    const size_t AMemSize = n * n * BATCHSIZE * sizeof(float);
-    const size_t APointerMemSize = BATCHSIZE * sizeof(float*);
+    int lda = maxn2;
+    int ldc = maxn2;
 
-    // create input and output arrays
-    float* d_A;
-    float* d_AInv;
-    float** d_PointerA;
-    float** d_PointerAInv;
-    int* h_info = (int*) malloc(BATCHSIZE * sizeof(int));
+    // create device info array
+    int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
-
-    // malloc space and copy data for A
-    gpuAssert(
-        cudaMalloc((void**) &d_A, AMemSize));
-    gpuAssert(
-        cudaMemcpy(d_A, (*A), AMemSize, cudaMemcpyHostToDevice));
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerA, APointerMemSize));
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerA, d_A, BATCHSIZE, n);
-
-    // malloc space for AInv
-    gpuAssert(
-        cudaMalloc((void**) &d_AInv, AMemSize));
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
-    tdeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
 
     // malloc space for info
     gpuAssert(
-        cudaMalloc((void**) &d_info, BATCHSIZE * sizeof(int)));
+        cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
     stat = cublasSgetriBatched(cHandle,
-                               n,
-                               d_PointerA,
+                               maxn2,
+                               d_PointerR,
                                lda,
                                NULL,
-                               d_PointerAInv,
+                               d_PointerInvR,
                                ldc,
                                d_info,
-                               BATCHSIZE);
+                               batchsize);
     
     // error handling
     if (stat != CUBLAS_STATUS_SUCCESS) {
@@ -93,22 +51,18 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         return stat;
     }
 
+    // copy info back to host
     gpuAssert(
         cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
     
+    // check for singular matrices
     for (int i = 0; i < BATCHSIZE; i++) {
         if (h_info[i] != 0) {
             printf("\nError: Matrix %d is singular\n", i);
         }
     }
 
-    // copy result back to host
-    gpuAssert(
-        cudaMemcpy((*AInv), d_AInv, AMemSize, cudaMemcpyDeviceToHost));
-
     // free memory
-    gpuAssert(
-        cudaFree(d_A));
     gpuAssert(
         cudaFree(d_AInv));
     gpuAssert(

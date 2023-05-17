@@ -60,10 +60,14 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
 // residualNorm = the norm of the residual
 // batchsize = the batchsize for the cublas handle
 int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_mHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
+    // set numBlocks;
     int numBlocks;
+
+    // create the cHat vector
     float* d_cHat;
     float** d_PointerCHat;
 
+    // allocate device memory for the cHat vector
     gpuAssert(
         cudaMalloc((void**) &d_cHat, maxn1 * batchsize * sizeof(float)));
     gpuAssert(
@@ -71,9 +75,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_Poin
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn1);
     
+    // set the cHat vector
     numBlocks = (maxn1 * maxn1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, currentBatch, batchsize, maxn1);
 
+    // print the cHat vector
     float* h_cHat = (float*) malloc(maxn1 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_cHat, d_cHat, maxn1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
@@ -86,18 +92,35 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_Poin
         printf("\n");
     }
 
-    // float* d_invR;
-    // float** d_PointerInvR;
+    // create the invR matrices
+    float* d_invR;
+    float** d_PointerInvR;
 
-    // gpuAssert(
-    //     cudaMalloc((void**) &d_invR, maxn2 * maxn2 * batchsize * sizeof(float)));
-    // gpuAssert(
-    //     cudaMalloc((void***) &d_PointerInvR, batchsize * sizeof(float*)));
-    // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
+    // allocate device memory for the invR matrices
+    gpuAssert(
+        cudaMalloc((void**) &d_invR, maxn2 * maxn2 * batchsize * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void***) &d_PointerInvR, batchsize * sizeof(float*)));
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
     
-    // invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
+    // compute the invR matrices
+    invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
 
+    float* h_invR = (float*) malloc(maxn2 * maxn2 * batchsize * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_invR, d_invR, maxn2 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("--printing invR--\n");
+    for (int b = 0; b < batchsize; b++) {
+        printf("batch %d\n", b);
+        for (int i = 0; i < maxn2; i++) {
+            for (int j = 0; j < maxn2; j++) {
+                printf("%f ", h_invR[b * maxn2 * maxn2 + i * maxn2 + j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
 
     return 0;
 }
