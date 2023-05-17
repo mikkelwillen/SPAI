@@ -46,6 +46,11 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
 }
 
 // function for computing mHat_k
+// d_PointerMHat_k = the pointer to the mHat_k vector
+// d_PointerInvR   = the pointer to the invR matrix
+// d_PointerCHat   = the pointer to the cHat vector
+// maxn2           = the maximum number of columns in A
+// batchsize       = the batchsize for the cublas handle
 __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, float** d_PointerCHat, int maxn2, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < maxn2 * batchsize) {
@@ -63,21 +68,51 @@ __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, fl
     }
 }
 
-// Function for computing the least squares problem
-// cHandle = the cublas handle
-// A = the sparse matrix
-// d_PointerQ = the pointer to the Q matrix
-// d_PointerR = the pointer to the R matrix
-// d_mHat_k = the pointer to the mHat_k vector
+// function for computing the residual
+// d_A               = the sparse matrix
 // d_PointerResidual = the pointer to the residual vector
-// d_PointerI = the pointer to the I vector
-// d_PointerJ = the pointer to the J vector
-// d_n1 = the number of rows in A
-// d_n2 = the number of columns in A
-// k = the index of the column to be added
-// residualNorm = the norm of the residual
-// batchsize = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
+// d_PointerMHat_k   = the pointer to the mHat_k vector
+// maxn2             = the maximum number of columns in A
+// currentBatch      = the current batch
+// batchsize         = the batchsize
+__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int maxn2, int currentBatch, int batchsize) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < d_A->m * batchsize) {
+        int b = tid / d_A->m;
+        int i = tid % d_A->m;
+        int k = currentBatch * batchsize + b;
+
+        float* d_residual = d_PointerResidual[b];
+        float* d_mHat_k = d_PointerMHat_k[b];
+
+        d_residual[i] = 0.0;
+
+        for (int j = 0; j < maxn2; j++) {
+            for (int h = d_A->offset[k]; h < A->offset[k +1]; h++) {
+                if (i == d_A->flatRowIndex[h]) {
+                    d_residual[i] += d_A->flatData[h] * d_mHat_k[j];
+                }
+            }
+        }
+
+    }
+}
+
+// Function for computing the least squares problem
+// cHandle           = the cublas handle
+// A                 = the sparse matrix
+// d_PointerQ        = the pointer to the Q matrix
+// d_PointerR        = the pointer to the R matrix
+// d_mHat_k          = the pointer to the mHat_k vector
+// d_PointerResidual = the pointer to the residual vector
+// d_PointerI        = the pointer to the I vector
+// d_PointerJ        = the pointer to the J vector
+// d_n1              = the number of rows in A
+// d_n2              = the number of columns in A
+// k                 = the index of the column to be added
+// residualNorm      = the norm of the residual
+// batchsize         = the batchsize for the cublas handle
+int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
     // define the number of blocks
     int numBlocks;
 
@@ -145,7 +180,12 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_Poin
     // compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeMHat_k<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_PointerInvR, d_PointerCHat, maxn2, batchsize);
+
+    // compute residual vectors
+    numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+
     
+
     return 0;
 }
 

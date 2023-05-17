@@ -94,6 +94,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
             residual[i] -= 1.0;
         }
     }
+    
     printf("residual:\n");
     for (int i = 0; i < A->m; i++) {
         printf("%f ", residual[i]);
