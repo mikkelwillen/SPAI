@@ -17,13 +17,13 @@
 // kernel for computing I, J n1 and n2
 // d_A = device pointer to A
 // d_M = device pointer to M
-// d_I = device pointer pointer to I
-// d_J = device pointer pointer to J
+// d_PointerI = device pointer pointer to I
+// d_PointerJ = device pointer pointer to J
 // d_n1 = device pointer to n1
 // d_n2 = device pointer to n2
 // currentBatch = the current batch
 // batchsize = the size of the batch
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int index = currentBatch * batchsize + tid;
@@ -63,13 +63,13 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 
             // set device values
             // giver det mening at parallelisere dette?
-            d_I[tid] = &I[0];
-            d_J[tid] = &J[0];
+            d_PointerI[tid] = &I[0];
+            d_PointerJ[tid] = &J[0];
             d_n1[tid] = n1;
             d_n2[tid] = n2;
         } else {
-            d_I[tid] = NULL;
-            d_J[tid] = NULL;
+            d_PointerI[tid] = NULL;
+            d_PointerJ[tid] = NULL;
             d_n1[tid] = 0;
             d_n2[tid] = 0;
         }
@@ -79,8 +79,8 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 // kernel for computing Ahat
 // d_A = device pointer to A
 // d_AHat = device pointer pointer to AHat
-// d_I = device pointer pointer to I
-// d_J = device pointer pointer to J
+// d_PointerI = device pointer pointer to I
+// d_PointerJ = device pointer pointer to J
 // d_n1 = device pointer to n1
 // d_n2 = device pointer to n2
 // maxn1 = the maximum value of n1
@@ -88,7 +88,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_I, int** d_J, int* d_n1
 // maxOffset = the maximum value of offset
 // currentBatch = the current batch
 // batchsize = the size of the batch
-__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
+__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * maxOffset) {
         int b = (tid / (maxn1 * maxn2 * maxOffset));
@@ -99,8 +99,8 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
         int n1 = d_n1[b];
         int n2 = d_n2[b];
 
-        int* I = d_I[b];
-        int* J = d_J[b];
+        int* I = d_PointerI[b];
+        int* J = d_PointerJ[b];
         if (tid == 0) {
             // print I
             printf("I: ");
@@ -140,17 +140,17 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_I, int** d_J, int*
 }
 
 // kernel for freeing I and J
-// d_I = device pointer pointer to I
-// d_J = device pointer pointer to J
+// d_PointerI = device pointer pointer to I
+// d_PointerJ = device pointer pointer to J
 // batchsize = the size of the batch
-__global__ void freeIJ(int** d_I, int** d_J, int batchsize) {
+__global__ void freeIJ(int** d_PointerI, int** d_PointerJ, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
-        if (d_I[tid] != NULL) {
-            free(d_I[tid]);
+        if (d_PointerI[tid] != NULL) {
+            free(d_PointerI[tid]);
         }
-        if (d_J[tid] != NULL) {
-            free(d_J[tid]);
+        if (d_PointerJ[tid] != NULL) {
+            free(d_PointerJ[tid]);
         }
     }
 }
@@ -191,23 +191,23 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
     for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
-        int** d_I;
-        int** d_J;
+        int** d_PointerI;
+        int** d_PointerJ;
         int* d_n1;
         int* d_n2;
 
         // malloc space
         gpuAssert(
-            cudaMalloc((void**) &d_I, batchsize * sizeof(int*)));
+            cudaMalloc((void**) &d_PointerI, batchsize * sizeof(int*)));
         gpuAssert(
-            cudaMalloc((void**) &d_J, batchsize * sizeof(int*)));
+            cudaMalloc((void**) &d_PointerJ, batchsize * sizeof(int*)));
         gpuAssert(
             cudaMalloc((void**) &d_n1, batchsize * sizeof(int)));
         gpuAssert(
             cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
         
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_I, d_J, d_n1, d_n2, i, batchsize, A->n);
+        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_PointerI, d_PointerJ, d_n1, d_n2, i, batchsize, A->n);
 
         // find the max value of n1 and n2
         int* n1 = (int*) malloc(batchsize * sizeof(float));
@@ -242,7 +242,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
 
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_I, d_J, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
+        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
         
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
@@ -283,6 +283,41 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
         qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
+
+        // overwrite AHat, since qr overwrote it previously
+        numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
+        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
+
+
+        // initialize mHat_k, residual, residualNorm
+        float* d_mHat_k;
+        float** d_PointerMHat_k;
+
+        float* d_residual;
+        float** d_PointerResidual;
+
+        float* d_residualNorm;
+
+        gpuAssert(
+            cudaMalloc((void**) &d_mHat_k, batchsize * maxn2 * sizeof(float)));
+        gpuAssert(
+            cudaMalloc((void**) &d_PointerMHat_k, batchsize * sizeof(float*)));
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2);
+
+        gpuAssert(
+            cudaMalloc((void**) &d_residual, batchsize * A->m * sizeof(float)));
+        gpuAssert(
+            cudaMalloc((void**) &d_PointerResidual, batchsize * sizeof(float*)));
+        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residual, batchsize, A->m);
+
+        gpuAssert(
+            cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
+        
+        
+
+        LSProblem(cHandle, A, d_PointerQ, d_PointerR, d_PointerMHat_k, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
+        
         
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
@@ -319,13 +354,15 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
 
 
+
+
         // free memory
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        freeIJ<<<numBlocks, BLOCKSIZE>>>(d_I, d_J, batchsize);
+        freeIJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, batchsize);
         gpuAssert(
-            cudaFree(d_I));
+            cudaFree(d_PointerI));
         gpuAssert(
-            cudaFree(d_J));
+            cudaFree(d_PointerJ));
         gpuAssert(
             cudaFree(d_n1));
         gpuAssert(

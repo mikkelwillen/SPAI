@@ -9,103 +9,95 @@
 #include "constants.cu.h"
 #include "parallelSpai.cu.h"
 #include "invBatched.cu.h"
+#include "helperKernels.cu.h"
 
-// Function for computing the least squares problem
-// cHandle is the cublas handle
-// A is the orginal CSC matrix
-// Q is the Q matrix from the QR factorization of AHat
-// R is the R matrix from the QR factorization
-// mHat_k is the solution of the least squares problem
-// residual is the residual vector of the least squares problem
-// I is indeces of the rows of AHat
-// J is indeces of the columns of AHat
-// n1 is the number of rows of AHat
-// n2 is the number of columns of AHat
-// k is the index of the column of mHat
-// residualNorm is the norm of the residual vector
-int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
-    // e) compute cHat = Q^T * ê_k
-    // make e_k and set index k to 1.0
-    float* e_k = (float*) malloc(n1 * sizeof(float));
-    for (int i = 0; i < n1; i++) {
-        e_k[i] = 0.0;
-        if (k == I[i]) {
-            e_k[i] = 1.0;
-        }
-    }
 
-    // malloc space for cHat and do matrix multiplication
-    float* cHat = (float*) malloc(n2 * sizeof(float));
-    for (int i = 0; i < n1; i++) {
-        cHat[i] = 0.0;
-        for (int j = 0; j < n2; j++) {
-            cHat[j] += Q[j*n2 + i] * e_k[i];
-        }
-    }
-    printf("n1: %d\n", n1);
-    printf("n2: %d\n", n2);
-    // print R
-    printf("R:\n");
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", R[i * n2 + j]);
-        }
-        printf("\n");
-    }
+// Function for setting the cHat vector, which is the k'th vector of the Q matrix
+// d_PointerCHat = the pointer to the cHat vector
+// d_PointerQ    = the pointer to the Q matrix
+// d_PointerI    = the pointer to the I vector
+// d_n1          = the number of rows in A
+// currentBatch  = the current batch
+// batchsize     = the batchsize for the cublas handle
+// maxn1         = the maximum number of rows in A
+__global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int currentBatch, int batchsize, int maxn1) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < maxn1 * maxn1 * batchsize) {
+        int b = tid / (maxn1 * maxn1);
+        int i = (tid % (maxn1 * maxn1)) / maxn1;
+        int j = (tid % (maxn1 * maxn1)) % maxn1;
+        int k = currentBatch * batchsize + b;
 
-    // f) compute mHat_k = R^-1 * cHat
-    // make the inverse of R of size n2 x n2
-    float* invR = (float*) malloc(n2 * n2 * sizeof(float));
-    int invSuccess = invBatched(cHandle, &R, n2, &invR);
+        float* d_cHat = d_PointerCHat[b];
+        float* d_Q = d_PointerQ[b];
+        int* d_I = d_PointerI[b];
 
-    printf("invR:\n");
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", invR[i * n2 + j]);
+        if (j == 0) {
+            d_cHat[i] = 0.0;
         }
-        printf("\n");
-    }
-    printf("after possible free\n");
-    for (int i = 0; i < n2; i++) {
-        (*mHat_k)[i] = 0.0;
-        for (int j = 0; j < n2; j++) {
-            (*mHat_k)[i] += invR[i * n2 + j] * cHat[j];
-        }
-    }
-    printf("mHat_k:\n");
-    for (int i = 0; i < n2; i++) {
-        printf("%f ", (*mHat_k)[i]);
-    }
+        __syncthreads();
 
-    printf("after m_hat\n");
-    // g) compute residual = A * mHat_k - e_k
-    // malloc space for residual
-    // do matrix multiplication
-    for (int i = 0; i < A->m; i++) {
-        residual[i] = 0.0;
-        for (int j = 0; j < n2; j++) {
-            for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
-                if (i == A->flatRowIndex[h]) {
-                    residual[i] += A->flatData[h] * (*mHat_k)[j];
-                }
+        if (i < d_n1[b]) {
+            if (k == d_I[i]) {
+                d_cHat[j] = d_Q[i * d_n1[b] + j];
             }
         }
-        if (i == k) {
-            residual[i] -= 1.0;
-        }
     }
-    printf("residual:\n");
-    for (int i = 0; i < A->m; i++) {
-        printf("%f ", residual[i]);
-    }
-    printf("\n");
+}
 
-    // compute the norm of the residual
-    *residualNorm = 0.0;
-    for (int i = 0; i < A->m; i++) {
-        *residualNorm += residual[i] * residual[i];
+// Function for computing the least squares problem
+// cHandle = the cublas handle
+// A = the sparse matrix
+// d_PointerQ = the pointer to the Q matrix
+// d_PointerR = the pointer to the R matrix
+// d_mHat_k = the pointer to the mHat_k vector
+// d_PointerResidual = the pointer to the residual vector
+// d_PointerI = the pointer to the I vector
+// d_PointerJ = the pointer to the J vector
+// d_n1 = the number of rows in A
+// d_n2 = the number of columns in A
+// k = the index of the column to be added
+// residualNorm = the norm of the residual
+// batchsize = the batchsize for the cublas handle
+int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_mHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
+    int numBlocks;
+    float* d_cHat;
+    float** d_PointerCHat;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_cHat, maxn1 * batchsize * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerCHat, batchsize * sizeof(float*)));
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn1);
+    
+    numBlocks = (maxn1 * maxn1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, currentBatch, batchsize, maxn1);
+
+    float* h_cHat = (float*) malloc(maxn1 * batchsize * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_cHat, d_cHat, maxn1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("--printing cHat--\n");
+    for (int b = 0; b < batchsize; b++) {
+        printf("batch %d\n", b);
+        for (int i = 0; i < maxn1; i++) {
+            printf("%f ", h_cHat[b * maxn1 + i]);
+        }
+        printf("\n");
     }
-    *residualNorm = sqrt(*residualNorm);
+
+    // float* d_invR;
+    // float** d_PointerInvR;
+
+    // gpuAssert(
+    //     cudaMalloc((void**) &d_invR, maxn2 * maxn2 * batchsize * sizeof(float)));
+    // gpuAssert(
+    //     cudaMalloc((void***) &d_PointerInvR, batchsize * sizeof(float*)));
+    // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    // deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
+    
+    // invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
+
 
     return 0;
 }
