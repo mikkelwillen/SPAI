@@ -299,8 +299,6 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
         printf("\n");
     }
 
-    // compute the new solution m_k for the least squares problem
-    LSProblem(cHandle, A, newQ, newR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
     
     float* tempM_k = (float*) malloc(n2Union * sizeof(float));
     memcpy(tempM_k, (*m_kOut), n2Union * sizeof(float));
