@@ -45,6 +45,24 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
     }
 }
 
+// function for computing mHat_k
+__global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, float** d_PointerCHat, int maxn2, int batchsize) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < maxn2 * batchsize) {
+        int b = tid / maxn2;
+        int i = tid % maxn2;
+
+        float* d_mHat_k = d_PointerMHat_k[b];
+        float* d_invR = d_PointerInvR[b];
+        float* d_cHat = d_PointerCHat[b];
+
+        d_mHat_k[i] = 0.0;
+        for (int j = 0; j < maxn2; j++) {
+            d_mHat_k[i] += d_invR[i * maxn2 + j] * d_cHat[j];
+        }
+    }
+}
+
 // Function for computing the least squares problem
 // cHandle = the cublas handle
 // A = the sparse matrix
@@ -59,8 +77,8 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
 // k = the index of the column to be added
 // residualNorm = the norm of the residual
 // batchsize = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_mHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
-    // set numBlocks;
+int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
+    // define the number of blocks
     int numBlocks;
 
     // create the cHat vector
@@ -107,6 +125,8 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_Poin
     // compute the invR matrices
     invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
 
+
+    // print the invR matrices
     float* h_invR = (float*) malloc(maxn2 * maxn2 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_invR, d_invR, maxn2 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
@@ -122,6 +142,10 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float** d_PointerQ, float** d_Poin
         printf("\n");
     }
 
+    // compute the mHat_k vectors
+    numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeMHat_k<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_PointerInvR, d_PointerCHat, maxn2, batchsize);
+    
     return 0;
 }
 

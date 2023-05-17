@@ -351,10 +351,23 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("\n");
         }
 
+        float* h_mHat_k = (float*) malloc(batchsize * maxn2 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_mHat_k, d_mHat_k, batchsize * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+
+        printf("--printing h_mHat_k--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn2; j++) {
+                printf("%f ", h_mHat_k[b * maxn2 + j]);
+            }
+            printf("\n");
+        }
 
 
 
 
+        
 
         // free memory
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
