@@ -64,12 +64,6 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
 
     // free memory
     gpuAssert(
-        cudaFree(d_AInv));
-    gpuAssert(
-        cudaFree(d_PointerA));
-    gpuAssert(
-        cudaFree(d_PointerAInv));
-    gpuAssert(
         cudaFree(d_info));
     free(h_info);
 
