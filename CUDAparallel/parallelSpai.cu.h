@@ -176,6 +176,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     }
 
     int numBlocks;
+    int iteration = 0;
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
@@ -316,7 +317,25 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
         
+        // check if the tolerance is met
+        float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
+        int toleranceCheck = 0;
+        gpuAssert(
+            cudaMemcpy(h_residualNorm, d_residualNorm, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         
+        for (int b = 0; b < batchsize; b++) {
+            if (h_residualNorm[b] > tol) {
+                toleranceCheck = 1;
+            }
+        }
+
+        // while the tolerance is not met, continue the loop
+        while (toleranceCheck && maxIterations > iteration) {
+            printf("\n-------Iteration: %d-------\n", iteration);
+            iteration++;
+
+            
+        }
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
         float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
