@@ -111,6 +111,7 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
         for (int i = 0; i < m; i++) {
             d_residualNorm[tid] += d_residual[i] * d_residual[i];
         }
+
         d_residualNorm[tid] = sqrt(d_residualNorm[tid]);
     }
 }
@@ -204,7 +205,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeNorm<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residualNorm, batchsize, maxn1);
+    computeNorm<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residualNorm, batchsize, A->m);
 
     float* h_residualNorm = (float*) malloc(sizeof(float) * batchsize);
     gpuAssert(
