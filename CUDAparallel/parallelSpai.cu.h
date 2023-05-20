@@ -390,6 +390,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, A->m, d_n1, i, batchsize);
 
+            int* d_KeepArray;
+            int** d_PointerKeepArray;
+
+            gpuAssert(
+                cudaMalloc((void**) &d_KeepArray, batchsize * A->n * sizeof(int)));
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerKeepArray, batchsize * sizeof(int*)));
+            
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_KeepArray, batchsize, A->n);
+
             int* h_l = (int*) malloc(batchsize * sizeof(int));
             gpuAssert(
                 cudaMemcpy(h_l, d_l, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
