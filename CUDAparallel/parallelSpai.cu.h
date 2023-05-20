@@ -189,6 +189,10 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
             }
         }
 
+        if (kNotInI) {
+            l++;
+        }
+
         d_l[tid] = l;
     }
 }
@@ -379,6 +383,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, A->m, d_n1, i, batchsize);
+
+            int* h_l = (int*) malloc(batchsize * sizeof(int));
+            gpuAssert(
+                cudaMemcpy(h_l, d_l, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            printf("--printing h_l--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("b: %d, l: %d\n", b, h_l[b]);
+            }
         }
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
