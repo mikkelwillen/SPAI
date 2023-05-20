@@ -101,6 +101,11 @@ __global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_P
     }
 }
 
+// function for computing the norm of the residual
+// d_PointerResidual = the pointer to the residual vector
+// d_residualNorm    = the pointer to the residual norm value
+// batchsize         = the batchsize
+// m                 = the number of rows in A
 __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, int batchsize, int m) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {

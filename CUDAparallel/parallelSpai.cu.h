@@ -15,14 +15,14 @@
 #include "helperKernels.cu.h"
 
 // kernel for computing I, J n1 and n2
-// d_A = device pointer to A
-// d_M = device pointer to M
-// d_PointerI = device pointer pointer to I
-// d_PointerJ = device pointer pointer to J
-// d_n1 = device pointer to n1
-// d_n2 = device pointer to n2
+// d_A          = device pointer to A
+// d_M          = device pointer to M
+// d_PointerI   = device pointer pointer to I
+// d_PointerJ   = device pointer pointer to J
+// d_n1         = device pointer to n1
+// d_n2         = device pointer to n2
 // currentBatch = the current batch
-// batchsize = the size of the batch
+// batchsize    = the size of the batch
 __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -77,17 +77,17 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
 }
 
 // kernel for computing Ahat
-// d_A = device pointer to A
-// d_AHat = device pointer pointer to AHat
-// d_PointerI = device pointer pointer to I
-// d_PointerJ = device pointer pointer to J
-// d_n1 = device pointer to n1
-// d_n2 = device pointer to n2
-// maxn1 = the maximum value of n1
-// maxn2 = the maximum value of n2
-// maxOffset = the maximum value of offset
+// d_A          = device pointer to A
+// d_AHat       = device pointer pointer to AHat
+// d_PointerI   = device pointer pointer to I
+// d_PointerJ   = device pointer pointer to J
+// d_n1         = device pointer to n1
+// d_n2         = device pointer to n2
+// maxn1        = the maximum value of n1
+// maxn2        = the maximum value of n2
+// maxOffset    = the maximum value of offset
 // currentBatch = the current batch
-// batchsize = the size of the batch
+// batchsize    = the size of the batch
 __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * maxOffset) {
@@ -142,7 +142,7 @@ __global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_
 // kernel for freeing I and J
 // d_PointerI = device pointer pointer to I
 // d_PointerJ = device pointer pointer to J
-// batchsize = the size of the batch
+// batchsize  = the size of the batch
 __global__ void freeIJ(int** d_PointerI, int** d_PointerJ, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -155,12 +155,50 @@ __global__ void freeIJ(int** d_PointerI, int** d_PointerJ, int batchsize) {
     }
 }
 
-// A = matrix we want to compute SPAI on
-// m, n = size of array
-// tolerance = tolerance
+// kernel for finding the length of L
+// d_l               = device pointer to l
+// d_PointerResidual = device pointer pointer to residual
+// d_PointerI        = device pointer pointer to I
+// m                 = the number of rows in A
+// n1                = the number of rows in AHat
+// currentBatch      = the current batch
+// batchsize         = the size of the batch
+__global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_PointerI, int m, int* d_n1, int currentBatch, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        int k = currentBatch * batchsize + tid;
+        int kNotInI = 0;
+
+        float* d_residual = d_PointerResidual[tid];
+        int* d_I = d_PointerI[tid];
+
+        int l = 0;
+        for (int i = 0; i < m; i++) {
+            if (d_residual[i] != 0.0) {
+                l++;
+            } else if (k == i) {
+                kNotInI = 1;
+            }
+        }
+
+        // check if k is in I
+        for (int i = 0; i < d_n1[tid]; i++) {
+            if (k == d_I[i]) {
+                kNotInI = 0;
+                break;
+            }
+        }
+
+        d_l[tid] = l;
+    }
+}
+
+// A            = matrix we want to compute SPAI on
+// m, n         = size of array
+// tolerance    = tolerance
 // maxIteration = constraint for the maximal number of iterations
-// s = number of rho_j - the most profitable indices
-// batchsize = number of matrices to be processed in parallel
+// s            = number of rho_j - the most profitable indices
+// batchsize    = number of matrices to be processed in parallel
 CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int batchsize) {
     printCSC(A);
 
@@ -319,22 +357,28 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         
         // check if the tolerance is met
         float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
-        int toleranceCheck = 0;
+        int toleranceNotMet = 0;
         gpuAssert(
             cudaMemcpy(h_residualNorm, d_residualNorm, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
         
         for (int b = 0; b < batchsize; b++) {
-            if (h_residualNorm[b] > tol) {
-                toleranceCheck = 1;
+            if (h_residualNorm[b] > tolerance) {
+                toleranceNotMet = 1;
             }
         }
 
         // while the tolerance is not met, continue the loop
-        while (toleranceCheck && maxIterations > iteration) {
+        while (toleranceNotMet && maxIterations > iteration) {
             printf("\n-------Iteration: %d-------\n", iteration);
             iteration++;
 
-            
+            int* d_l;
+
+            gpuAssert(
+                cudaMalloc((void**) &d_l, batchsize * sizeof(int)));
+
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, A->m, d_n1, i, batchsize);
         }
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
