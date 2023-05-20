@@ -313,8 +313,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
-        
-        
 
         LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
         

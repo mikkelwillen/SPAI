@@ -2,6 +2,7 @@
     "files.associations": {
         "*.le": "lisp",
         "stdio.h": "c",
-        "csc.h": "c"
+        "csc.h": "c",
+        "cmath": "cpp"
     }
 }

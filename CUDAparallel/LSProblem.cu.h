@@ -101,6 +101,20 @@ __global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_P
     }
 }
 
+__global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, int batchsize, int m) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+
+        float* d_residual = d_PointerResidual[tid];
+
+        d_residualNorm[tid] = 0.0;
+        for (int i = 0; i < m; i++) {
+            d_residualNorm[tid] += d_residual[i] * d_residual[i];
+        }
+        d_residualNorm[tid] = sqrt(d_residualNorm[tid]);
+    }
+}
+
 // Function for computing the least squares problem
 // cHandle           = the cublas handle
 // A                 = the sparse matrix
@@ -115,7 +129,7 @@ __global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_P
 // k                 = the index of the column to be added
 // residualNorm      = the norm of the residual
 // batchsize         = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* residualNorm, int batchsize) {
+int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
     // define the number of blocks
     int numBlocks;
 
@@ -188,7 +202,18 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, maxn2, currentBatch, batchsize);
 
-    
+    // compute the norm of the residual
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeNorm<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residualNorm, batchsize, maxn1);
+
+    float* h_residualNorm = (float*) malloc(sizeof(float) * batchsize);
+    gpuAssert(
+        cudaMemcpy(h_residualNorm, d_residualNorm, sizeof(float) * batchsize, cudaMemcpyDeviceToHost));
+
+    printf("--print residualNorm--\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("%f ", h_residualNorm[i]);
+    }
 
     return 0;
 }
