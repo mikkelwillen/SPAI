@@ -212,15 +212,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeNorm<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residualNorm, batchsize, A->m);
 
-    float* h_residualNorm = (float*) malloc(sizeof(float) * batchsize);
-    gpuAssert(
-        cudaMemcpy(h_residualNorm, d_residualNorm, sizeof(float) * batchsize, cudaMemcpyDeviceToHost));
-
-    printf("--print residualNorm--\n");
-    for (int i = 0; i < batchsize; i++) {
-        printf("%f ", h_residualNorm[i]);
-    }
-
     return 0;
 }
 

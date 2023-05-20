@@ -360,10 +360,15 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
         
         // check if the tolerance is met
-        float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
         int toleranceNotMet = 0;
+        float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_residualNorm, d_residualNorm, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        
+        printf("--printing h_residualNorm--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("%f ", h_residualNorm[b]);
+        }
         
         for (int b = 0; b < batchsize; b++) {
             if (h_residualNorm[b] > tolerance) {
