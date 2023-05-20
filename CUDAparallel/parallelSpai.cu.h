@@ -218,7 +218,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     }
 
     int numBlocks;
-    int iteration = 0;
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
@@ -234,6 +233,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
     for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
+        int iteration = 0;
         int** d_PointerI;
         int** d_PointerJ;
         int* d_n1;
