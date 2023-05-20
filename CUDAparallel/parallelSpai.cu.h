@@ -375,6 +375,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 toleranceNotMet = 1;
             }
         }
+        printf("toleranceNotMet: %d\n", toleranceNotMet);
 
         // while the tolerance is not met, continue the loop
         while (toleranceNotMet && maxIterations > iteration) {
