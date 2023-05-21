@@ -163,7 +163,7 @@ __global__ void freeIJ(int** d_PointerI, int** d_PointerJ, int batchsize) {
 // n1                = the number of rows in AHat
 // currentBatch      = the current batch
 // batchsize         = the size of the batch
-__global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_PointerI, int m, int* d_n1, int currentBatch, int batchsize) {
+__global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_PointerI, int** d_PointerL, int m, int* d_n1, int currentBatch, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int k = currentBatch * batchsize + tid;
@@ -171,6 +171,7 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
 
         float* d_residual = d_PointerResidual[tid];
         int* d_I = d_PointerI[tid];
+        int* d_L = d_PointerL[tid];
 
         int l = 0;
         for (int i = 0; i < m; i++) {
@@ -194,6 +195,95 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
         }
 
         d_l[tid] = l;
+
+        // malloc space for L and fill it
+        d_L = (int*) malloc(l * sizeof(int));
+
+        int index = 0;
+        for (int i = 0; i < m; i++) {
+            if (d_residual[i] != 0.0) {
+                d_L[index] = i;
+                index++;
+            } else if (k == i && kNotInI) {
+                d_L[index] = i;
+                index++;
+            }
+        }
+    }
+}
+
+__global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_PointerL, int** d_PointerJ, int maxn2, int* d_l, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    int n = d_A->n;
+    if (tid < n * batchsize) {
+        int b = tid / n;
+        int i = tid % n;
+
+        int* d_KeepArray = d_PointerKeepArray[b];
+        int* d_L = d_PointerL[b];
+        int* d_J = d_PointerJ[b];
+
+        if (i == 0) {
+            d_KeepArray[i] = 0;
+        }
+    
+
+        for (int j = 0; j < d_l[b]; j++) {
+            for (int h = d_A->offset[i]; h < d_A->offset[i + 1]; h++) {
+                if (d_A->flatRowIndex[h] == d_L[j]) {
+                    d_KeepArray[i] = 1;
+                }
+            }
+        }
+
+        // remove the indeces that are already in J
+        for (int i = 0; i < maxn2; i++) {
+            d_KeepArray[d_J[i]] = 0;
+        }
+    }
+}
+
+// kernel for finding the length of n2Tilde
+// d_PointerKeepArray = device pointer pointer to keepArray
+// d_n2Tilde          = device pointer to n2Tilde
+// batchsize          = the size of the batch
+__global__ void computeN2Tilde(int** d_PointerKeepArray, int* d_n2Tilde, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        int* d_KeepArray = d_PointerKeepArray[tid];
+
+        int n2Tilde = 0;
+        for (int i = 0; i < d_n2Tilde[tid]; i++) {
+            if (d_KeepArray[i]) {
+                n2Tilde++;
+            }
+        }
+
+        d_n2Tilde[tid] = n2Tilde;
+    }
+}
+
+// kernel for setting JTilde
+// d_PointerKeepArray = device pointer pointer to keepArray
+// d_PointerJTilde    = device pointer pointer to JTilde
+// n                  = the number of columns in A
+// batchsize          = the size of the batch
+__global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, int* d_N2Tilde, int n, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        int* d_KeepArray = d_PointerKeepArray[tid];
+        int* d_JTilde = d_PointerJTilde[tid];
+        int n2Tilde = d_N2Tilde[tid];
+
+        d_JTilde = (int*) malloc(n2Tilde * sizeof(int));
+
+        int index = 0;
+        for (int i = 0; i < n; i++) {
+            if (d_KeepArray[i]) {
+                d_JTilde[index] = i;
+                index++;
+            }
+        }
     }
 }
 
@@ -317,7 +407,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
 
-        
+
         gpuAssert(
             cudaMalloc((void**) &d_R, batchsize * maxn1 * maxn2 * sizeof(float)));
         gpuAssert(
@@ -382,14 +472,19 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("\n-------Iteration: %d-------\n", iteration);
             iteration++;
 
+            // compute the length of L and set L
             int* d_l;
+            int** d_PointerL;
 
             gpuAssert(
                 cudaMalloc((void**) &d_l, batchsize * sizeof(int)));
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerL, batchsize * sizeof(int*)));
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, A->m, d_n1, i, batchsize);
+            computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, d_PointerL, A->m, d_n1, i, batchsize);
 
+            // check what indeces to keep
             int* d_KeepArray;
             int** d_PointerKeepArray;
 
@@ -401,6 +496,26 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_KeepArray, batchsize, A->n);
 
+            numBlocks = (batchsize * A->n + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeKeepArray<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerKeepArray, d_PointerL, d_PointerJ, maxn2, d_l, batchsize);
+
+            int* d_n2Tilde;
+            gpuAssert(
+                cudaMalloc((void**) &d_n2Tilde, batchsize * sizeof(int)));
+            
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeN2Tilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_n2Tilde, batchsize);
+
+            // fill JTilde
+            int** d_PointerJTilde;
+
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerJTilde, batchsize * sizeof(int*)));
+            
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeJTilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_PointerJTilde, A->n, batchsize);
+
+
             int* h_l = (int*) malloc(batchsize * sizeof(int));
             gpuAssert(
                 cudaMemcpy(h_l, d_l, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
@@ -408,6 +523,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             for (int b = 0; b < batchsize; b++) {
                 printf("b: %d, l: %d\n", b, h_l[b]);
             }
+
+            int* h_Jtilde = (int*) malloc(batchsize * A->n * sizeof(int));
         }
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
