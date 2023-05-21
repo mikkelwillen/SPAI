@@ -316,4 +316,45 @@ __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float**
     }
 }
 
+// kernel for finding the index of the maximum rho squared
+// d_PointerRhoSquared      = device pointer pointer to rhoSquared
+// d_PointerSmallestIndices = device pointer pointer to smallestIndices
+// d_PointerSmallestJTilde  = device pointer pointer to smallestJTilde
+// d_newN2Tilde             = device pointer to newN2Tilde
+// d_n2Tilde                = device pointer to n2Tilde
+// s                        = the number of indices to keep
+// batchsize                = the size of the batch
+__global__ void computeSmallestIndices(float** d_PointerRhoSquared, int** d_PointerSmallestIndices, int** d_PointerSmallestJTilde, int** d_PointerJTilde, int* d_newN2Tilde, int* d_n2Tilde, int s, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        float* d_rhoSquared = d_PointerRhoSquared[tid];
+        int* d_smallestIndices = d_PointerSmallestIndices[tid];
+        int* d_smallestJTilde = d_PointerSmallestJTilde[tid];
+        int* d_JTilde = d_PointerJTilde[tid];
+
+        d_newN2Tilde[tid] = MIN(s, d_n2Tilde[tid]);
+
+        for (int i = 0; i < d_newN2Tilde[tid]; i++) {
+            d_smallestIndices[i] = -1;
+        }
+
+        // jeg tror altså ikke det her er rigtigt
+        for (int i = 0; i < d_n2Tilde[tid]; i++) {
+            for (int j = 0; j < d_newN2Tilde[tid]; j++) {
+                if (d_smallestIndices[j] == -1) {
+                    d_smallestIndices[j] = i;
+                } else if (d_rhoSquared[i] < d_rhoSquared[d_smallestIndices[j]]) {
+                    for (int h = d_newN2Tilde[tid] - 1; h > j; h--) {
+                        d_smallestIndices[h] = d_smallestIndices[h - 1];
+                    }
+                }
+            }
+        }
+
+        for (int i = 0; i < d_newN2Tilde[tid]; i++) {
+            d_smallestJTilde[i] = d_JTilde[d_smallestIndices[i]];
+        }
+    }
+}
+
 #endif
