@@ -212,7 +212,7 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
     }
 }
 
-__global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_PointerL, int** d_PointerJ, int maxn2, int* d_l, int batchsize) {
+__global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_PointerL, int** d_PointerJ, int* d_n2, int* d_l, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int n = d_A->n;
     if (tid < n * batchsize) {
@@ -222,6 +222,7 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
         int* d_KeepArray = d_PointerKeepArray[b];
         int* d_L = d_PointerL[b];
         int* d_J = d_PointerJ[b];
+        int n2 = d_n2[b];
 
         if (i == 0) {
             d_KeepArray[i] = 0;
@@ -237,7 +238,7 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
         }
 
         // remove the indeces that are already in J
-        for (int i = 0; i < maxn2; i++) {
+        for (int i = 0; i < n2; i++) {
             d_KeepArray[d_J[i]] = 0;
         }
     }
@@ -497,7 +498,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_KeepArray, batchsize, A->n);
 
             numBlocks = (batchsize * A->n + BLOCKSIZE - 1) / BLOCKSIZE;
-            computeKeepArray<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerKeepArray, d_PointerL, d_PointerJ, maxn2, d_l, batchsize);
+            computeKeepArray<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerKeepArray, d_PointerL, d_PointerJ, d_n2, d_l, batchsize);
 
             int* d_n2Tilde;
             gpuAssert(
