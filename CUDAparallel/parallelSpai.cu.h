@@ -511,8 +511,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             gpuAssert(
                 cudaMalloc((void**) &d_PointerJTilde, batchsize * sizeof(int*)));
             
-            // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            // computeJTilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_PointerJTilde, d_n2Tilde, A->n, batchsize);
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeJTilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_PointerJTilde, d_n2Tilde, A->n, batchsize);
 
 
             int* h_l = (int*) malloc(batchsize * sizeof(int));
