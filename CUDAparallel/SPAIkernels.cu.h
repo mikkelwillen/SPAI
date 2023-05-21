@@ -309,6 +309,8 @@ __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float**
             Ae_jNorm = sqrt(Ae_jNorm);
 
             d_rhoSquared[i] = d_residualNorm[b] * d_residualNorm[b] - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
+        } else {
+            d_rhoSquared[i] = 0.0;
         }
     }
 }
