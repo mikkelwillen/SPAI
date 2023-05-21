@@ -235,10 +235,10 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
             }
         }
 
-        // // remove the indeces that are already in J
-        // for (int i = 0; i < n2; i++) {
-        //     d_KeepArray[d_J[i]] = 0;
-        // }
+        // remove the indeces that are already in J
+        for (int i = 0; i < n2; i++) {
+            d_KeepArray[d_J[i]] = 0;
+        }
     }
 }
 
