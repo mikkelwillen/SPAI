@@ -294,7 +294,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerSmallestJTilde, batchsize * sizeof(int*)));
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestJTilde, d_smallestJTilde, batchsize, s);
+            iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestJTilde, d_smallestJTilde, batchsize, s);
         
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeSmallestIndices<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_PointerSmallestIndices, d_PointerSmallestJTilde, d_PointerJTilde, d_newN2Tilde, d_n2Tilde, s, batchsize);
