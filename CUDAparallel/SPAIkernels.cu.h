@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <cuda.h>
+#include <math.h>
 #include "csc.cu.h"
 
 // kernel for computing I, J n1 and n2
@@ -273,6 +274,41 @@ __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, i
                 d_JTilde[index] = i;
                 index++;
             }
+        }
+    }
+}
+
+// kernel for computing rho squared
+// d_A                 = device pointer to A
+// d_PointerRhoSquared = device pointer pointer to rhoSquared
+// d_PointerResidual   = device pointer pointer to residual
+// d_PointerJTilde     = device pointer pointer to JTilde
+// d_n2Tilde           = device pointer to n2Tilde
+// maxn2Tilde          = the maximum length of n2Tilde
+// batchsize           = the size of the batch
+__global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float** d_PointerResidual, int** d_PointerJTilde, float* d_residualNorm, int* d_n2Tilde, int maxn2Tilde, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn2Tilde) {
+        int b = tid / maxn2Tilde;
+        int i = tid % maxn2Tilde;
+
+        float* d_rhoSquared = d_PointerRhoSquared[b];
+        float* d_residual = d_PointerResidual[b];
+        int* d_JTilde = d_PointerJTilde[b];
+
+        if (i > d_n2Tilde[b]) {
+            float rTAe_j = 0.0;
+            for (int j = d_A->offset[d_JTilde[i]]; j < d_A->offset[d_JTilde[i] + 1]; j++) {
+                rTAe_j += d_A->flatData[j] * d_residual[d_A->flatRowIndex[j]];
+            }
+
+            float Ae_jNorm = 0.0;
+            for (int j = d_A->offset[d_JTilde[i]]; j < d_A->offset[d_JTilde[i] + 1]; j++) {
+                Ae_jNorm += d_A->flatData[j] * d_A->flatData[j];
+            }
+            Ae_jNorm = sqrt(Ae_jNorm);
+
+            d_rhoSquared[i] = d_residualNorm[b] * d_residualNorm[b] - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
         }
     }
 }

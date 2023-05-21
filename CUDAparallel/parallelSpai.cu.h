@@ -256,13 +256,19 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeJTilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_PointerJTilde, d_n2Tilde, A->n, batchsize);
 
+            float* d_rhoSquared;
             float** d_PointerRhoSquared;
 
             gpuAssert(
+                cudaMalloc((void**) &d_rhoSquared, batchsize * maxn2Tilde * sizeof(float)));
+            gpuAssert(
                 cudaMalloc((void**) &d_PointerRhoSquared, batchsize * sizeof(float*)));
+
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_rhoSquared, batchsize, maxn2Tilde);
             
-            // numBlocks = (batchsize * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
-            // computeRhoSquared<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerRhoSquared, d_PointerResidual, d_PointerJTilde, d_n2Tilde, batchsize);
+            numBlocks = (batchsize * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeRhoSquared<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerRhoSquared, d_PointerResidual, d_PointerJTilde, d_residualNorm, d_n2Tilde, maxn2Tilde, batchsize);
 
             int* h_l = (int*) malloc(batchsize * sizeof(int));
             gpuAssert(
@@ -272,7 +278,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 printf("b: %d, l: %d\n", b, h_l[b]);
             }
 
-            int* h_Jtilde = (int*) malloc(batchsize * A->n * sizeof(int));
+            float* h_rhoSquared = (float*) malloc(batchsize * maxn2Tilde * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(h_rhoSquared, d_rhoSquared, batchsize * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
+            printf("--printing h_rhoSquared--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("b: %d\n", b);
+                for (int j = 0; j < maxn2Tilde; j++) {
+                    printf("%f ", h_rhoSquared[b * maxn2Tilde + j]);
+                }
+                printf("\n");
+            }
         }
 
         float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
