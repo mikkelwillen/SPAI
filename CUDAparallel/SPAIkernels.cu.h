@@ -263,10 +263,9 @@ __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, i
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int* d_KeepArray = d_PointerKeepArray[tid];
-        int* d_JTilde = d_PointerJTilde[tid];
         int n2Tilde = d_N2Tilde[tid];
 
-        d_JTilde = (int*) malloc(n2Tilde * sizeof(int));
+        int* d_JTilde = (int*) malloc(n2Tilde * sizeof(int));
 
         int index = 0;
         for (int i = 0; i < n; i++) {
@@ -275,6 +274,8 @@ __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, i
                 index++;
             }
         }
+
+        d_PointerJTilde[tid] = d_JTilde;
     }
 }
 
