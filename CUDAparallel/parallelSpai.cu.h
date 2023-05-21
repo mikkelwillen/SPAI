@@ -196,7 +196,7 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
         d_l[tid] = l;
 
         // malloc space for L and fill it
-        d_L = (int*) malloc(l * sizeof(int));
+        int* d_L = (int*) malloc(l * sizeof(int));
 
         int index = 0;
         for (int i = 0; i < m; i++) {
@@ -208,7 +208,7 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
                 index++;
             }
         }
-        
+
         d_PointerL[tid] = d_L;
     }
 }
