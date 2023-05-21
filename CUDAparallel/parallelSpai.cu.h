@@ -83,10 +83,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         int maxn1 = 0;
         int maxn2 = 0;
         for (int j = 0; j < batchsize; j++) {
-            if (n1[j] > maxn1) {
+            if (h_n1[j] > maxn1) {
                 maxn1 = h_n1[j];
             }
-            if (n2[j] > maxn2) {
+            if (h_n2[j] > maxn2) {
                 maxn2 = h_n2[j];
             }
         }
