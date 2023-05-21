@@ -224,10 +224,7 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
         int* d_J = d_PointerJ[b];
         int n2 = d_n2[b];
 
-        if (i == 0) {
-            d_KeepArray[i] = 0;
-        }
-    
+        d_KeepArray[i] = 0;    
 
         for (int j = 0; j < d_l[b]; j++) {
             for (int h = d_A->offset[i]; h < d_A->offset[i + 1]; h++) {
