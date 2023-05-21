@@ -228,9 +228,9 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
 
         for (int j = 0; j < d_l[b]; j++) {
             for (int h = d_A->offset[i]; h < d_A->offset[i + 1]; h++) {
-            //     if (d_A->flatRowIndex[h] == d_L[j]) {
+                if (d_A->flatRowIndex[h] == d_L[j]) {
             //         d_KeepArray[i] = 1;
-            //     }
+                }
             }
         }
 
