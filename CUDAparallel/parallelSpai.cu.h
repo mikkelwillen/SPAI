@@ -247,13 +247,13 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
 // d_PointerKeepArray = device pointer pointer to keepArray
 // d_n2Tilde          = device pointer to n2Tilde
 // batchsize          = the size of the batch
-__global__ void computeN2Tilde(int** d_PointerKeepArray, int* d_n2Tilde, int batchsize) {
+__global__ void computeN2Tilde(int** d_PointerKeepArray, int* d_n2Tilde, int n, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int* d_KeepArray = d_PointerKeepArray[tid];
 
         int n2Tilde = 0;
-        for (int i = 0; i < d_n2Tilde[tid]; i++) {
+        for (int i = 0; i < n; i++) {
             if (d_KeepArray[i]) {
                 n2Tilde++;
             }
@@ -504,7 +504,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_n2Tilde, batchsize * sizeof(int)));
             
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            computeN2Tilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_n2Tilde, batchsize);
+            computeN2Tilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_n2Tilde, A->n, batchsize);
 
             // fill JTilde
             int** d_PointerJTilde;
