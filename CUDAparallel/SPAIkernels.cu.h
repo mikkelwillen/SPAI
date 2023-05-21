@@ -296,7 +296,7 @@ __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float**
         float* d_residual = d_PointerResidual[b];
         int* d_JTilde = d_PointerJTilde[b];
 
-        if (i > d_n2Tilde[b]) {
+        if (i < d_n2Tilde[b]) {
             float rTAe_j = 0.0;
             for (int j = d_A->offset[d_JTilde[i]]; j < d_A->offset[d_JTilde[i] + 1]; j++) {
                 rTAe_j += d_A->flatData[j] * d_residual[d_A->flatRowIndex[j]];
