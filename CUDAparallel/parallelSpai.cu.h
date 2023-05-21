@@ -171,7 +171,6 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
 
         float* d_residual = d_PointerResidual[tid];
         int* d_I = d_PointerI[tid];
-        int* d_L = d_PointerL[tid];
 
         int l = 0;
         for (int i = 0; i < m; i++) {
@@ -209,6 +208,8 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
                 index++;
             }
         }
+        
+        d_PointerL[tid] = d_L;
     }
 }
 
