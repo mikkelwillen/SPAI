@@ -276,3 +276,5 @@ __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, i
         }
     }
 }
+
+#endif
