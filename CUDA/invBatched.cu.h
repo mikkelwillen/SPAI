@@ -97,9 +97,9 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     for (int i = 0; i < BATCHSIZE; i++) {
         if (h_info[i] != 0) {
             printf("\nError: Matrix %d is singular\n", i);
-        }
 
-        return 1;
+            return 1;
+        }
     }
 
     // copy result back to host
