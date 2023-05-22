@@ -454,23 +454,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
                 printf("\n");
             }
-
-            // l) Set I = I U ITilde and J = J U JTilde to use in the next iteration
-            // update values for the next iteration of the for loop
-            n1 = n1Union;
-            n2 = n2Union;
-            printf("before free I and J\n");
-            free(I);
-            free(J);
-            I = (int*) malloc(sizeof(int) * n1);
-            J = (int*) malloc(sizeof(int) * n2);
-            for (int i = 0; i < n1; i++) {
-                I[i] = IUnion[i];
-            }
-            for (int i = 0; i < n2; i++) {
-                J[i] = JUnion[i];
-            }
-            printf("after free I and J\n");
             
             // free memory
             free(L);
