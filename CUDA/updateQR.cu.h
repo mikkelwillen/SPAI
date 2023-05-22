@@ -389,7 +389,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    printf("I:\n");
+    printf("I (after pr * I):\n");
     for (int i = 0; i < n1Union; i++) {
         printf("%d ", I[i]);
     }
