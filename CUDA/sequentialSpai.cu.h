@@ -176,6 +176,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             int* smallestIndices;
             int* smallestJTilde;
 
+            printf("print I");
+            for (int i = 0; i < n1; i++) {
+                printf("%d ", I[i]);
+            }
+
             // a) Set L to the set of indices where r(l) != 0
             // count the numbers of nonzeros in residual
             for (int i = 0; i < A->m; i++) {
