@@ -81,8 +81,10 @@ int main(int argc, char** argv) {
         freeCSC(cscA);
         freeCSC(cscB);
         freeCSC(cscC);
-        freeCSC(res);
-    
+        if (res != NULL) {
+            freeCSC(res);
+        }
+
         free(A);
         free(B);
         free(C);
