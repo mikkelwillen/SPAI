@@ -59,7 +59,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     // malloc space for AInv
     gpuAssert(
         cudaMalloc((void**) &d_AInv, AMemSize));
-    printf("after cudaMalloc d_AInv\n")
+    printf("after cudaMalloc d_AInv\n");
     gpuAssert(
         cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
     printf("after cudaMalloc d_PointerAInv\n");
