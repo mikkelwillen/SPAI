@@ -155,14 +155,14 @@ int main(int argc, char** argv) {
         struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
         printf("hallo?\n");
     
-        int* I = (int*) malloc(sizeof(int) * 3);
-        int* J = (int*) malloc(sizeof(int) * 3);
-        for (int i = 0; i < 3; i++) {
+        int* I = (int*) malloc(sizeof(int) * 40);
+        int* J = (int*) malloc(sizeof(int) * 40);
+        for (int i = 0; i < 40; i++) {
             I[i] = i;
             J[i] = i;
         }
-        float* CDense = CSCToDense(cscC, I, J, 3, 3);
-        float* resDense = CSCToDense(res, I, J, 3, 3);
+        float* CDense = CSCToDense(cscC, I, J, 40, 40);
+        float* resDense = CSCToDense(res, I, J, 40, 40);
         
         // multiply CDense with resDense
         float* identity = (float*) malloc(sizeof(float) * 40 * 40);
