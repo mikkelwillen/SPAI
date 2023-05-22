@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
         
     
         
-        struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
+        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 1);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * 40);
