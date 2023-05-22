@@ -404,8 +404,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("freed AITildeJTilde\n");
     free(ABreve);
     printf("freed ABreve\n");
-    free(ATilde);
-    printf("freed ATilde\n");
+    // free(ATilde);
+    // printf("freed ATilde\n");
     free(Pr);
     printf("freed Pr\n");
     free(Pc);
@@ -426,7 +426,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("freed unsortedQ\n");
     free(unsortedR);
     printf("freed unsortedR\n");
-    
+
     free(tempM_k);
     printf("freed tempM_k\n");
 
