@@ -460,6 +460,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 printf("\n");
             }
 
+            // print I
+            printf("\nI: ");
+            for (int i = 0; i < n1; i++) {
+                printf("%d ", I[i]);
+            }
+
             n1 = n1Union;
             n2 = n2Union;
             
