@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
             J[i] = i;
         }
         float* CDense = CSCToDense(cscC, I, J, n, n);
-        prinft("After CSCToDense\n");
+        printf("After CSCToDense\n");
         float* resDense = CSCToDense(res, I, J, n, n);
         printf("After CSCToDense\n");
         
