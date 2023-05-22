@@ -454,6 +454,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
                 printf("\n");
             }
+
+            n1 = n1Union;
+            n2 = n2Union;
             
             // free memory
             free(L);
