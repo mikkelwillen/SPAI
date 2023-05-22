@@ -307,7 +307,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < newN2Tilde; i++) {
                 smallestIndices[i] = -1;
             }
-
+            
+            // we iterate through rhoSq and find the smallest indeces
+            // first, we set the first s indeces to the first s indeces of JTilde
+            // then if we find a smaller rhoSq, we shift the indeces to the right
+            // we insert the index of JTilde with the rhoSq smaller than the current smallest elements
+            // smallestIndices then contain the indeces of JTIlde corresponding to the smallest values of rhoSq
             for (int i = 0; i < n2Tilde; i++) {
                 for (int j = 0; j < newN2Tilde; j++) {
                     if (smallestIndices[j] == -1) {
@@ -316,6 +321,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                         for (int h = newN2Tilde - 1; h > j; h--) {
                             smallestIndices[h] = smallestIndices[h - 1];
                         }
+
+                        smallestIndices[j] = i;
                     }
                 }
             }
