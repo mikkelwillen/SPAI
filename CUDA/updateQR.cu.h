@@ -11,17 +11,17 @@
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
 
-int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
+int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
-    float* AIJTilde = CSCToDense(A, I, JTilde, n1, n2Tilde);
+    float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
 
     // print AIJTilde
     printf("AIJTilde:\n");
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", AIJTilde[i*n2Tilde + j]);
+            printf("%f ", AIJTilde[i * n2Tilde + j]);
         }
         printf("\n");
     }
@@ -45,28 +45,28 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     // set upper left square to AHat of size n1 x n2
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
-            ATilde[i*n2Union + j] = (*AHat)[i*n2 + j];
+            ATilde[i*n2Union + j] = (*AHat)[i * n2 + j];
         }
     }
 
     // set upper right square to AIJTilde of size n1 x n2Tilde
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            ATilde[i*n2Union + n2 + j] = AIJTilde[i*n2Tilde + j];
+            ATilde[i * n2Union + n2 + j] = AIJTilde[i * n2Tilde + j];
         }
     }
 
     // set lower left square to zeros of size n1Tilde x n2
     for (int i = 0; i < n1Tilde; i++) {
         for (int j = 0; j < n2; j++) {
-            ATilde[(n1 + i)*n2Union + j] = 0;
+            ATilde[(n1 + i) * n2Union + j] = 0;
         }
     }
 
     // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
     for (int i = 0; i < n1Tilde; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            ATilde[(n1 + i)*n2Union + n2 + j] = AITildeJTilde[i*n2Tilde + j];
+            ATilde[(n1 + i) * n2Union + n2 + j] = AITildeJTilde[i * n2Tilde + j];
         }
     }
 
@@ -74,7 +74,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("ATilde:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            printf("%f ", ATilde[i*n2Union + j]);
+            printf("%f ", ATilde[i * n2Union + j]);
         }
         printf("\n");
     }
@@ -103,9 +103,9 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* ABreve = (float*)malloc(n1 * n2Tilde * sizeof(float));
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            ABreve[i*n2Tilde + j] = 0;
+            ABreve[i * n2Tilde + j] = 0;
             for (int k = 0; k < n1; k++) {
-                ABreve[i*n2Tilde + j] += (*Q)[k*n1 + i] * AIJTilde[k*n2Tilde + j];
+                ABreve[i * n2Tilde + j] += (*Q)[k * n1 + i] * AIJTilde[k * n2Tilde + j];
             }
         }
     }
@@ -113,7 +113,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("ABreve:\n");
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", ABreve[i*n2Tilde + j]);
+            printf("%f ", ABreve[i * n2Tilde + j]);
         }
         printf("\n");
     }
@@ -122,7 +122,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* B1 = (float*) malloc(n2 * n2Tilde * sizeof(float));
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            B1[i*n2Tilde + j] = ABreve[i*n2Tilde + j];
+            B1[i * n2Tilde + j] = ABreve[i * n2Tilde + j];
         }
     }
 
@@ -163,7 +163,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("B2:\n");
     for (int i = 0; i < n1Union - n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B2[i*n2Tilde + j]);
+            printf("%f ", B2[i * n2Tilde + j]);
         }
         printf("\n");
     }
@@ -177,7 +177,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("B2Q:\n");
     for (int i = 0; i < n1Union - n2; i++) {
         for (int j = 0; j < n1Union - n2; j++) {
-            printf("%f ", B2Q[i*(n1Union - n2) + j]);
+            printf("%f ", B2Q[i * (n1Union - n2) + j]);
         }
         printf("\n");
     }
@@ -186,7 +186,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("B2R:\n");
     for (int i = 0; i < n1Union - n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B2R[i*n2Tilde + j]);
+            printf("%f ", B2R[i * n2Tilde + j]);
         }
         printf("\n");
     }
@@ -197,23 +197,23 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* firstMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            firstMatrix[i*n1Union + j] = 0.0;
+            firstMatrix[i * n1Union + j] = 0.0;
         }
     }
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
-            firstMatrix[i*n1Union + j] = (*Q)[i*n1 + j];
+            firstMatrix[i * n1Union + j] = (*Q)[i*n1 + j];
         }
     }
     for (int i = 0; i < n1Tilde; i++) {
-        firstMatrix[(n1 + i)*n1Union + n1 + i] = 1.0;
+        firstMatrix[(n1 + i) * n1Union + n1 + i] = 1.0;
     }
 
     // print firstMatrix
     printf("firstMatrix:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            printf("%f ", firstMatrix[i*n1Union + j]);
+            printf("%f ", firstMatrix[i * n1Union + j]);
         }
         printf("\n");
     }
@@ -223,7 +223,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* secondMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            secondMatrix[i*n1Union + j] = 0.0;
+            secondMatrix[i * n1Union + j] = 0.0;
         }
     }
     for (int i = 0; i < n2; i++) {
@@ -259,7 +259,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("unsortedQ:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
-            printf("%f ", unsortedQ[i*n1Union + j]);
+            printf("%f ", unsortedQ[i * n1Union + j]);
         }
         printf("\n");
     }
@@ -268,25 +268,25 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* unsortedR = (float*) malloc(n1Union * n2Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            unsortedR[i*n2Union + j] = 0.0;
+            unsortedR[i * n2Union + j] = 0.0;
         }
     }
 
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
-            unsortedR[i*n2Union + j] = (*R)[i*n2 + j];
+            unsortedR[i * n2Union + j] = (*R)[i * n2 + j];
         }
     }
 
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            unsortedR[i*n2Union + n2 + j] = B1[i*n2Tilde + j];
+            unsortedR[i * n2Union + n2 + j] = B1[i * n2Tilde + j];
         }
     }
 
     for (int i = 0; i < n1Tilde; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            unsortedR[(n2 + i)*n2Union + n2 + j] = B2R[i*n2Tilde + j];
+            unsortedR[(n2 + i) * n2Union + n2 + j] = B2R[i * n2Tilde + j];
         }
     }
 
@@ -294,7 +294,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("B1:\n");
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B1[i*n2Tilde + j]);
+            printf("%f ", B1[i * n2Tilde + j]);
         }
         printf("\n");
     }
@@ -303,7 +303,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("unsortedR:\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
-            printf("%f ", unsortedR[i*n2Union + j]);
+            printf("%f ", unsortedR[i * n2Union + j]);
         }
         printf("\n");
     }
@@ -376,35 +376,35 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    free(I);
-    free(J);
-    I = (int*) malloc(n1Union * sizeof(int));
-    J = (int*) malloc(n2Union * sizeof(int));
+    free(*I);
+    free(*J);
+    (*I) = (int*) malloc(n1Union * sizeof(int));
+    (*J) = (int*) malloc(n2Union * sizeof(int));
     
     // compute pr * I
     for (int i = 0; i < n1Union; i++) {
-        I[i] = 0;
+        (*I)[i] = 0;
         for (int j = 0; j < n1Union; j++) {
-            I[i] += Pr[i * n1Union + j] * IUnion[j];
+            (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
         }
     }
 
     printf("I (after pr * I):\n");
     for (int i = 0; i < n1Union; i++) {
-        printf("%d ", I[i]);
+        printf("%d ", (*I)[i]);
     }
 
     // compute J * pc
     for (int i = 0; i < n2Union; i++) {
-        J[i] = 0;
+        (*J)[i] = 0;
         for (int j = 0; j < n2Union; j++) {
-            J[i] += JUnion[i] * Pc[i * n2Union + j];
+            (*J)[i] += JUnion[i] * Pc[i * n2Union + j];
         }
     }
 
     printf("J:\n");
     for (int i = 0; i < n2Union; i++) {
-        printf("%d ", J[i]);
+        printf("%d ", (*J)[i]);
     }
 
     // free memory
