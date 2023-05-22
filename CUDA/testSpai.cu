@@ -165,20 +165,20 @@ int main(int argc, char** argv) {
         float* resDense = CSCToDense(res, I, J, 3, 3);
         
         // multiply CDense with resDense
-        float* identity = (float*) malloc(sizeof(float) * 3 * 3);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3;j++) {
-                identity[i * 3 + j] = 0.0;
-                for (int k = 0; k < 3; k++) {
-                    identity[i * 3 + j] += CDense[i * 3 + k] * resDense[k * 3 + j];
+        float* identity = (float*) malloc(sizeof(float) * 40 * 40);
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 40;j++) {
+                identity[i * 40 + j] = 0.0;
+                for (int k = 0; k < 40; k++) {
+                    identity[i * 40 + j] += CDense[i * 40 + k] * resDense[k * 40 + j];
                 }
             }
         }
     
         printf("identity:\n");
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3;j++) {
-                printf("%f ", identity[i * 3 + j]);
+        for (int i = 0; i < 40; i++) {
+            for (int j = 0; j < 40;j++) {
+                printf("%f ", identity[i * 40 + j]);
             }
             printf("\n");
         }
