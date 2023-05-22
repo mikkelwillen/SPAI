@@ -132,7 +132,7 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
         B2 = (float*) malloc(n1Tilde * n2Tilde * sizeof(float));
         for (int i = 0; i < n1Tilde; i++) {
             for (int j = 0; j < n2Tilde; j++) {
-                B2[i*n2Tilde + j] += AITildeJTilde[i*n2Tilde + j];
+                B2[i * n2Tilde + j] += AITildeJTilde[i * n2Tilde + j];
             }
         }
     } else {
@@ -149,6 +149,14 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
         }
     }
     
+    // print AITildeJTilde
+    printf("AITildeJTilde:\n");
+    for (int i = 0; i < n1Tilde; i++) {
+        for (int j = 0; j < n2Tilde; j++) {
+            printf("%f ", AITildeJTilde[i * n2Tilde + j]);
+        }
+        printf("\n");
+    }
 
     // print B2
     printf("B2:\n");
