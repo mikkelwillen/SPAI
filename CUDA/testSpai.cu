@@ -77,6 +77,7 @@ int main(int argc, char** argv) {
         // }
     
         // free memory
+        printf("freeing memory\n");
         freeCSC(cscA);
         freeCSC(cscB);
         freeCSC(cscC);
