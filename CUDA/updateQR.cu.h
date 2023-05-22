@@ -389,12 +389,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
+    printf("I:\n");
+    for (int i = 0; i < n1Union; i++) {
+        printf("%d ", I[i]);
+    }
+
     // compute J * pc
     for (int i = 0; i < n2Union; i++) {
         J[i] = 0;
         for (int j = 0; j < n2Union; j++) {
             J[i] += JUnion[i] * Pc[j * n2Union + i];
         }
+    }
+
+    printf("J:\n");
+    for (int i = 0; i < n2Union; i++) {
+        printf("%d ", J[i]);
     }
 
     // free memory
