@@ -11,7 +11,7 @@
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
 
-void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
+int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -413,6 +413,8 @@ void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** 
     printf("freed tempM_k\n");
 
     printf("done with updateQR\n");
+
+    return 0;
 }
 
 #endif
