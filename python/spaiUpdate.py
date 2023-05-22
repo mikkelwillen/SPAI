@@ -31,15 +31,6 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
                 J.append(i)
 
         # b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
-        # I = []
-        # for i in range(A.shape[0]):
-        #     keep = False
-        #     for j in range(len(J)):
-        #         if A[i, J[j]] != 0:
-        #             keep = True
-        #     if keep:
-        #         I.append(i)
-
         A_J = A[:,J]
         I = list(np.unique(A_J.nonzero()[0]))
         
@@ -106,6 +97,7 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 5):
                 e_j = np.zeros(A.shape[1])
                 e_j[j] = 1
                 µ = (np.matmul(np.matmul(residual.T, A), e_j) ** 2) / (np.linalg.norm(np.matmul(A, e_j)) ** 2)
+                # ((np.linalg.norm(residual)) ** 2) - ((residual.T * A * e_j) ** 2) / (np.linalg.norm(A * e_j)) ** 2
                 tmp = np.linalg.norm(residual) - µ
                 rhoSq.append(tmp)
             print("rho:", rhoSq)

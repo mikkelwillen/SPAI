@@ -4,7 +4,6 @@ epsilon = tolerance (give as input to function, so user can choose)
 max_iter = constraint for the maximal number of iterations (give as input)
 s = number of rho_j - the most profitable indices (set to 5) (could think of a smart weighting)
 
-
 For every column m_k of M
 (a) Find initial sparsity J of m_k
 (b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
@@ -14,8 +13,7 @@ For every column m_k of M
 	(a) Compute cHat = Q^T * eHat_k
 	(b) Compute the inverse of R
 	(c) Compute mHat_k = R^-1 * cHat
-	(d) set m_k(J) = mHat_k
-(f) compute residual
+    (d) Compute residual
 
 while residual > tolerance:
 	(a) Set L set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
@@ -25,14 +23,15 @@ while residual > tolerance:
 	(d) Find the indices JTilde corresponding to the smallest s elements of rho^2
 	(e) Determine the new indices I-rond_tilde
 	(f) Make I U ITilde and J U JTilde
-	(g) Update the QR decomposition with:
+	(g) Update the QR decomposition
 		(a) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
 		(b) Compute ABreve = Q^T * A(I, JTilde)
 		(c) Compute B1 = ABreve(0 : n2, 0 : n2)
 		(d) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
 		(f) Do QR decomposition of B2
 		(g) Compute Q_B and R_B from algorithm 17
-		(h) Solve the augmented LS problem for mHat_k
-		(i) Set M(J U JTilde) solve the LS problem = Pc * mHat_k
-	(k) compute the new residual
+		(h) Solve the augmented LS problem for mHat_k and compute new residual
+		(i) Set M(J U JTilde) 
 	(l) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
+
+ (g) Set m_k(J) = mHat_k

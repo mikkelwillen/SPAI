@@ -2,6 +2,8 @@ import spai
 import spaiUpdate
 import numpy as np
 import random
+import improvedSpai
+import scipy
 
 # Function for generating an array with random 
 # numbers between 0 and 99
@@ -16,8 +18,8 @@ def arrayGen(m, n):
 # Test functions for SPAI with normal QR
 # decomposition
 # Comparison bewteen SPAI and numpy inverse
-def compare(A):
-    spaiTest = spai.SPAI(A)
+def compare(algo, A):
+    spaiTest = algo(A)
     npTest = np.linalg.inv(A)
     diff = spaiTest - npTest
     print("testDif:\n", diff)
@@ -25,8 +27,8 @@ def compare(A):
 
 # checking the dot product of A and M with the
 # identity matrix
-def checkIdentity(A):
-    spaiTesxt = spai.SPAI(A)
+def checkIdentity(algo, A):
+    spaiTest = algo(A)
     print("shapeA:\n %a, shapeM:\n %a" %(A.shape, spaiTest.shape))
     identity = np.matmul(A, spaiTest)
     print("identity:\n", identity)
@@ -37,8 +39,8 @@ def checkIdentity(A):
 # and SPAI by computing the dot product of A and M
 # for both of them and checking how close they are
 # the identity matrix
-def errorTest(A):
-    spaiTest = spai.SPAI(A)
+def errorTest(algo, A):
+    spaiTest = algo(A)
     npTest = np.linalg.inv(A)
 
     identitySPAI = np.matmul(A, spaiTest)
@@ -51,27 +53,31 @@ def errorTest(A):
     print("Error of the SPAI algorithm: ", error)
 
 # Run SPAI
-def test(A):
-    spai.SPAI(A)
+def test(algo, A):
+    algo(A)
 
 
 # Test functions for SPAI with updating QR
 # decomposition
 # Comparison bewteen SPAI and numpy inverse
-def compareU(A):
-    spaiTest = spaiUpdate.SPAI(A)
-    npTest = np.linalg.inv(A)
+def compareU(algo, A):
+    spaiTest = algo(A)
+    npTest = scipy.sparse.linalg.inv(A)
     diff = spaiTest - npTest
     print("testDif:\n", diff)
     print("norm:\n", np.linalg.norm(diff))
 
 # checking the dot product of A and M with the
 # identity matrix
-def checkIdentityU(A):
-    spaiTest = spaiUpdate.SPAI(A)
-    print("shapeA:\n %a, shapeM:\n %a" %(A.shape, spaiTest.shape))
-    identity = np.matmul(A, spaiTest)
+def checkIdentityU(algo, A):
+    spaiTest = algo(A)
+    print("shapeA:\n %a, \nshapeM:\n %a" %(A.shape, spaiTest.shape))
+    identity = A * spaiTest
     print("identity:\n", identity)
+    for i in range(identity.shape[0]):
+        for j in range(identity.shape[1]):
+            if i == j:
+                print("(%a, %a) = %a" % (i, j, identity[i,j]))
     print("normI:\n", np.linalg.norm(identity))
     print("shape:\n", identity.shape)
 
@@ -79,12 +85,12 @@ def checkIdentityU(A):
 # and SPAI by computing the dot product of A and M
 # for both of them and checking how close they are
 # the identity matrix
-def errorTestU(A):
-    spaiTest = spaiUpdate.SPAI(A)
-    npTest = np.linalg.inv(A)
+def errorTestU(algo, A):
+    spaiTest = algo(A)
+    AInv = scipy.sparse.linalg.inv(A)
 
-    identitySPAI = np.matmul(A, spaiTest)
-    identityNP = np.matmul(A, npTest)
+    identitySPAI = A * spaiTest
+    identityNP = A * AInv
 
     normISPAI = np.linalg.norm(identitySPAI)
     normINP = np.linalg.norm(identityNP)
@@ -93,8 +99,15 @@ def errorTestU(A):
     print("Error of the SPAI algorithm: %a" % error)
 
 # Run SPAI
-def testU(A):
-    spaiUpdate.SPAI(A)
+def testU(algo, A):
+    M = algo(A)
 
-test1 = arrayGen(4, 4)
-errorTestU(test1)
+    print("Norm of implementation:", np.linalg.norm(A * M - np.identity(M.shape[1])))
+
+    print("Norm of library-implementation: ", np.linalg.norm(A * AInv - np.identity(M.shape[1])))
+
+A = scipy.sparse.random(50, 50, density=0.1, format='csr', random_state=1)
+AInv = scipy.sparse.linalg.inv(A)
+
+checkIdentityU(improvedSpai.improvedSPAI, A)
+

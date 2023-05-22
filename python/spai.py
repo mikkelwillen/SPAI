@@ -29,7 +29,7 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 1):
             if m_k[i] != 0:
                 J.append(i)
 
-        # b) Compute the row indices I of the corrosponding nonzero entries of A(i, J)
+        # b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         I = []
         for i in range(A.shape[0]):
             keep = False
@@ -137,7 +137,7 @@ def SPAI(A, tol = 0.001, max_iter = 100, s = 1):
                     APrime[i, j] = A[I[i], J[j]]
             print("APrime:\n", APrime)
 
-            # g) Update the QR decomposition with algo 17 (too simple now)
+            # g) Update the QR decomposition with algo 17
             QPrime, RPrime = qr.qr_factorization(APrime)
             print("QPrime:\n", QPrime)
             print("RPrime:\n", RPrime)
