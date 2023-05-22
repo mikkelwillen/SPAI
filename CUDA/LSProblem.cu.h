@@ -58,6 +58,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
     int invSuccess = invBatched(cHandle, &R, n2, &invR);
 
+    if (invSuccess != 0) {
+        printf("Error inverting R\n");
+        return 1;
+    }
+
     printf("invR:\n");
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2; j++) {

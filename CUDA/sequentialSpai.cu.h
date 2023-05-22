@@ -137,7 +137,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         mHat_k = (float*) malloc(n2 * sizeof(float));
         residual = (float*) malloc(A->m * sizeof(float));        
 
-        LSProblem(cHandle, A, Q, R, &mHat_k, residual, I, J, n1, n2, k, &residualNorm);
+        int invSuccess = LSProblem(cHandle, A, Q, R, &mHat_k, residual, I, J, n1, n2, k, &residualNorm);
+
+        if (invSuccess != 0) {
+            printf("LSProblem failed\n");
+            return NULL;
+        }
 
         printf("\nnorm: %f", residualNorm);
         printf("\n");
@@ -425,7 +430,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
 
             // g) Update the QR factorization of A(IUnion, JUnion)
-            updateQR(cHandle, A, &AHat, &Q, &R, I, J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
+            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, I, J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
+
+            if (updateSuccess != 0) {
+                printf("update failed\n");
+                return NULL;
+            }
 
             // print Q
             printf("\nQ when we return from update: ");
