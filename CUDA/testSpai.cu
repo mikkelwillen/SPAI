@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(10, 10, 0.2);
+        struct CSC* cscC = createRandomCSC(40, 40, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
     
     
@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
         
     
         
-        struct CSC* res = sequentialSpai(cscD, 0.01, 2, 1);
+        struct CSC* res = sequentialSpai(cscC, 0.01, 2, 1);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * 3);
