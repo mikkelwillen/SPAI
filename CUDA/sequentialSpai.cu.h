@@ -444,7 +444,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
 
             // g) Update the QR factorization of A(IUnion, JUnion)
-            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, I, J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
+            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &I, &J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
 
             if (updateSuccess != 0) {
                 printf("update failed\n");
