@@ -394,14 +394,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         printf("%d ", (*I)[i]);
     }
 
-    // // compute J * pc
-    // for (int i = 0; i < n2Union; i++) {
-    //     (*J)[i] = 0;
-    //     for (int j = 0; j < n2Union; j++) {
-    //         (*J)[i] += JUnion[i] * Pc[i * n2Union +j];
-    //     }
-    // }
-
     // compute Pc * J
     for (int i = 0; i < n2Union; i++) {
         (*J)[i] = 0;

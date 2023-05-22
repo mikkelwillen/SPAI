@@ -16,8 +16,6 @@ int main(int argc, char** argv) {
         int m = 4;
         int n = 10;
     
-    
-    
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
         float* C = (float*) malloc(sizeof(float) * n * n);
@@ -42,121 +40,13 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
     
-    
-    
-    
-    
-    
-        // // test of multiply
-        // CSC* cscD = multiplyCSC(cscB, cscC);
-        // float* denseB = CSCToDense(cscB);
-        // float* denseC = CSCToDense(cscC);
-        // float* denseD = (float*) malloc(sizeof(float) * m * n);
-        // // multiply denseB with denseC
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         denseD[i * n + j] = 0.0;
-        //         for (int k = 0; k < n; k++) {
-        //             denseD[i * n + j] += denseB[i * n + k] * denseC[k * n + j];
-        //         }
-        //     }
-        // }
-    
-        // float* CSCDdense = CSCToDense(cscD);
-        // // print denseD
-        // printf("denseD:\n");
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", denseD[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
-    
-        // print CSCDdense
-        // printf("CSCDdense:\n");
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", CSCDdense[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
-    
-        // struct CSC* cscDia = createDiagonalCSC(m, n);
-        // printCSC(cscA);
-        // printCSC(cscB);
-        // printCSC(cscDia);
-        // struct CSC* M = sequentialSpai(cscB, 0.01, 5, 1);
-        // printCSC(M);
-    
-        // sequentialTest(cscB);
-    
-        // float* Q = (float*) malloc(m * m * sizeof(float));
-        // float* R = (float*) malloc(sizeof(float) * m * n);
-        // float* invC = (float*) malloc(sizeof(float) * n * n);
-    
-        // invBatched(C, n, invC);
-    
-        // // print invC
-        // printf("invC:\n");
-        // for (int i = 0; i < n; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", invC[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
-    
-        // // TEST PERMUTATIONS
-        // float* Pr = (float*) malloc(sizeof(float) * m * m);
-        // float* Pc = (float*) malloc(sizeof(float) * n * n);
-        // int* I = (int*) malloc(sizeof(int) * m);
-        // I[0] = 1; I[1] = 0; I[2] = 2; I[3] = 3;
-        // int* J = (int*) malloc(sizeof(int) * n);
-        // J[0] = 1; J[1] = 0; J[2] = 2;
-        // createPermutationMatrices(I, J, m, n, Pr, Pc);
-        // float* switchRows = (float*) malloc(sizeof(float) * m * n);
-        // float* switchCols = (float*) malloc(sizeof(float) * m * n);
-        // // compute switchRows = Pr * A
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         switchRows[i * n + j] = 0.0;
-        //         for (int k = 0; k < m; k++) {
-        //             switchRows[i * n + j] += Pr[i * m + k] * A[k * n + j];
-        //         }
-        //     }
-        // }
-        // // compute switchCols = A * Pc
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         switchCols[i * n + j] = 0.0;
-        //         for (int k = 0; k < n; k++) {
-        //             switchCols[i * n + j] += A[i * n + k] * Pc[k * n + j];
-        //         }
-        //     }
-        // }
-        // //print switchRows
-        // printf("switchRows:\n");
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", switchRows[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
-        // //print switchCols
-        // printf("switchCols:\n");
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", switchCols[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
-        
-    
-        
         struct CSC* res = sequentialSpai(cscC, 0.01, 10, 1);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * n);
+        printf("After malloc I\n");
         int* J = (int*) malloc(sizeof(int) * n);
+        printf("After malloc J\n");
         for (int i = 0; i < n; i++) {
             I[i] = i;
             J[i] = i;
@@ -165,6 +55,7 @@ int main(int argc, char** argv) {
         float* resDense = CSCToDense(res, I, J, n, n);
         
         // multiply CDense with resDense
+        printf("Mulitplying CDense with resDense\n");
         float* identity = (float*) malloc(sizeof(float) * n * n);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n;j++) {
@@ -193,28 +84,6 @@ int main(int argc, char** argv) {
         free(B);
         free(C);
     
-    
-        // qrBatched(B, m, n, Q, R);
-    
-        // // compute QR
-        // float* QR = (float*) malloc(sizeof(float) * m * n);
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         QR[i * n + j] = 0.0;
-        //         for (int k = 0; k < m; k++) {
-        //             QR[i * n + j] += Q[i * m + k] * R[k * n + j];
-        //         }
-        //     }
-        // }
-        
-        // // print QR
-        // printf("QR:\n");
-        // for (int i = 0; i < m; i++) {
-        //     for (int j = 0; j < n; j++){
-        //         printf("%f ", QR[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
     } else if (argc == 7) {
         // read args
         printf("hallo?\n");
