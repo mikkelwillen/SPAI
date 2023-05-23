@@ -52,6 +52,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         }
         printf("\n");
     }
+    printf("after print R\n");
 
     // f) compute mHat_k = R^-1 * cHat
     // make the inverse of R of size n2 x n2
