@@ -171,9 +171,9 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     // print various matrices
     {
         printf("R: \n");
-        for (int i = 0; i < n2; i++) {
-            for (int j = 0; j < n1; j++) {
-                printf("%f ", (*R)[i * n1 + j]);
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n2; j++) {
+                printf("%f ", (*R)[i * n2 + j]);
             }
             printf("\n");
         }
