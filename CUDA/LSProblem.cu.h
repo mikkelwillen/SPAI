@@ -39,9 +39,10 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     for (int i = 0; i < n1; i++) {
         cHat[i] = 0.0;
         for (int j = 0; j < n2; j++) {
-            cHat[j] += Q[j*n2 + i] * e_k[i];
+            cHat[j] += Q[i * n2 + j] * e_k[i];
         }
     }
+
     printf("n1: %d\n", n1);
     printf("n2: %d\n", n2);
     // print R
