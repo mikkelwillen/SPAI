@@ -338,14 +338,13 @@ __global__ void computeSmallestIndices(float** d_PointerRhoSquared, int** d_Poin
             d_smallestIndices[i] = -1;
         }
 
-        // jeg tror altså ikke det her er rigtigt
         for (int i = 0; i < d_n2Tilde[tid]; i++) {
-            for (int j = 0; j < d_newN2Tilde; j++) {
+            for (int j = 0; j < d_newN2Tilde[tid]; j++) {
                 if (d_smallestIndices[j] == -1) {
                     d_smallestIndices[j] = i;
                     break;
                 } else if (d_rhoSquared[i] < d_rhoSquared[d_smallestIndices[j]]) {
-                    for (int k = d_newN2Tilde - 1; k > j; k--) {
+                    for (int k = d_newN2Tilde[tid] - 1; k > j; k--) {
                         d_smallestIndices[k] = d_smallestIndices[k - 1];
                     }
                     d_smallestIndices[j] = i;
