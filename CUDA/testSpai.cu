@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
     
-        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 5);
+        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 3);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * n);
