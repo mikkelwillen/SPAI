@@ -26,10 +26,43 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // create device info array
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
+    int* d_PivotArray;
 
     // malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
+    
+    // malloc space for pivot array
+    gpuAssert(
+        cudaMalloc((void**) &d_PivotArray, maxn2 * batchsize * sizeof(int)));
+
+    // run batched LU factorization from cublas
+    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    stat = cublasSgetrfBatched(cHandle,
+                               maxn2,
+                               d_PointerR,
+                               lda,
+                               d_PivotArray,
+                               d_info,
+                               batchsize);
+    
+    // error handling
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf("\ncublasSgetrfBatched failed");
+        printf("\ncublas error: %d\n", stat);
+        
+        return stat;
+    }
+
+    // copy info back to host
+    gpuAssert(
+        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    
+    for (int i = 0; i < BATCHSIZE; i++) {
+        if (h_info[i] != 0) {
+            printf("\nError in LU: Matrix %d is singular\n", i);
+        }
+    }
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -37,7 +70,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
                                maxn2,
                                d_PointerR,
                                lda,
-                               NULL,
+                               d_PivotArray,
                                d_PointerInvR,
                                ldc,
                                d_info,
@@ -58,7 +91,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // check for singular matrices
     for (int i = 0; i < BATCHSIZE; i++) {
         if (h_info[i] != 0) {
-            printf("\nError: Matrix %d is singular\n", i);
+            printf("\nError in INV: Matrix %d is singular\n", i);
         }
     }
 
