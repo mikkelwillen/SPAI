@@ -56,6 +56,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     // f) compute mHat_k = R^-1 * cHat
     // make the inverse of R of size n2 x n2
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
+    printf("malloc invR\n");
     int invSuccess = invBatched(cHandle, &R, n2, &invR);
 
     if (invSuccess != 0) {
