@@ -113,7 +113,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     // copy R from AHat
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n1; j++) {
-            if (i >= j) {
+            if (i <= j) {
                 (*R)[i * n1 + j] = (*AHat)[i * n1 + j];
             } else {
                 (*R)[i * n1 + j] = 0.0;
