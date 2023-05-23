@@ -308,8 +308,10 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     // sort unsortedQ and unsortedR into Q and R
     free(*Q);
     (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
+    printf("malloc q\n");
     free(*R);
     (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
+    printf("malloc r\n");
 
     // compute Pr * unsortedQ
     for (int i = 0; i < n1Union; i++) {
@@ -320,6 +322,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             }
         }
     }
+    printf("pr * unsortedQ\n");
 
     // compute unsortedR * Pc
     for (int i = 0; i < n1Union; i++) {
@@ -330,6 +333,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             }
         }
     }
+    printf("unsortedR * Pc\n");
 
     // set AHat to Q * R
     free(*AHat);
@@ -342,11 +346,16 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             }
         }
     }
+    printf("Q * R\n");
 
     free(*I);
+    printf("free I\n");
     free(*J);
+    printf("free J\n");
     (*I) = (int*) malloc(n1Union * sizeof(int));
+    printf("malloc I\n");
     (*J) = (int*) malloc(n2Union * sizeof(int));
+    printf("malloc J\n");
     
     // compute pr * I
     for (int i = 0; i < n1Union; i++) {

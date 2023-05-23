@@ -139,7 +139,8 @@ CSC* createRandomCSC(int m, int n, float sparsity){
     }
 
     CSC* A = createCSC(M, m, n);
-
+    free(M);
+    
     return A;
 }
 
