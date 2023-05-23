@@ -480,14 +480,14 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("JUnion freed\n");
             free(ITilde);
             printf("ITilde freed\n");
+            free(JTilde);
+            printf("JTilde freed\n");
             free(smallestIndices);
             printf("smallestIndices freed\n");
             free(smallestJTilde);
             printf("smallestJTilde freed\n");
             free(rhoSq);
             printf("rhoSq freed\n");
-            free(JTilde);
-            printf("JTilde freed\n");
             free(keepArray);
             printf("keepArray freed\n");
         }
