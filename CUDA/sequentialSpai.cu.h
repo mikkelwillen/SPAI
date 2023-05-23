@@ -338,6 +338,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                         }
 
                         smallestIndices[j] = i;
+                        break;
                     }
                 }
             }
