@@ -111,12 +111,12 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         cudaMemcpy(h_tau, d_tau, tauMemSize, cudaMemcpyDeviceToHost));
     
     // copy R from AHat
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n1; j++) {
-            if (i >= j) {
-                (*R)[i * n1 + j] = (*AHat)[i * n1 + j];
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            if (i <= j) {
+                (*R)[i * n2 + j] = (*AHat)[i * n2 + j];
             } else {
-                (*R)[i * n1 + j] = 0.0;
+                (*R)[i * n2 + j] = 0.0;
             }
         }
     }
