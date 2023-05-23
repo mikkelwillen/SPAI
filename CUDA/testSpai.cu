@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 3;
+        int n = 10;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
     
-        struct CSC* res = sequentialSpai(cscD, 0.01, 10, 3);
+        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 3);
 
         float* Cinv = (float*) malloc(sizeof(float) * n * n);
         printf("hallo?\n");
