@@ -284,7 +284,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    for (int i = 0; i < n1Tilde; i++) {
+    for (int i = 0; i < n1Union - n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
             unsortedR[(n2 + i) * n2Union + n2 + j] = B2R[i * n2Tilde + j];
         }
