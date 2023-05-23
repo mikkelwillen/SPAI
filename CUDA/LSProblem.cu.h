@@ -116,6 +116,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     }
     *residualNorm = sqrt(*residualNorm);
 
+    // free memory
+    free(e_k);
+    free(cHat);
+    free(invR);
+    
     return 0;
 }
 

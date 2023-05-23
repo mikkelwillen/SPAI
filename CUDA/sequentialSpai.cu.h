@@ -517,7 +517,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("mHat_k freed\n");
         free(residual);
         printf("all freed\n");
-
     }
     printCSC(M);
 

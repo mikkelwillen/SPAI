@@ -153,7 +153,10 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         cudaFree(d_PointerAInv));
     gpuAssert(
         cudaFree(d_info));
+    gpuAssert(
+        cudaFree(d_PivotArray));
     free(h_info);
+
 
     return 0;
 }

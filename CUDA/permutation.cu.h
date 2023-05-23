@@ -70,6 +70,10 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
             }
         }
     }
+
+    // free memory
+    free(IIndex);
+    free(JIndex);
 }
 
 #endif

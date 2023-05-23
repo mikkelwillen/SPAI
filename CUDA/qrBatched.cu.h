@@ -166,6 +166,11 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
                 (*Q)[i * n1 + j] -= Qvvt[i * n1 + j];
             }
         }
+
+        // free memory
+        free(v);
+        free(Qv);
+        free(Qvvt);
     }
 
     // print various matrices
@@ -211,6 +216,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
 
     // free arrays and destroy cHandle
     free(h_tau);
+
     gpuAssert(
         cudaFree(d_AHat));
     gpuAssert(
