@@ -32,7 +32,7 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
         Q, R = np.linalg.qr(AHat.todense(), mode="complete")
         R_1 = R[0:n2,:]
         
-        # e) Compute the solution m_k for the least sqaures problem
+        # e) Compute the solution m_k for the least squares problem
         # a) Compute cHat = Q^T * eHat_k
         e_k = np.matrix([0]*M.shape[1]).T
         e_k[k] = 1
@@ -104,10 +104,6 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             # Find permutation matrices
             Pc = permutation.perm(J, n2, JTilde, n2Tilde, "col")
             Pr = permutation.perm(I, n1, ITilde, n1Tilde, "row")
-
-            # Virker også, men ekstremt langsomt for some reason
-            # Pc = permutation.permutation(unionJ, "col")
-            # Pr = permutation.permutation(unionI, "row")
             
             # b) Compute ABreve = Q^T * A(I, JTilde)
             ABreve = Q.T * AIJTilde
@@ -271,7 +267,17 @@ def printSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             # g) Update the QR decomposition
             # a) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
-            AIJTilde = A[np.ix_(I, JTilde)]
+            print("A =", A)
+            print("I = ", I)
+            print("JTilde = ", JTilde)
+            # AIJTilde = A[np.ix_(I, JTilde)]
+
+            AIJTilde = np.zeros((len(I), len(JTilde)))
+            for i in range(len(I)):
+                for j in range(len(JTilde)):
+                    AIJTilde[i, j] = A[I[i], JTilde[j]]
+
+            print("AIJTilde = ", AIJTilde)
 
             AITildeJTilde = A[np.ix_(ITilde,JTilde)]
 
@@ -284,12 +290,17 @@ def printSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             # Pr = permutation.permutation(unionI, "row")
             
             # b) Compute ABreve = Q^T * A(I, JTilde)
-            ABreve = Q.T * AIJTilde
+            print("Q = ", Q)
+            # ABreve = Q.T * AIJTilde
+            ABreve = np.dot(Q.T, AIJTilde)
 
             # c) Compute B_1 = ABreve(0 : n2, 0 : n2)
             B_1 = ABreve[:n2,:]
 
             # d) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
+            print("ABreve = ", ABreve)
+            print("ABreve[n2:n1,:] = ", ABreve[n2:n1,:])
+            print("AITildeJTIlde = ", AITildeJTilde.todense())
             B_2 = np.vstack((ABreve[n2:n1,:], AITildeJTilde.todense()))
 
             # f) Do QR decomposition of B2
@@ -313,6 +324,7 @@ def printSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             # h) Solve the augmented LS problem for mHat_k and compute new residual
             R_1 = R[0:n2,:]  
+            print("R_1 = ", R_1)
 
             eTilde_k = Pr.T * e_k[I]
 
@@ -326,7 +338,11 @@ def printSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             m_k[J] = Pc.T * mTilde_k
 
             # Compute residual r
-            residual = A[:,J] * m_k[J] - e_k
+            print("A[:, J] = ", A[:,J])
+            print("m_k[J] = ", m_k[J])
+            print("e_k = ", e_k)
+            A_JDense = A[:,J].todense()
+            residual = A_JDense * m_k[J] - e_k
 
             # Permute Q and R to be used in next iteration
             Q = Pr * Q 
