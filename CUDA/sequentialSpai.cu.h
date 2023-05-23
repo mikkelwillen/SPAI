@@ -333,7 +333,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                         smallestIndices[j] = i;
                         break;
                     } else if (rhoSq[i] < rhoSq[smallestIndices[j]]) {
-                        for (int h = j; h < s - 1; h++) {
+                        for (int h = j; h < newN2Tilde - 1; h++) {
                             smallestIndices[h + 1] = smallestIndices[h];
                         }
 
