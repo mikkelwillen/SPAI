@@ -300,7 +300,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
 
     // print m_kOut
     printf("m_kOut:\n");
-    for (int i = 0; i < n1Union; i++) {
+    for (int i = 0; i < n2Union; i++) {
         printf("%f ", (*m_kOut)[i]);
     }
     printf("\n");
