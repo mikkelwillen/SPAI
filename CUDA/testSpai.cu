@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
     
         C[0] = 20.0; C[1] = 0.0;   C[2] = 0.0; 
         C[3] = 0.0;  C[4] = 30.0;  C[5] = 10.0; 
-        C[6] = 0.0;  C[7] = 0.0;   C[8] = 10.0;
+        C[6] = 25.0;  C[7] = 0.0;   C[8] = 10.0;
     
         B[0] = 20.0; B[1] = 0.0;   B[2] = 0.0; 
         B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
@@ -40,7 +40,9 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, 0.2);
         struct CSC* cscD = createCSC(C, n, n);
     
-        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 3);
+        struct CSC* res = sequentialSpai(cscD, 0.01, 10, 3);
+
+        float* Cinv = (float*) malloc(sizeof(float) * n * n);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * n);
