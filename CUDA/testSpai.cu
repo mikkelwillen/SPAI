@@ -83,6 +83,7 @@ int main(int argc, char** argv) {
         freeCSC(cscA);
         freeCSC(cscB);
         freeCSC(cscC);
+        freeCSC(cscD);
         if (res != NULL) {
             freeCSC(res);
         }
@@ -90,6 +91,9 @@ int main(int argc, char** argv) {
         free(A);
         free(B);
         free(C);
+        free(Cinv);
+        free(I);
+        free(J);
     
     } else if (argc == 7) {
         // read args
