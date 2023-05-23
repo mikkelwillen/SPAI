@@ -38,10 +38,9 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     // create input and output arrays
     float* d_A;
     float* d_AInv;
-    float* d_PivotArray;
+    int* d_PivotArray;
     float** d_PointerA;
     float** d_PointerAInv;
-    float** d_PointerPivotArray;
     int* h_info = (int*) malloc(BATCHSIZE * sizeof(int));
     printf("after h_info malloc\n");
     int* d_info;
@@ -71,10 +70,6 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     gpuAssert(
         cudaMalloc((void**) &d_PivotArray, n * BATCHSIZE * sizeof(float)));
     printf("after cudaMalloc d_PivotArray\n");
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerPivotArray, BATCHSIZE * sizeof(float*)));
-    printf("after cudaMalloc d_PointerPivotArray\n");
-    deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerPivotArray, d_PivotArray, BATCHSIZE, n);
 
     // malloc space for info
     gpuAssert(
@@ -87,7 +82,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
                                n,
                                d_PointerA,
                                lda,
-                               d_PointerPivotArray,
+                               d_PivotArray,
                                d_info,
                                BATCHSIZE);
 
@@ -97,7 +92,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
                                n,
                                d_PointerA,
                                lda,
-                               d_PointerPivotArray,
+                               d_PivotArray,
                                d_PointerAInv,
                                ldc,
                                d_info,
