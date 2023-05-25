@@ -80,7 +80,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         }
         printf("\n");
     }
-    printf("after possible free\n");
     for (int i = 0; i < n2; i++) {
         (*mHat_k)[i] = 0.0;
         for (int j = 0; j < n2; j++) {
