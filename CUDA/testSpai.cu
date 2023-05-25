@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(n, n, spasity);
+        struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
     
         struct CSC* res = sequentialSpai(cscC, tolerance, maxIterations, s);
