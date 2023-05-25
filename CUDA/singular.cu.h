@@ -120,17 +120,17 @@ int checkSingularity(CSC* cscA) {
         return 1;
     } 
 
-    // float* h_A = (float*) malloc(lda * n * sizeof(float));
-    // gpuAssert(
-    //     cudaMemcpy(h_A, d_A, lda * n * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("LU factorization:\n");
-    // for (int i = 0; i < m; i++) {
-    //     printf("[");
-    //     for (int j = 0; j < n; j++) {
-    //         printf("%f ", h_A[i * n + j]);
-    //     }
-    //     printf("]\n");
-    // }
+    float* h_A = (float*) malloc(lda * n * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_A, d_A, lda * n * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("LU factorization:\n");
+    for (int i = 0; i < m; i++) {
+        printf("[");
+        for (int j = 0; j < n; j++) {
+            printf("%f ", h_A[i * n + j]);
+        }
+        printf("]\n");
+    }
 
     if (h_info > 0) {
         printf("The input matrix is singular: %d\n", h_info);
@@ -142,12 +142,15 @@ int checkSingularity(CSC* cscA) {
     free(A);
     free(I);
     free(J);
-    // gpuAssert(
-    //     cudaFree(d_A));
-    // gpuAssert(
-    //     cudaFree(workspace));
-    // gpuAssert(
-    //     cudaFree(devIpiv));
+    free(h_A);
+    gpuAssert(
+        cudaFree(d_A));
+    gpuAssert(
+        cudaFree(workspace));
+    gpuAssert(
+        cudaFree(devIpiv));
+    gpuAssert(
+        cudaFree(d_info));
 
     cusolverDnDestroy(cHandle);
 
