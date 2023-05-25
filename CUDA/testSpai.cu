@@ -14,11 +14,11 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 2;
+        int n = 3;
         float sparsity = 1.0;
         float tolerance = 0.01;
         int maxIterations = 3;
-        int s = 1;
+        int s = 3;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
