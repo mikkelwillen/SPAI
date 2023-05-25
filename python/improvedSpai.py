@@ -5,6 +5,11 @@ warnings.filterwarnings("ignore")
 import permutation
 
 def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
+    determinant = np.linalg.det(A)
+    if determinant == 0:    
+        print("A is singular")
+        return None
+    
     M = scipy.sparse.identity(A.shape[1], format='csr')
 
     # index for the k'th column
@@ -165,6 +170,14 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
 def printSPAI(A, tol = 0.001, max_iter = 100, s = 5):
     print("A = \n%a" % A.A)
+    
+    determinant = np.linalg.det(A.todense())
+    print("det(A) = %a" % determinant)
+
+    if determinant == 0:    
+        print("A is singular")
+        return None
+    
 
     M = scipy.sparse.identity(A.shape[1], format='csr')
     print("M = \n%a" % M)

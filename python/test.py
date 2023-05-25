@@ -106,8 +106,8 @@ def testU(algo, A):
 
     print("Norm of library-implementation: ", np.linalg.norm(A * AInv - np.identity(M.shape[1])))
 
-A = scipy.sparse.random(40, 40, density=0.1, format='csr', random_state=1)
-AInv = scipy.sparse.linalg.inv(A)
+A = scipy.sparse.random(10, 10, density=0.2, format='csr', random_state=1)
+# AInv = scipy.sparse.linalg.inv(A)
 
 B = [[0, 0, 24.1, 0, 0, 0, 0, 0, 61.24, 13.48], 
      [0, 45.95, 0, 0, 85.9, 0, 67.39, 0, 0, 97.53],
@@ -133,5 +133,5 @@ C = [[0, 0, 24.1, 0, 0, 0, 0, 0, 61.24, 13.48],
 
 CSparse = scipy.sparse.csr_array(C)
 
-testU(improvedSpai.printSPAI, CSparse)
+testU(improvedSpai.printSPAI, A)
 
