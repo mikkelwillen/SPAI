@@ -211,6 +211,15 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
+    // print secondMatrix
+    printf("secondMatrix:\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            printf("%f ", secondMatrix[i * n1Union + j]);
+        }
+        printf("\n");
+    }
+
     // compute unsortedQ = firstMatrix * secondMatrix
     float* unsortedQ = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
