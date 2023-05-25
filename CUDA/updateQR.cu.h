@@ -331,7 +331,11 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     for (int i = 0; i < A->m; i++) {
         residual[i] = 0.0;
         for (int j = 0; j < A->n; j++) {
-            residual[i] += ADense[i * A->n + j] * (*m_kOut)[j];
+            for (int h = 0; h < n2Union; h++) {
+                if (JUnion[h] == j) {
+                    residual[i] += ADense[i * A->n + j] * (*m_kOut)[h];
+                }
+            }
         }
         if (i == k) {
             residual[i] -= 1.0;
