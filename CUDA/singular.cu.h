@@ -45,7 +45,7 @@ int checkSingularity(CSC* cscA) {
 
     float* d_A;
     int lda = MAX(1, m);
-    int* Lwork;
+    int Lwork;
     float* workspace;
     int* devIpiv = NULL;
     int info;
@@ -61,7 +61,7 @@ int checkSingularity(CSC* cscA) {
                                        n, 
                                        d_A, 
                                        lda,
-                                       Lwork);
+                                       &Lwork);
     
     // error handling
     if (stat != CUSOLVER_STATUS_SUCCESS) {
@@ -72,7 +72,7 @@ int checkSingularity(CSC* cscA) {
 
     // allocate the work buffer
     gpuAssert(
-        cudaMalloc((void**) &workspace, *Lwork));
+        cudaMalloc((void**) &workspace, Lwork));
 
     // perform LU factorization from cusolver
     // https://docs.nvidia.com/cuda/cusolver
