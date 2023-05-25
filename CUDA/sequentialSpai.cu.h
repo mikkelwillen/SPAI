@@ -422,6 +422,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 printf("%d ", ITilde[i]);
             }
 
+            if (n1Tilde == 0) {
+                n2Tilde = 0;
+                break;
+            }
+
             // f) set IUnion and JUnion
             // make union of I and ITilde
             n1Union = n1 + n1Tilde;
