@@ -314,6 +314,46 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
     printf("\n");
 
+    // g) compute residual = A * mHat_k - e_k
+    // malloc space for residual
+    // do matrix multiplication
+    int* IDense = (int*) malloc(A->m * sizeof(int));
+    int* JDense = (int*) malloc(A->n * sizeof(int));
+    for (int i = 0; i < A->m; i++) {
+        IDense[i] = i;
+    }
+    for (int j = 0; j < A->n; j++) {
+        JDense[j] = j;
+    }
+
+    float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
+    // compute residual
+    for (int i = 0; i < A->m; i++) {
+        residual[i] = 0.0;
+        for (int j = 0; j < A->n; j++) {
+            residual[i] += ADense[i * A->n + j] * (m_kOut)[j];
+        }
+        if (i == k) {
+            residual[i] -= 1.0;
+        }
+    }
+    
+    printf("residual:\n");
+    for (int i = 0; i < A->m; i++) {
+        printf("%f ", residual[i]);
+    }
+    printf("\n");
+
+    // compute the norm of the residual
+    *residualNorm = 0.0;
+    for (int i = 0; i < A->m; i++) {
+        *residualNorm += residual[i] * residual[i];
+    }
+    *residualNorm = sqrt(*residualNorm);
+    
+    printf("residual norm: %f\n", *residualNorm);
+
+
     // sort unsortedQ and unsortedR into Q and R
     free(*Q);
     (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
