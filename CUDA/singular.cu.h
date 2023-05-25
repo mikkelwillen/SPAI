@@ -47,7 +47,8 @@ int checkSingularity(CSC* cscA) {
     int lda = MAX(1, m);
     int Lwork;
     float* workspace;
-    int* devIpiv = NULL;
+    int* devIpiv;
+    int devSize = MIN(m, n);
     int info;
 
     gpuAssert(
@@ -74,6 +75,10 @@ int checkSingularity(CSC* cscA) {
     gpuAssert(
         cudaMalloc((void**) &workspace, Lwork * sizeof(float)));
 
+    // allocate the pivot array
+    gpuAssert(
+        cudaMalloc((void**) &devIpiv, devSize * sizeof(int)));
+
     // perform LU factorization from cusolver
     // https://docs.nvidia.com/cuda/cusolver
     stat = cusolverDnSgetrf(cHandle,
@@ -90,6 +95,7 @@ int checkSingularity(CSC* cscA) {
         printf("The %d'th paramter is wrong\n", -info);
 
     }
+
     if (stat != CUSOLVER_STATUS_SUCCESS) {
         printf("CUSOLVER LU factorization failed with status: %d\n", stat);
 
