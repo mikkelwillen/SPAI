@@ -26,7 +26,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     int checkSingular = checkSingularity(A);
     if (checkSingular == 1) {
         printf("Matrix is singular\n");
-        
+
         return NULL;
     }
 
@@ -408,11 +408,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                         n1Tilde++;
                     }
                 }
-            }
-
-            if (n1Tilde == 0) {
-                n2Tilde = 0;
-                n2Union = n2;
             }
 
             // print I
