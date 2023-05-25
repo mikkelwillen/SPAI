@@ -103,7 +103,7 @@ int checkSingularity(CSC* cscA) {
     }
 
     if (info > 0) {
-        printf("The input matrix is singular\n");
+        printf("The input matrix is singular: %d\n", info);
 
         return 1;
     }
