@@ -326,13 +326,43 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         JDense[j] = j;
     }
 
+    free(*I);
+    printf("free I\n");
+    free(*J);
+    printf("free J\n");
+    (*I) = (int*) malloc(n1Union * sizeof(int));
+    printf("malloc I\n");
+    (*J) = (int*) malloc(n2Union * sizeof(int));
+    printf("malloc J\n");
+    
+    // compute pr * I
+    for (int i = 0; i < n1Union; i++) {
+        (*I)[i] = 0;
+        for (int j = 0; j < n1Union; j++) {
+            (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
+        }
+    }
+
+    printf("I (after pr * I):\n");
+    for (int i = 0; i < n1Union; i++) {
+        printf("%d ", (*I)[i]);
+    }
+
+    // compute Pc * J
+    for (int i = 0; i < n2Union; i++) {
+        (*J)[i] = 0;
+        for (int j = 0; j < n2Union; j++) {
+            (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
+        }
+    }
+
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
     // compute residual
     for (int i = 0; i < A->m; i++) {
         residual[i] = 0.0;
         for (int j = 0; j < A->n; j++) {
             for (int h = 0; h < n2Union; h++) {
-                if (JUnion[h] == j) {
+                if (J[h] == j) {
                     residual[i] += ADense[i * A->n + j] * (*m_kOut)[h];
                 }
             }
