@@ -10,10 +10,10 @@
 #include "updateQR.cu.h"
 
 int runIdentityTest(float* A, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
-    cscA = createCSC(A, m, n);
-    float* identity = malloc (sizeof(float) * n * n);
+    struct CSC* cscA = createCSC(A, m, n);
+    float* identity = (float*) malloc (sizeof(float) * n * n);
 
-    res = sequentialSpai(cscA, tolerance, maxIterations, s);
+    float* res = sequentialSpai(cscA, tolerance, maxIterations, s);
 
     int* I = (int*) malloc(sizeof(int) * m);
     int* J = (int*) malloc(sizeof(int) * n);
@@ -96,32 +96,32 @@ int main(int argc, char** argv) {
             J[i] = i;
         }
 
-        float* CDense = CSCToDense(cscM4, I, J, n, n);
-        printf("After CSCToDense\n");
-        float* resDense = CSCToDense(res, I, J, n, n);
-        printf("After CSCToDense\n");
+        // float* CDense = CSCToDense(cscM4, I, J, n, n);
+        // printf("After CSCToDense\n");
+        // float* resDense = CSCToDense(res, I, J, n, n);
+        // printf("After CSCToDense\n");
         
         
 
-        // multiply CDense with resDense
-        printf("Mulitplying CDense with resDense\n");
-        float* identity = (float*) malloc(sizeof(float) * n * n);
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n;j++) {
-                identity[i * n + j] = 0.0;
-                for (int k = 0; k < n; k++) {
-                    identity[i * n + j] += CDense[i * n + k] * resDense[k * n + j];
-                }
-            }
-        }
+        // // multiply CDense with resDense
+        // printf("Mulitplying CDense with resDense\n");
+        // float* identity = (float*) malloc(sizeof(float) * n * n);
+        // for (int i = 0; i < n; i++) {
+        //     for (int j = 0; j < n;j++) {
+        //         identity[i * n + j] = 0.0;
+        //         for (int k = 0; k < n; k++) {
+        //             identity[i * n + j] += CDense[i * n + k] * resDense[k * n + j];
+        //         }
+        //     }
+        // }
     
-        printf("identity:\n");
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n;j++) {
-                printf("%f ", identity[i * n + j]);
-            }
-            printf("\n");
-        }
+        // printf("identity:\n");
+        // for (int i = 0; i < n; i++) {
+        //     for (int j = 0; j < n;j++) {
+        //         printf("%f ", identity[i * n + j]);
+        //     }
+        //     printf("\n");
+        // }
     
         // free memory
         printf("freeing memory\n");
