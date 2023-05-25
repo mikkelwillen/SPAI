@@ -16,7 +16,6 @@
 // n = the number of columns in A
 // returns 1 if A is singular, 0 otherwise
 int checkSingularity(CSC* cscA) {
-
     // initialize cusolver
     cusolverDnHandle_t cHandle;
     cusolverStatus_t stat;
@@ -53,6 +52,7 @@ int checkSingularity(CSC* cscA) {
         }
         printf("]\n");
     }
+    
     float* d_A;
     int lda = MAX(1, m);
     int Lwork;
@@ -134,14 +134,15 @@ int checkSingularity(CSC* cscA) {
     free(A);
     free(I);
     free(J);
-    gpuAssert(
-        cudaFree(d_A));
-    gpuAssert(
-        cudaFree(workspace));
-    gpuAssert(
-        cudaFree(devIpiv));
+    // gpuAssert(
+    //     cudaFree(d_A));
+    // gpuAssert(
+    //     cudaFree(workspace));
+    // gpuAssert(
+    //     cudaFree(devIpiv));
+
     cusolverDnDestroy(cHandle);
-    
+
     return 0;
 }
 
