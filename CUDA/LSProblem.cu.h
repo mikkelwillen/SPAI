@@ -89,19 +89,43 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     // g) compute residual = A * mHat_k - e_k
     // malloc space for residual
     // do matrix multiplication
+    int* IDense = (int*) malloc(A->m * sizeof(int));
+    int* JDense = (int*) malloc(A->n * sizeof(int));
+    for (int i = 0; i < A->m; i++) {
+        IDense[i] = i;
+    }
+    for (int j = 0; j < A->n; j++) {
+        JDense[j] = j;
+    }
+
+    float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
+    // compute residual
     for (int i = 0; i < A->m; i++) {
         residual[i] = 0.0;
-        for (int j = 0; j < n2; j++) {
-            for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
-                if (i == A->flatRowIndex[h]) {
-                    residual[i] += A->flatData[h] * (*mHat_k)[j];
-                }
-            }
+        for (int j = 0; j < A->n; j++) {
+            residual[i] += ADense[i * A->n + j] * (*mHat_k)[j];
         }
         if (i == k) {
             residual[i] -= 1.0;
         }
     }
+
+
+
+    // noget lort
+    // for (int i = 0; i < A->m; i++) {
+    //     residual[i] = 0.0;
+    //     for (int j = 0; j < n2; j++) {
+    //         for (int h = A->offset[k]; h < A->offset[k + 1]; h++) {
+    //             if (i == A->flatRowIndex[h]) {
+    //                 residual[i] += A->flatData[h] * (*mHat_k)[j];
+    //             }
+    //         }
+    //     }
+    //     if (i == k) {
+    //         residual[i] -= 1.0;
+    //     }
+    // }
     
     printf("residual:\n");
     for (int i = 0; i < A->m; i++) {
