@@ -43,6 +43,15 @@ int checkSingularity(CSC* cscA) {
     // densify A
     float* A = CSCToDense(cscA, I, J, m, n);
 
+    // print A
+    printf("A:\n");
+    for (int i = 0; i < m; i++) {
+        printf("[");
+        for (int j = 0; j < n; j++) {
+            printf("%f ", A[i * n + j]);
+        }
+        printf("]\n");
+    }
     float* d_A;
     int lda = MAX(1, m);
     int Lwork;
@@ -100,6 +109,18 @@ int checkSingularity(CSC* cscA) {
         printf("CUSOLVER LU factorization failed with status: %d\n", stat);
 
         return 1;
+    } 
+
+    float* h_A = (float*) malloc(m * n * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_A, d_A, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("LU factorization:\n");
+    for (int i = 0; i < m; i++) {
+        printf("[");
+        for (int j = 0; j < n; j++) {
+            printf("%f ", h_A[i * n + j]);
+        }
+        printf("]\n");
     }
 
     if (info > 0) {
