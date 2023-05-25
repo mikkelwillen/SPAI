@@ -113,7 +113,7 @@ int checkSingularity(CSC* cscA) {
 
     float* h_A = (float*) malloc(lda * n * sizeof(float));
     gpuAssert(
-        cudaMemcpy(h_A, d_A, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_A, d_A, lda * n * sizeof(float), cudaMemcpyDeviceToHost));
     printf("LU factorization:\n");
     for (int i = 0; i < m; i++) {
         printf("[");
