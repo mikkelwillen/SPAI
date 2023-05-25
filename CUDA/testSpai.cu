@@ -35,6 +35,33 @@ int runIdentityTest(float* A, int m, int n, float sparsity, float tolerance, int
             }
         }
     }
+
+    // print A
+    printf("A:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", A[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print inv
+    printf("inv:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", inv[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print identity
+    printf("identity:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", identity[i * n + j]);
+        }
+        printf("\n");
+    }
 }
 
 
