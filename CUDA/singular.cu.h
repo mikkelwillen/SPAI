@@ -72,7 +72,7 @@ int checkSingularity(CSC* cscA) {
 
     // allocate the work buffer
     gpuAssert(
-        cudaMalloc((void**) &workspace, Lwork));
+        cudaMalloc((void**) &workspace, Lwork * sizeof(float)));
 
     // perform LU factorization from cusolver
     // https://docs.nvidia.com/cuda/cusolver
