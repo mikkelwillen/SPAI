@@ -15,6 +15,10 @@ int main(int argc, char** argv) {
         initHwd();
         int m = 4;
         int n = 40;
+        float sparsity = 1.0;
+        float tolerance = 0.01;
+        int maxIterations = 10;
+        int s = 2;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
@@ -37,10 +41,10 @@ int main(int argc, char** argv) {
     
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(n, n, 0.2);
+        struct CSC* cscC = createRandomCSC(n, n, spasity);
         struct CSC* cscD = createCSC(C, n, n);
     
-        struct CSC* res = sequentialSpai(cscC, 0.01, 10, 3);
+        struct CSC* res = sequentialSpai(cscC, tolerance, maxIterations, s);
 
         float* Cinv = (float*) malloc(sizeof(float) * n * n);
         printf("hallo?\n");
