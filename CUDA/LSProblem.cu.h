@@ -115,6 +115,8 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         *residualNorm += residual[i] * residual[i];
     }
     *residualNorm = sqrt(*residualNorm);
+    
+    printf("residual norm: %f\n", *residualNorm);
 
     // free memory
     free(e_k);
