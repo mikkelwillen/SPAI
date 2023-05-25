@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 3;
+        int n = 4;
         float sparsity = 1.0;
         float tolerance = 0.01;
         int maxIterations = 2;
@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
         float* C = (float*) malloc(sizeof(float) * n * n);
+        float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
     
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -38,15 +39,22 @@ int main(int argc, char** argv) {
         B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
         B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
         B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
+
+        m4[0] = 10.0; m4[1] = 0.0; m4[2] = 0.0; m4[3] = 14.0;
+        m4[4] = 0.0; m4[5] = 0.0; m4[6] = 2.0; m4[7] = 0.0;
+        m4[8] = 13.0; m4[9] = 0.0; m4[10] = 0.0; m4[11] = 1.0;
+        m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
+
+
     
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
         struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
+        struct CSC* cscM4 = createCSC(m4, 4, 4);
     
-        struct CSC* res = sequentialSpai(cscD, tolerance, maxIterations, s);
+        struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
 
-        float* Cinv = (float*) malloc(sizeof(float) * n * n);
         printf("hallo?\n");
     
         int* I = (int*) malloc(sizeof(int) * n);
@@ -96,7 +104,6 @@ int main(int argc, char** argv) {
         free(A);
         free(B);
         free(C);
-        free(Cinv);
         free(I);
         free(J);
     
