@@ -26,6 +26,7 @@ int checkSingularity(CSC* cscA) {
 
         return 1;
     }
+
     int m = cscA->m;
     int n = cscA->n;
 
@@ -129,6 +130,18 @@ int checkSingularity(CSC* cscA) {
         return 1;
     }
 
+    // free memory
+    free(A);
+    free(I);
+    free(J);
+    gpuAssert(
+        cudaFree(d_A));
+    gpuAssert(
+        cudaFree(workspace));
+    gpuAssert(
+        cudaFree(devIpiv));
+    cusolverDnDestroy(cHandle);
+    
     return 0;
 }
 
