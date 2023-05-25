@@ -175,9 +175,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int j = 0; j < A->n; j++) {
                 for (int h = 0; h < n2; h++) {
                     if (J[h] == j) {
-                        residual[i] += ADense[i * n2 + j] * mHat_k[h];
+                        residual[i] += ADense[i * A->n + j] * mHat_k[h];
                         printf("residual[%d] += AHat[%d * %d + %d] * mHat_k[%d]\n", i, i, n2, j, h);
-                        printf("residual[%d] += %f * %f\n", i, ADense[i * n2 + j], mHat_k[h]);
+                        printf("residual[%d] += %f * %f\n", i, ADense[i * A->n + j], mHat_k[h]);
                     }
                 }
             }
