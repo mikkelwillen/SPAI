@@ -59,7 +59,7 @@ int checkSingularity(CSC* cscA) {
     float* workspace;
     int* devIpiv;
     int devSize = MIN(m, n);
-    int info;
+    int* d_info;
 
     gpuAssert(
         cudaMalloc((void**) &d_A, m * n * sizeof(float)));
@@ -89,6 +89,10 @@ int checkSingularity(CSC* cscA) {
     gpuAssert(
         cudaMalloc((void**) &devIpiv, devSize * sizeof(int)));
 
+    // allocate the info array
+    gpuAssert(
+        cudaMalloc((void**) &d_info, sizeof(int)));
+
     // perform LU factorization from cusolver
     // https://docs.nvidia.com/cuda/cusolver
     stat = cusolverDnSgetrf(cHandle,
@@ -98,11 +102,15 @@ int checkSingularity(CSC* cscA) {
                             lda,
                             workspace,
                             devIpiv,
-                            &info);
+                            d_info);
 
     // error handling
-    if (info < 0) {
-        printf("The %d'th paramter is wrong\n", -info);
+    int h_info;
+    gpuAssert(
+        cudaMemcpy(&h_info, d_info, sizeof(int), cudaMemcpyDeviceToHost));
+        
+    if (h_info < 0) {
+        printf("The %d'th paramter is wrong\n", -h_info);
 
     }
 
@@ -124,8 +132,8 @@ int checkSingularity(CSC* cscA) {
     //     printf("]\n");
     // }
 
-    if (info > 0) {
-        printf("The input matrix is singular: %d\n", info);
+    if (h_info > 0) {
+        printf("The input matrix is singular: %d\n", h_info);
 
         return 1;
     }
