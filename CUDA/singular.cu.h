@@ -16,6 +16,7 @@
 // n = the number of columns in A
 // returns 1 if A is singular, 0 otherwise
 int checkSingularity(CSC* cscA) {
+
     // initialize cusolver
     cusolverDnHandle_t cHandle;
     cusolverStatus_t stat;
@@ -90,7 +91,7 @@ int checkSingularity(CSC* cscA) {
 
     }
     if (stat != CUSOLVER_STATUS_SUCCESS) {
-        printf("CUSOLVER LU factorization failed\n");
+        printf("CUSOLVER LU factorization failed with status: %d\n", stat);
 
         return 1;
     }
