@@ -173,7 +173,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         for (int i = 0; i < A->m; i++) {
             residual[i] = 0.0;
             for (int j = 0; j < A->n; j++) {
-                residual[i] += ADense[i * A->n + j] * (*mHat_k)[j];
+                residual[i] += ADense[i * A->n + j] * mHat_k[j];
             }
             if (i == k) {
                 residual[i] -= 1.0;
