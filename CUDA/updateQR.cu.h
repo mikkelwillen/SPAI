@@ -415,8 +415,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("freed B2R\n");
     free(firstMatrix);
     printf("freed firstMatrix\n");
-    free(secondMatrix);
-    printf("freed secondMatrix\n");
+    // free(secondMatrix);
+    // printf("freed secondMatrix\n");
     free(unsortedQ);
     printf("freed unsortedQ\n");
     free(unsortedR);
