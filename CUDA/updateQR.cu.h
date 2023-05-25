@@ -431,41 +431,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
     printf("Q * R\n");
 
-    free(*I);
-    printf("free I\n");
-    free(*J);
-    printf("free J\n");
-    (*I) = (int*) malloc(n1Union * sizeof(int));
-    printf("malloc I\n");
-    (*J) = (int*) malloc(n2Union * sizeof(int));
-    printf("malloc J\n");
-    
-    // compute pr * I
-    for (int i = 0; i < n1Union; i++) {
-        (*I)[i] = 0;
-        for (int j = 0; j < n1Union; j++) {
-            (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
-        }
-    }
-
-    printf("I (after pr * I):\n");
-    for (int i = 0; i < n1Union; i++) {
-        printf("%d ", (*I)[i]);
-    }
-
-    // compute Pc * J
-    for (int i = 0; i < n2Union; i++) {
-        (*J)[i] = 0;
-        for (int j = 0; j < n2Union; j++) {
-            (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
-        }
-    }
-
-    printf("J:\n");
-    for (int i = 0; i < n2Union; i++) {
-        printf("%d ", (*J)[i]);
-    }
-
     // free memory
     free(AIJTilde);
     printf("freed AIJTilde\n");
