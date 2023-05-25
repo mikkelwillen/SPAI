@@ -9,6 +9,34 @@
 #include "permutation.cu.h"
 #include "updateQR.cu.h"
 
+int runIdentityTest(float* A, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
+    cscA = createCSC(A, m, n);
+    float* identity = malloc (sizeof(float) * n * n);
+
+    res = sequentialSpai(cscA, tolerance, maxIterations, s);
+
+    int* I = (int*) malloc(sizeof(int) * m);
+    int* J = (int*) malloc(sizeof(int) * n);
+    for (int i = 0; i < m; i++) {
+        I[i] = i;
+    }
+    for (int i = 0; i < n; i++) {
+        J[i] = i;
+    }
+
+    float* inv = CSCToDense(res, I, J, m, n);
+    
+    // identity = A * inv
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            identity[i * n + j] = 0.0;
+            for (int k = 0; k < n; k++) {
+                identity[i * n + j] += A[i * n + k] * inv[k * n + j];
+            }
+        }
+    }
+}
+
 
 int main(int argc, char** argv) {
     if (argc == 1) {
@@ -24,6 +52,7 @@ int main(int argc, char** argv) {
         float* B = (float*) malloc(sizeof(float) * m * n);
         float* C = (float*) malloc(sizeof(float) * n * n);
         float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
+        float* m5 = (float*) malloc(sizeof(float) * 5 * 5);
     
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -53,7 +82,8 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
-        struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
+        // struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
+        runIdentityTest(m4, 4, 4, sparsity, tolerance, maxIterations, s);
 
         printf("hallo?\n");
     
