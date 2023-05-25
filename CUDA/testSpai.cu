@@ -14,7 +14,7 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 10;
+        int n = 3;
         float sparsity = 1.0;
         float tolerance = 0.01;
         int maxIterations = 5;
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
     
-        struct CSC* res = sequentialSpai(cscC, tolerance, maxIterations, s);
+        struct CSC* res = sequentialSpai(cscD, tolerance, maxIterations, s);
 
         float* Cinv = (float*) malloc(sizeof(float) * n * n);
         printf("hallo?\n");
