@@ -12,6 +12,7 @@
 #include "invBatched.cu.h"
 #include "updateQR.cu.h"
 #include "LSProblem.cu.h"
+#include "singular.cu.h"
 
 
 // A = matrix we want to compute SPAI on
@@ -21,6 +22,13 @@
 // s = number of rho_j - the most profitable indices
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printCSC(A);
+
+    int checkSingular = checkSingularity(A);
+    if (checkSingular == 1) {
+        printf("Matrix is singular\n");
+        
+        return NULL;
+    }
 
     // initialize cuBLAS
     cublasHandle_t cHandle;
