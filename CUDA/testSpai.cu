@@ -13,7 +13,7 @@ int runIdentityTest(float* A, int m, int n, float sparsity, float tolerance, int
     struct CSC* cscA = createCSC(A, m, n);
     float* identity = (float*) malloc (sizeof(float) * n * n);
 
-    float* res = sequentialSpai(cscA, tolerance, maxIterations, s);
+    struct CSC* res = sequentialSpai(cscA, tolerance, maxIterations, s);
 
     int* I = (int*) malloc(sizeof(int) * m);
     int* J = (int*) malloc(sizeof(int) * n);
@@ -129,9 +129,6 @@ int main(int argc, char** argv) {
         freeCSC(cscB);
         freeCSC(cscC);
         freeCSC(cscD);
-        if (res != NULL) {
-            freeCSC(res);
-        }
 
         free(A);
         free(B);
