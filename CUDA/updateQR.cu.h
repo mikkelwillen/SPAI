@@ -39,45 +39,45 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     // create AITildeJTilde of size n1Tilde x n2Tilde
     float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
 
-    // create ATilde of size n1Union x n2Union
-    float* ATilde = (float*) malloc(n1Union * n2Union * sizeof(float));
+    // // create ATilde of size n1Union x n2Union
+    // float* ATilde = (float*) malloc(n1Union * n2Union * sizeof(float));
     
-    // set upper left square to AHat of size n1 x n2
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2; j++) {
-            ATilde[i*n2Union + j] = (*AHat)[i * n2 + j];
-        }
-    }
+    // // set upper left square to AHat of size n1 x n2
+    // for (int i = 0; i < n1; i++) {
+    //     for (int j = 0; j < n2; j++) {
+    //         ATilde[i*n2Union + j] = (*AHat)[i * n2 + j];
+    //     }
+    // }
 
-    // set upper right square to AIJTilde of size n1 x n2Tilde
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            ATilde[i * n2Union + n2 + j] = AIJTilde[i * n2Tilde + j];
-        }
-    }
+    // // set upper right square to AIJTilde of size n1 x n2Tilde
+    // for (int i = 0; i < n1; i++) {
+    //     for (int j = 0; j < n2Tilde; j++) {
+    //         ATilde[i * n2Union + n2 + j] = AIJTilde[i * n2Tilde + j];
+    //     }
+    // }
 
-    // set lower left square to zeros of size n1Tilde x n2
-    for (int i = 0; i < n1Tilde; i++) {
-        for (int j = 0; j < n2; j++) {
-            ATilde[(n1 + i) * n2Union + j] = 0;
-        }
-    }
+    // // set lower left square to zeros of size n1Tilde x n2
+    // for (int i = 0; i < n1Tilde; i++) {
+    //     for (int j = 0; j < n2; j++) {
+    //         ATilde[(n1 + i) * n2Union + j] = 0;
+    //     }
+    // }
 
-    // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
-    for (int i = 0; i < n1Tilde; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            ATilde[(n1 + i) * n2Union + n2 + j] = AITildeJTilde[i * n2Tilde + j];
-        }
-    }
+    // // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
+    // for (int i = 0; i < n1Tilde; i++) {
+    //     for (int j = 0; j < n2Tilde; j++) {
+    //         ATilde[(n1 + i) * n2Union + n2 + j] = AITildeJTilde[i * n2Tilde + j];
+    //     }
+    // }
 
-    // print ATilde
-    printf("ATilde:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            printf("%f ", ATilde[i * n2Union + j]);
-        }
-        printf("\n");
-    }
+    // // print ATilde
+    // printf("ATilde:\n");
+    // for (int i = 0; i < n1Union; i++) {
+    //     for (int j = 0; j < n2Union; j++) {
+    //         printf("%f ", ATilde[i * n2Union + j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // Create permutation matrices Pr and Pc
     float* Pr = (float*)malloc(n1Union * n1Union * sizeof(float));
