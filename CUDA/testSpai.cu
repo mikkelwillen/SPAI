@@ -9,7 +9,7 @@
 #include "permutation.cu.h"
 #include "updateQR.cu.h"
 
-int runIdentityTest(CSC* A, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
+int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
 
     struct CSC* res = sequentialSpai(cscA, tolerance, maxIterations, s);
