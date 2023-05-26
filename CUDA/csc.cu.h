@@ -192,10 +192,12 @@ CSC* updateKthColumnCSC(CSC* A, float* newVaules, int k, int* J, int n2) {
 
     // insert the new values into the flatData and flatRowIndex from k
     int index = 0;
-    for (int i = A->offset[k]; i < A->offset[k] + deltaNonzeros + 1; i++) {
-        newA->flatData[i] = newVaules[index];
-        newA->flatRowIndex[i] = J[index];
-        index++;
+    for (int i = 0; i < n2 + 1; i++) {
+        if (newVaules[index] != 0.0) {
+            newA->flatData[A->offset[k] + index] = newVaules[index];
+            newA->flatRowIndex[A->offset[k] + index] = J[index];
+            index++;
+        }
     }
 
     // Copy the old flatData and flatRowIndex values after k
