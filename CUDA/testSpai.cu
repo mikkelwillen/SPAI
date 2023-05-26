@@ -69,11 +69,11 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 4;
+        int n = 10;
         float sparsity = 0.5;
         float tolerance = 0.01;
         int maxIterations = 4;
-        int s = 1;
+        int s = 2;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
