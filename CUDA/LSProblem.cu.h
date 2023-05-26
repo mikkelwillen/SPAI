@@ -39,7 +39,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     for (int j = 0; j < n2; j++) {
         cHat[j] = 0.0;
         for (int i = 0; i < n1; i++) {
-            cHat[j] += Q[i * n2 + j] * e_k[i];
+            cHat[j] += Q[i * n1 + j] * e_k[i];
         }
     }
 
