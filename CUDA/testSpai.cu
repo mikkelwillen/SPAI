@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
-        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscM4, n, n, sparsity, tolerance, maxIterations, s);
 
         printf("hallo?\n");
     
