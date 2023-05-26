@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
         initHwd();
         int m = 4;
         int n = 5;
-        float sparsity = 1.0;
+        float sparsity = 0.2;
         float tolerance = 0.01;
         int maxIterations = 4;
         int s = 1;
