@@ -88,7 +88,7 @@ int main(int argc, char** argv) {
         }
     
         C[0] = 20.0; C[1] = 0.0;   C[2] = 0.0; 
-        C[3] = 30.0;  C[4] = 30.0;  C[5] = 0.0; 
+        C[3] = 0.0;  C[4] = 30.0;  C[5] = 10.0; 
         C[6] = 25.0;  C[7] = 0.0;   C[8] = 10.0;
     
         B[0] = 20.0; B[1] = 0.0;   B[2] = 0.0; 
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
-        runIdentityTest(m4, 4, 4, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscD, 3, 3, sparsity, tolerance, maxIterations, s);
 
         printf("hallo?\n");
     
