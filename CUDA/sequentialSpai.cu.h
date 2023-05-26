@@ -547,6 +547,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         for (int i = 0; i < n2; i++) {
             printf("%f ", mHat_k[i]);
         }
+        // print J
+        printf("\nJ: ");
+        for (int i = 0; i < n2; i++) {
+            printf("%d ", J[i]);
+        }
+        // print n2
+        printf("\nn2: %d\n", n2);
         M = updateKthColumnCSC(M, mHat_k, k, J, n2);
         printCSC(M);
         printf("\nM after updateKthColumnCSC:\n");
