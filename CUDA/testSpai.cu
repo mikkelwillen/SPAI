@@ -13,7 +13,7 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
     float* identity = (float*) malloc (sizeof(float) * n * n);
 
     struct CSC* res = sequentialSpai(cscA, tolerance, maxIterations, s);
-
+    printf("After sequentialSpai\n");
     int* I = (int*) malloc(sizeof(int) * m);
     int* J = (int*) malloc(sizeof(int) * n);
     for (int i = 0; i < m; i++) {
