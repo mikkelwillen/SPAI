@@ -37,6 +37,12 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
+    // print JTilde
+    printf("JTilde:\n");
+    for (int i = 0; i < n2Tilde; i++) {
+        printf("%d ", JTilde[i]);
+    }
+    
     float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
 
     // print AIJTilde
