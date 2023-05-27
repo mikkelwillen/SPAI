@@ -586,6 +586,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
     printf("vi er done\n");
     cublasDestroy(cHandle);
+    printf("cublas destroyed\n");
 
     return M;
 }
