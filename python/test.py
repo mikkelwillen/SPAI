@@ -131,7 +131,11 @@ C = [[0, 0, 24.1, 0, 0, 0, 0, 0, 61.24, 13.48],
      [0, 0, 0, 72.09, 0, 0, 0, 0, 0, 28.52]
      ]
 
-CSparse = scipy.sparse.csr_array(C)
+D = [[20, 0, 0],
+     [0, 30, 10],
+     [25, 0, 10]]
 
-testU(improvedSpai.printSPAI, A)
+DSparse = scipy.sparse.csr_array(D)
+
+testU(improvedSpai.printSPAI, DSparse)
 

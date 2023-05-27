@@ -11,6 +11,28 @@
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
 
+// Function for updating the QR decomposition
+// cHandle = the cublas handle
+// A = the input CSC matrix
+// AHat = the submatrix of size n1 x n2
+// Q = the Q matrix
+// R = the R matrix
+// I = the row indices of AHat
+// J = the column indices of AHat
+// ITilde = the row indices to potentioally add to AHat
+// JTilde = the column indices to potentially add to AHat
+// IUnion = the union of I and ITilde
+// JUnion = the union of J and JTilde
+// n1 = the lentgh of I
+// n2 = the length of J
+// n1Tilde = the length of ITilde
+// n2Tilde = the length of JTilde
+// n1Union = the length of IUnion
+// n2Union = the length of JUnion
+// m_kOut = the output of the LS problem
+// residual = the residual vector
+// residualNorm = the norm of the residual vector
+// k = the current iteration
 void* updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int* I, int* J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
