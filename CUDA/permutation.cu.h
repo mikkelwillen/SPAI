@@ -27,11 +27,6 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
         }
         prevLowest = currentLowest;
     }
-    // print IIndex
-    printf("IIndex:\n");
-    for (int i = 0; i < n1; i++) {
-        printf("%d ", IIndex[i]);
-    }
 
     // create row permutation matrix of size n1 x n1
     for (int i = 0; i < n1; i++) {
