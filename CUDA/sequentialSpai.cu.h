@@ -425,6 +425,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             for (int i = 0; i < n2Tilde; i++) {
                 JUnion[n2 + i] = smallestJTilde[i];
             }
+            JTilde = smallestJTilde;
 
             // print JUnion
             printf("\nJUnion: ");
