@@ -21,6 +21,8 @@
 // maxIteration = constraint for the maximal number of iterations
 // s = number of rho_j - the most profitable indices
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
+    printf("------SEQUENTIAL SPAI------\n");
+    printf("running with parameters: tolerance = %f, maxIteration = %d, s = %d\n", tolerance, maxIteration, s);
     printCSC(A);
 
     int checkSingular = checkSingularity(A);
