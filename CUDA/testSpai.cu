@@ -111,7 +111,6 @@ int main(int argc, char** argv) {
         m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
         m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
 
-
     
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
@@ -119,49 +118,10 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
-        // struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
+        // run test
         runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
-
-        printf("hallo?\n");
-    
-        int* I = (int*) malloc(sizeof(int) * n);
-        printf("After malloc I\n");
-        int* J = (int*) malloc(sizeof(int) * n);
-        printf("After malloc J\n");
-        for (int i = 0; i < n; i++) {
-            I[i] = i;
-            J[i] = i;
-        }
-
-        // float* CDense = CSCToDense(cscM4, I, J, n, n);
-        // printf("After CSCToDense\n");
-        // float* resDense = CSCToDense(res, I, J, n, n);
-        // printf("After CSCToDense\n");
-        
-        
-
-        // // multiply CDense with resDense
-        // printf("Mulitplying CDense with resDense\n");
-        // float* identity = (float*) malloc(sizeof(float) * n * n);
-        // for (int i = 0; i < n; i++) {
-        //     for (int j = 0; j < n;j++) {
-        //         identity[i * n + j] = 0.0;
-        //         for (int k = 0; k < n; k++) {
-        //             identity[i * n + j] += CDense[i * n + k] * resDense[k * n + j];
-        //         }
-        //     }
-        // }
-    
-        // printf("identity:\n");
-        // for (int i = 0; i < n; i++) {
-        //     for (int j = 0; j < n;j++) {
-        //         printf("%f ", identity[i * n + j]);
-        //     }
-        //     printf("\n");
-        // }
     
         // free memory
-        printf("freeing memory\n");
         freeCSC(cscA);
         freeCSC(cscB);
         freeCSC(cscC);
@@ -169,10 +129,7 @@ int main(int argc, char** argv) {
 
         free(A);
         free(B);
-        free(C);
-        free(I);
-        free(J);
-    
+        free(C);    
     } else if (argc == 7) {
         // read args
         printf("hallo?\n");
