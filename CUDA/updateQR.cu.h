@@ -365,35 +365,35 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         JDense[j] = j;
     }
 
-    free(*I);
-    printf("free I\n");
-    free(*J);
-    printf("free J\n");
-    (*I) = (int*) malloc(n1Union * sizeof(int));
-    printf("malloc I\n");
-    (*J) = (int*) malloc(n2Union * sizeof(int));
-    printf("malloc J\n");
+    // free(*I);
+    // printf("free I\n");
+    // free(*J);
+    // printf("free J\n");
+    // (*I) = (int*) malloc(n1Union * sizeof(int));
+    // printf("malloc I\n");
+    // (*J) = (int*) malloc(n2Union * sizeof(int));
+    // printf("malloc J\n");
     
-    // compute pr * I
-    for (int i = 0; i < n1Union; i++) {
-        (*I)[i] = 0;
-        for (int j = 0; j < n1Union; j++) {
-            (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
-        }
-    }
+    // // compute pr * I
+    // for (int i = 0; i < n1Union; i++) {
+    //     (*I)[i] = 0;
+    //     for (int j = 0; j < n1Union; j++) {
+    //         (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
+    //     }
+    // }
 
-    printf("I (after pr * I):\n");
-    for (int i = 0; i < n1Union; i++) {
-        printf("%d ", (*I)[i]);
-    }
+    // printf("I (after pr * I):\n");
+    // for (int i = 0; i < n1Union; i++) {
+    //     printf("%d ", (*I)[i]);
+    // }
 
-    // compute Pc * J
-    for (int i = 0; i < n2Union; i++) {
-        (*J)[i] = 0;
-        for (int j = 0; j < n2Union; j++) {
-            (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
-        }
-    }
+    // // compute Pc * J
+    // for (int i = 0; i < n2Union; i++) {
+    //     (*J)[i] = 0;
+    //     for (int j = 0; j < n2Union; j++) {
+    //         (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
+    //     }
+    // }
 
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
     // compute residual
@@ -488,7 +488,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             (*R)[i * n2Union + j] = unsortedR[i * n2Union + j];
         }
     }
-    
+
 
     // free memory
     free(AIJTilde);
