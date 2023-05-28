@@ -99,7 +99,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         n1 = 0;
         for (int j = 0; j < n2; j++) {
-            for (int i = A->offset[sortedJ[j]]; i < A->offset[J[j] + 1]; i++) {
+            for (int i = A->offset[sortedJ[j]]; i < A->offset[sortedJ[j] + 1]; i++) {
                 int keep = 1;
                 for (int h = 0; h < A->m; h++) {
                     if (A->flatRowIndex[i] == sortedI[h]) {
@@ -440,7 +440,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             JUnion = (int*) malloc(sizeof(int) * n2Union);
             printf("after JUnion\n");
             for (int i = 0; i < n2; i++) {
-                JUnion[i] = J[i];
+                JUnion[i] = unsortedJ[i];
             }
             for (int i = 0; i < n2Tilde; i++) {
                 JUnion[n2 + i] = JTilde[i];
@@ -495,7 +495,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             n1Union = n1 + n1Tilde;
             IUnion = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
             for (int i = 0; i < n1; i++) {
-                IUnion[i] = I[i];
+                IUnion[i] = unsortedI[i];
             }
             for (int i = 0; i < n1Tilde; i++) {
                 IUnion[n1 + i] = ITilde[i];
