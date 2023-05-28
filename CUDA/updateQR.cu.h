@@ -470,6 +470,26 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     // }
     printf("Q * R\n");
 
+    // set R to unsortedR and Q to unsortedQ
+    free(*Q);
+    printf("free Q\n");
+    free(*R);
+    printf("free R\n");
+    (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
+    printf("malloc Q\n");
+    (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
+    printf("malloc R\n");
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n1Union; j++) {
+            (*Q)[i * n1Union + j] = unsortedQ[i * n1Union + j];
+        }
+    }
+    for (int i = 0; i < n1Union; i++) {
+        for (int j = 0; j < n2Union; j++) {
+            (*R)[i * n2Union + j] = unsortedR[i * n2Union + j];
+        }
+    }
+
     // set I and J to IUnion and JUnion
     free(*I);
     printf("free I\n");
@@ -485,7 +505,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     for (int i = 0; i < n2Union; i++) {
         (*J)[i] = JUnion[i];
     }
-    
+
 
     // free memory
     free(AIJTilde);
