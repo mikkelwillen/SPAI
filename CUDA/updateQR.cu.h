@@ -427,48 +427,65 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     printf("residual norm: %f\n", *residualNorm);
 
 
-    // sort unsortedQ and unsortedR into Q and R
-    free(*Q);
-    (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
-    printf("malloc q\n");
-    free(*R);
-    (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
-    printf("malloc r\n");
+    // // sort unsortedQ and unsortedR into Q and R
+    // free(*Q);
+    // (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
+    // printf("malloc q\n");
+    // free(*R);
+    // (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
+    // printf("malloc r\n");
 
-    // compute Pr * unsortedQ
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n1Union; j++) {
-            (*Q)[i * n1Union + j] = 0.0;
-            for (int k = 0; k < n1Union; k++) {
-                (*Q)[i * n1Union + j] += Pr[i * n1Union + k] * unsortedQ[k * n1Union + j];
-            }
-        }
-    }
-    printf("pr * unsortedQ\n");
+    // // compute Pr * unsortedQ
+    // for (int i = 0; i < n1Union; i++) {
+    //     for (int j = 0; j < n1Union; j++) {
+    //         (*Q)[i * n1Union + j] = 0.0;
+    //         for (int k = 0; k < n1Union; k++) {
+    //             (*Q)[i * n1Union + j] += Pr[i * n1Union + k] * unsortedQ[k * n1Union + j];
+    //         }
+    //     }
+    // }
+    // printf("pr * unsortedQ\n");
 
-    // compute unsortedR * Pc
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            (*R)[i * n2Union + j] = 0.0;
-            for (int k = 0; k < n2Union; k++) {
-                (*R)[i * n2Union + j] += unsortedR[i * n2Union + k] * Pc[k * n2Union + j];
-            }
-        }
-    }
-    printf("unsortedR * Pc\n");
+    // // compute unsortedR * Pc
+    // for (int i = 0; i < n1Union; i++) {
+    //     for (int j = 0; j < n2Union; j++) {
+    //         (*R)[i * n2Union + j] = 0.0;
+    //         for (int k = 0; k < n2Union; k++) {
+    //             (*R)[i * n2Union + j] += unsortedR[i * n2Union + k] * Pc[k * n2Union + j];
+    //         }
+    //     }
+    // }
+    // printf("unsortedR * Pc\n");
 
-    // set AHat to Q * R
-    free(*AHat);
-    (*AHat) = (float*) malloc(n1Union * n2Union * sizeof(float));
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            (*AHat)[i * n2Union + j] = 0.0;
-            for (int k = 0; k < n1Union; k++) {
-                (*AHat)[i * n2Union + j] += (*Q)[i * n1Union + k] * (*R)[k * n2Union + j];
-            }
-        }
-    }
+    // // set AHat to Q * R
+    // free(*AHat);
+    // (*AHat) = (float*) malloc(n1Union * n2Union * sizeof(float));
+    // for (int i = 0; i < n1Union; i++) {
+    //     for (int j = 0; j < n2Union; j++) {
+    //         (*AHat)[i * n2Union + j] = 0.0;
+    //         for (int k = 0; k < n1Union; k++) {
+    //             (*AHat)[i * n2Union + j] += (*Q)[i * n1Union + k] * (*R)[k * n2Union + j];
+    //         }
+    //     }
+    // }
     printf("Q * R\n");
+
+    // set I and J to IUnion and JUnion
+    free(*I);
+    printf("free I\n");
+    free(*J);
+    printf("free J\n");
+    (*I) = (int*) malloc(n1Union * sizeof(int));
+    printf("malloc I\n");
+    (*J) = (int*) malloc(n2Union * sizeof(int));
+    printf("malloc J\n");
+    for (int i = 0; i < n1Union; i++) {
+        (*I)[i] = IUnion[i];
+    }
+    for (int i = 0; i < n2Union; i++) {
+        (*J)[i] = JUnion[i];
+    }
+    
 
     // free memory
     free(AIJTilde);
