@@ -22,18 +22,32 @@ typedef struct CSC {
     int* flatRowIndex;
 } CSC;
 
+// function for setting device arrays for a CSC matrix
+// d_A = The device CSC matrix
+// offset = The offset array
+// flatData = The flat data array
+// flatRowIndex = The flat row index array
 __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int* flatRowIndex) {
     d_A->offset = offset;
     d_A->flatData = flatData;
     d_A->flatRowIndex = flatRowIndex;
 }
 
+// (DEPRECATED) tror ikke den kopiere rigtigt
+// function for setting host arrays for a CSC matrix 
+// d_A = The device CSC matrix
+// offset = The offset array
+// flatData = The flat data array
+// flatRowIndex = The flat row index array
 __global__ void cscDataDeviceToHost(CSC* d_A, int* offset, float* flatData, int* flatRowIndex) {
     offset = d_A->offset;
     flatData = d_A->flatData;
     flatRowIndex = d_A->flatRowIndex;
 }
 
+// (DEPRECATED) er ikke sikker på den har de rigtige værdier
+// function for freeing the device arrays of a CSC matrix 
+// d_A = The device CSC matrix
 __global__ void cscDataFree(CSC* d_A) {
     free(d_A->offset);
     free(d_A->flatData);
@@ -347,7 +361,8 @@ CSC* copyCSCFromDeviceToHost(CSC* d_A) {
 // A = The CSC matrix to free
 void freeDeviceCSC(CSC* A) {
     cscDataFree<<<1, 1>>>(A);
-    cudaFree(A);
+    gpuAssert(
+        cudaFree(A));
 }
 
 // Frees all the elements of a CSC struct

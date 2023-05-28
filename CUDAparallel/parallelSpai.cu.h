@@ -14,6 +14,7 @@
 #include "LSProblem.cu.h"
 #include "helperKernels.cu.h"
 #include "SPAIkernels.cu.h"
+#include "singular.cu.h"
 
 
 // A            = matrix we want to compute SPAI on
@@ -23,7 +24,17 @@
 // s            = number of rho_j - the most profitable indices
 // batchsize    = number of matrices to be processed in parallel
 CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int batchsize) {
+    printf("---------PARALLEL SPAI---------\n");
+    printf("running with parameters: tolerance: %f, maxIterations: %d, s: %d, batchsize: %d\n", tolerance, maxIterations, s, batchsize);
     printCSC(A);
+
+    // check if matrix is singular
+    int checkSingular = checkSingularity(A);
+    if (checkSingular == 1) {
+        printf("Matrix is singular\n");
+
+        return NULL;
+    }
 
     // initialize cublas
     cublasHandle_t cHandle;
