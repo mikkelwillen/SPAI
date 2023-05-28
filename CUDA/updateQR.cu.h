@@ -395,6 +395,18 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     //     }
     // }
 
+    // set I and J to IUnion and JUnion
+    free(*I);
+    free(*J);
+    (*I) = (int*) malloc(n1Union * sizeof(int));
+    (*J) = (int*) malloc(n2Union * sizeof(int));
+    for (int i = 0; i < n1Union; i++) {
+        (*I)[i] = IUnion[i];
+    }
+    for (int i = 0; i < n2Union; i++) {
+        (*J)[i] = JUnion[i];
+    }
+
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
     // compute residual
     for (int i = 0; i < A->m; i++) {
