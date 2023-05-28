@@ -78,34 +78,34 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         cudaMalloc((void**) &d_info, BATCHSIZE * sizeof(int)));
     printf("after cudaMalloc d_info\n");
 
-    // // run batched LU factorization from cublas
-    // // cublas docs: https://docs.nvidia.com/cuda/cublas/
-    // stat = cublasSgetrfBatched(cHandle,
-    //                            n,
-    //                            d_PointerA,
-    //                            lda,
-    //                            d_PivotArray,
-    //                            d_info,
-    //                            BATCHSIZE);
+    // run batched LU factorization from cublas
+    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    stat = cublasSgetrfBatched(cHandle,
+                               n,
+                               d_PointerA,
+                               lda,
+                               d_PivotArray,
+                               d_info,
+                               BATCHSIZE);
 
-    // // error handling
-    // if (stat != CUBLAS_STATUS_SUCCESS) {
-    //     printf("\ncublasSgetrfBatched failed");
-    //     printf("\ncublas error: %d\n", stat);
+    // error handling
+    if (stat != CUBLAS_STATUS_SUCCESS) {
+        printf("\ncublasSgetrfBatched failed");
+        printf("\ncublas error: %d\n", stat);
         
-    //     return stat;
-    // }
+        return stat;
+    }
 
-    // gpuAssert(
-    //     cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    gpuAssert(
+        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
 
-    // for (int i = 0; i < BATCHSIZE; i++) {
-    //     if (h_info[i] != 0) {
-    //         printf("\nError in LU: Matrix %d is singular\n", i);
+    for (int i = 0; i < BATCHSIZE; i++) {
+        if (h_info[i] != 0) {
+            printf("\nError in LU: Matrix %d is singular\n", i);
 
-    //         return 1;
-    //     }
-    // }
+            return 1;
+        }
+    }
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
