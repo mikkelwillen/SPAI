@@ -62,6 +62,16 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
         }
         printf("\n");
     }
+
+    // calculate error
+    float error = 0.0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            error += (identity[i * n + j] - (i == j ? 1.0 : 0.0)) * (identity[i * n + j] - (i == j ? 1.0 : 0.0));
+        }
+    }
+
+    printf("Error: %f\n", error);
 }
 
 
