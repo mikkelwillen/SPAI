@@ -63,6 +63,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* R;
         float* mHat_k;
         float* residual;
+        int* sortedJ = (int*) malloc(sizeof(int) * M->m);
 
         // 1) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
@@ -501,9 +502,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
                 printf("\n");
             }
+            
+            free(sortedJ);
+            sortedJ = (int*) malloc(sizeof(int) * n2Union);
 
             // 13) Update the QR factorization of A(IUnion, JUnion)
-            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &I, &J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
+            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &sortedJ, &I, &J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
 
             if (updateSuccess != 0) {
                 printf("update failed\n");
