@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
         float sparsity = 1.0;
         float tolerance = 0.01;
         int maxIterations = 19;
-        int s = 2;
+        int s = 1;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
