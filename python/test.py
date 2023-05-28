@@ -81,6 +81,10 @@ def checkIdentityU(algo, A):
     print("normI:\n", np.linalg.norm(identity))
     print("shape:\n", identity.shape)
 
+    print("Norm of implementation:", np.linalg.norm(A * spaiTest - np.identity(spaiTest.shape[1])))
+
+    print("Norm of library-implementation: ", np.linalg.norm(A * AInv - np.identity(spaiTest.shape[1])))
+
 # Check the error difference between numpy inverse
 # and SPAI by computing the dot product of A and M
 # for both of them and checking how close they are
@@ -132,10 +136,11 @@ C = [[0, 0, 24.1, 0, 0, 0, 0, 0, 61.24, 13.48],
      ]
 
 D = [[20, 0, 0],
-     [0, 30, 10],
+     [0, 30, 0],
      [25, 0, 10]]
 
 DSparse = scipy.sparse.csr_array(D)
+CSparse = scipy.sparse.csr_array(C)
 
-testU(improvedSpai.printSPAI, DSparse)
+checkIdentityU(improvedSpai.printSPAI, A)
 

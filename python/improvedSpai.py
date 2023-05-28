@@ -148,15 +148,15 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             I = unionI
             n1 = I.size
-            
+
             m_k[J] = Pc.T * mTilde_k
 
             # 14) Compute residual r
             residual = A[:,J] * m_k[J] - e_k
 
             # Permute Q and R to be used in next iteration
-            Q = Pr * Q 
-            R_1 = R_1 * Pc
+            # Q = Pr * Q 
+            # R_1 = R_1 * Pc
 
         # 16) Set m_k(J) = mHat_k
         M[:,k] = m_k
