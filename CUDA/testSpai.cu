@@ -71,7 +71,7 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
         }
     }
 
-    printf("Error: %f\n", error);
+    printf("Error: %f%\n", error);
 }
 
 
