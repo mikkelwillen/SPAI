@@ -352,7 +352,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     for (int i = 0; i < n2Union; i++) {
         (*sortedJ)[i] = 0;
         for (int j = 0; j < n2Union; j++) {
-            (*sortedJ)[i] += Pc[i * n2Union + j] * (*JUnion)[j];
+            (*sortedJ)[i] += Pc[i * n2Union + j] * JUnion[j];
         }
     }
 
