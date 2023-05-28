@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         int n = 10;
         float sparsity = 0.5;
         float tolerance = 0.01;
-        int maxIterations = 4;
+        int maxIterations = 8;
         int s = 2;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
