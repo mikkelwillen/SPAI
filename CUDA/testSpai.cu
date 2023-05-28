@@ -69,10 +69,10 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 4;
+        int n = 10;
         float sparsity = 0.5;
         float tolerance = 0.01;
-        int maxIterations = 3;
+        int maxIterations = 9;
         int s = 1;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // struct CSC* res = sequentialSpai(cscM4, tolerance, maxIterations, s);
-        runIdentityTest(cscM4, n, n, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
 
         printf("hallo?\n");
     
