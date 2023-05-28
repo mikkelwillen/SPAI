@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 100;
+        int n = 20;
         float sparsity = 0.4;
         float tolerance = 0.01;
-        int maxIterations = 39;
+        int maxIterations = 19;
         int s = 1;
     
         float* A = (float*) malloc(sizeof(float) * m * n);
