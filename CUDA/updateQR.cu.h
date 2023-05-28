@@ -64,7 +64,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
 
 
-    // create AITildeJTilde of size n1Tilde x n2Tilde
+    // 13.1) create AITildeJTilde of size n1Tilde x n2Tilde
     float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
 
     // // create ATilde of size n1Union x n2Union
@@ -112,7 +112,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     float* Pc = (float*)malloc(n2Union * n2Union * sizeof(float));
     createPermutationMatrices(IUnion, JUnion, n1Union, n2Union, Pr, Pc);
 
-    // ABreve of size n1 x n2Tilde = Q^T * AIJTilde
+    // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* ABreve = (float*)malloc(n1 * n2Tilde * sizeof(float));
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2Tilde; j++) {
@@ -131,7 +131,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         printf("\n");
     }
 
-    // B1 = ABreve[0 : n2, 0 : n2]
+    // 13.3) Compute B1 = ABreve[0 : n2, 0 : n2]
     float* B1 = (float*) malloc(n2 * n2Tilde * sizeof(float));
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
@@ -139,7 +139,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
+    // 13.4) Compute B2 = ABreve[n2 + 1 : n1, 0 : n2Tilde] + AITildeJTilde
     float* B2;
     if (n1 - n2 < 0) {
         B2 = (float*) malloc(n1Tilde * n2Tilde * sizeof(float));
@@ -181,7 +181,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         printf("\n");
     }
 
-    // compute QR factorization of B2
+    // 13.5) Do QR factorization of B2
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
     int qrSuccess = qrBatched(cHandle, &B2, n1Union - n2, n2Tilde, &B2Q, &B2R);
@@ -205,7 +205,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
 
     
-    
+    // 13.6) Compute Q_B and R_B from algorithm 17
     // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
     float* firstMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
@@ -324,7 +324,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     free(*m_kOut);
     (*m_kOut) = (float*) malloc(n2Union * sizeof(float));
 
-    // compute the new solution m_k for the least squares problem
+    // 13.7) compute the new solution m_k for the least squares problem
     int lsSuccess = LSProblem(cHandle, A, unsortedQ, unsortedR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
 
     if (lsSuccess != 0) {
@@ -353,7 +353,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
     printf("\n");
 
-    // g) compute residual = A * mHat_k - e_k
+    // 14) compute residual = A * mHat_k - e_k
     // malloc space for residual
     // do matrix multiplication
     int* IDense = (int*) malloc(A->m * sizeof(int));

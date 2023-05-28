@@ -22,9 +22,11 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
 }
 
 // Function to do inversion of batch matrices
+// cHandle is the cublas handle
 // A is an array of batch matrices
 // n is the max number of rows and columns of the matrices
 // AInv is an array of batch inverse matrices
+// returns 0 if succesful, 1 if not
 int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     printf("\nDo inversion of A\n");
 

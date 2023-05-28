@@ -37,11 +37,13 @@ __global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int 
 }
 
 // Function to do QR decomposition of batch AHat matrices
-// AHat is an array of batch matrices
+// cHandle is the cublas handle
+// AHat is an array of pointers to batch matrices
 // n1 is the max number of rows of the matrices
 // n2 is the max number of columns of the matrices
-// Q is an array of batch Q matrices
-// R is an array of batch R matrices
+// Q is an array of pointers to batch Q matrices
+// R is an array of pointers batch R matrices
+// returns 0 if succesful, 1 if not
 int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, float** R) {
     printf("\nDo QR decomposition of AHat\n");
 

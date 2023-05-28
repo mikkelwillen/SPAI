@@ -5,33 +5,33 @@ max_iter = constraint for the maximal number of iterations (give as input)
 s = number of rho_j - the most profitable indices (set to 5) (could think of a smart weighting)
 
 For every column m_k of M
-(a) Find initial sparsity J of m_k
-(b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
-(c) Create AHat = A(I, J)
-(d) Do QR decomposition of AHat
-(e) Compute the solution m_k for the least sqaures problem
-	(a) Compute cHat = Q^T * eHat_k
-	(b) Compute the inverse of R
-	(c) Compute mHat_k = R^-1 * cHat
-    (d) Compute residual
+1) Find initial sparsity J of m_k
+2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
+3) Create AHat = A(I, J)
+4) Do QR decomposition of AHat
+5) Compute the solution m_k for the least sqaures problem
+    5.1) Compute cHat = Q^T * eHat_k
+    5.2) Compute the inverse of R
+	5.3) Compute mHat_k = R^-1 * cHat
+6) Compute residual
 
 while residual > tolerance:
-	(a) Set L set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
-	(b) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
-	(c) For each j in JTilde solve the minimisation problem by computing:
+	7) Set L set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
+	  8) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
+	  9) For each j in JTilde solve the minimisation problem by computing:
 		rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
-	(d) Find the indices JTilde corresponding to the smallest s elements of rho^2
-	(e) Determine the new indices I-rond_tilde
-	(f) Make I U ITilde and J U JTilde
-	(g) Update the QR decomposition
-		(a) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
-		(b) Compute ABreve = Q^T * A(I, JTilde)
-		(c) Compute B1 = ABreve(0 : n2, 0 : n2)
-		(d) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
-		(f) Do QR decomposition of B2
-		(g) Compute Q_B and R_B from algorithm 17
-		(h) Solve the augmented LS problem for mHat_k and compute new residual
-		(i) Set M(J U JTilde) 
-	(l) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
+	10) Find the indices JTilde corresponding to the smallest s elements of rho^2
+	11) Determine the new indices I-rond_tilde
+	12) Make I U ITilde and J U JTilde
+	13) Update the QR decomposition
+		13.1) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
+		13.2) Compute ABreve = Q^T * A(I, JTilde)
+		13.3) Compute B1 = ABreve(0 : n2, 0 : n2)
+		13.4) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
+		13.5) Do QR decomposition of B2
+		13.6) Compute Q_B and R_B from algorithm 17
+		13.7) Solve the augmented LS problem for mHat_k and compute new residual
+    14) Compute residual 
+    15) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
 
- (g) Set m_k(J) = mHat_k
+16) Set m_k(J) = mHat_k

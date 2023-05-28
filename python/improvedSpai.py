@@ -18,42 +18,42 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
     for m_k in M.T:
         print("_______________NEW COLUMN: %a_______________" %k)
 
-        # a) Find initial sparsity J of m_k
+        # 1) Find initial sparsity J of m_k
         m_k = M[:,k]
 
         J = m_k.nonzero()[0]
         n2 = J.size
 
-        # b) Compute the row indices I of the corresponding nonzero entries of A(i, J)
+        # 2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         A_J = A[:,J]
 
         I = np.unique(A_J.nonzero()[0])
         n1 = I.size
 
-        # c) Create Â = A(I, J)
+        # 3) Create Â = A(I, J)
         AHat = A[np.ix_(I, J)]
 
-        # d) Do QR decomposition of AHat. R_1 upper triangular n1 x n1 matrix. 0 is an (n1 − n2)×n2 zero matrix. Q1 is m×n, Q2 is m×(m − n).
+        # 4) Do QR decomposition of AHat. R_1 upper triangular n1 x n1 matrix. 0 is an (n1 − n2)×n2 zero matrix. Q1 is m×n, Q2 is m×(m − n).
         Q, R = np.linalg.qr(AHat.todense(), mode="complete")
         R_1 = R[0:n2,:]
         
-        # e) Compute the solution m_k for the least squares problem
-        # a) Compute cHat = Q^T * eHat_k
+        # 5) Compute the solution m_k for the least squares problem
+        # 5.1) Compute cHat = Q^T * eHat_k
         e_k = np.matrix([0]*M.shape[1]).T
         e_k[k] = 1
 
         eHat_k = e_k[I]
         cHat_k = Q.T * eHat_k
 
-        # b) Compute the inverse of R
+        # 5.2) Compute the inverse of R
         invR_1 = np.linalg.inv(R_1)
 
-        # c) Compute mHat_k = R^-1 * cHat
+        # 5.3) Compute mHat_k = R^-1 * cHat
         mHat_k = invR_1 * cHat_k[0:n2,:]
 
         m_k[J] = mHat_k
 
-        # d) Compute residual
+        # 6) Compute residual
         residual = A_J * mHat_k - e_k
 
         # iterations of the while-loop
@@ -63,17 +63,17 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             iter += 1
 
-            # a) Set L set of indices, where r(l) =/= 0
+            # 7) Set L set of indices, where r(l) =/= 0
             L = np.nonzero(residual)[0]
 
-            # b) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
+            # 8) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
             JTilde = np.array([],dtype=int)
             for l in L:
                 nonzerosInA_l = np.unique(A[l,:].nonzero()[1])
                 N_l = np.setdiff1d(nonzerosInA_l, J)
                 JTilde = np.union1d(JTilde,N_l)
 
-            # c) For each j in JTilde solve the minimisation problem by computing: rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
+            # 9) For each j in JTilde solve the minimisation problem by computing: rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
             rhoSq = []
             for j in JTilde:
                 e_j = np.matrix([0]*M.shape[1]).T
@@ -83,10 +83,10 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
                 rhoSq.append(rhoSq_j)
 
-            # d) Find the indices JTilde corresponding to the smallest s elements of rho^2
+            # 10) Find the indices JTilde corresponding to the smallest s elements of rho^2
             smallestIndices = sorted(range(len(rhoSq)), key = lambda sub: rhoSq[sub])[:s]
 
-            # e) Determine the new indices ITilde
+            # 11) Determine the new indices ITilde
             J = np.array(J)
             I = np.array(I)
 
@@ -96,12 +96,12 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             n2Tilde = len(JTilde)
             n1Tilde = len(ITilde)
 
-            # f) Make I U ITilde and J U JTilde
+            # 12) Make I U ITilde and J U JTilde
             unionI = np.union1d(ITilde, I)
             unionJ = np.union1d(JTilde, J)
 
-            # g) Update the QR decomposition
-            # a) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
+            # 13) Update the QR decomposition
+            # 13.1) Compute ATilde from AHat, A(I, JTilde) and A(ITilde, JTilde)
             AIJTilde = A[np.ix_(I, JTilde)]
 
             AITildeJTilde = A[np.ix_(ITilde,JTilde)]
@@ -110,19 +110,19 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             Pc = permutation.perm(J, n2, JTilde, n2Tilde, "col")
             Pr = permutation.perm(I, n1, ITilde, n1Tilde, "row")
             
-            # b) Compute ABreve = Q^T * A(I, JTilde)
+            # 13.2) Compute ABreve = Q^T * A(I, JTilde)
             ABreve = Q.T * AIJTilde
 
-            # c) Compute B_1 = ABreve(0 : n2, 0 : n2)
+            # 13.3) Compute B_1 = ABreve(0 : n2, 0 : n2)
             B_1 = ABreve[:n2,:]
 
-            # d) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
+            # 13.4) Compute B2 = ABreve(n2 + 1 : n1, 0 : n2Tilde) above AITildeJTilde
             B_2 = np.vstack((ABreve[n2:n1,:], AITildeJTilde.todense()))
 
-            # f) Do QR decomposition of B2
+            # 13.5) Do QR decomposition of B2
             Q_B, R_B = np.linalg.qr(B_2, mode="complete") 
 
-            # g) Compute Q_B and R_B from algorithm 17
+            # 13.6) Compute Q_B and R_B from algorithm 17
             QZeroZeroIdentity = np.hstack((np.vstack((Q, np.zeros((n1Tilde, n1)))), np.vstack((np.zeros((n1, n1Tilde)), np.identity(n1Tilde)))))
 
             IdentityZeroZeroQ_B = np.hstack((np.vstack((np.identity(n2), np.zeros((n1-n2+n1Tilde,n2)))), np.vstack((np.zeros((n2,n1-n2+n1Tilde)), Q_B))))
@@ -131,14 +131,7 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
             
             R = np.hstack((np.vstack((R_1, np.zeros((n1Tilde + n1 - n2, n2)))), np.vstack((B_1, R_B))))
 
-            # Update I and J
-            J = unionJ
-            n2 = J.size
-
-            I = unionI
-            n1 = I.size
-
-            # h) Solve the augmented LS problem for mHat_k and compute new residual
+            # 13.7) Solve the augmented LS problem for mHat_k and compute new residual
             R_1 = R[0:n2,:]  
 
             eTilde_k = Pr.T * e_k[I]
@@ -149,17 +142,23 @@ def improvedSPAI(A, tol = 0.001, max_iter = 100, s = 5):
 
             mTilde_k = invR_1 * cHat_k[0:n2,:]
 
-            # i) Set M(J U JTilde) 
+            # 15) set I = I U I_tilde, J = J U J_tilde and A' = A(I, J)
+            J = unionJ
+            n2 = J.size
+
+            I = unionI
+            n1 = I.size
+            
             m_k[J] = Pc.T * mTilde_k
 
-            # Compute residual r
+            # 14) Compute residual r
             residual = A[:,J] * m_k[J] - e_k
 
             # Permute Q and R to be used in next iteration
             Q = Pr * Q 
             R_1 = R_1 * Pc
 
-        # Place result column in matrix
+        # 16) Set m_k(J) = mHat_k
         M[:,k] = m_k
 
         # iterate k
