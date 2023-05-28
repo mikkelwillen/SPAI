@@ -572,6 +572,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("I freed\n");
         free(J);
         printf("J freed\n");
+        free(sortedJ);
+        printf("sortedJ freed\n");
         free(AHat);
         printf("AHat freed\n");
         free(Q);
