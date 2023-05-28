@@ -64,6 +64,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* mHat_k;
         float* residual;
         int* sortedJ = (int*) malloc(sizeof(int) * M->m);
+        int* sortedI;
 
         // 1) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
@@ -204,6 +205,16 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         
         printf("residual norm: %f\n", residualNorm);
 
+        free(sortedJ);
+        sortedJ = (int*) malloc(n2 * sizeof(int));
+        for (int i = 0; i < n2; i++) {
+            sortedJ[i] = J[i];
+        }
+        sortedI = (int*) malloc(n1 * sizeof(int));
+        for (int i = 0; i < n1; i++) {
+            sortedI[i] = I[i];
+        }
+
         int somethingToBeDone = 1;
 
         // while norm of residual > tolerance do
@@ -300,7 +311,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // remove the indeces that are already in J
             for (int i = 0; i < n2; i++) {
-                keepArray[J[i]] = 0;
+                keepArray[sortedJ[i]] = 0;
             }
             printf("after remove\n");
 
@@ -450,7 +461,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 for (int i = A->offset[JUnion[j]]; i < A->offset[JUnion[j] + 1]; i++) {
                     int keep = 1;
                     for (int h = 0; h < A->m; h++) {
-                        if (A->flatRowIndex[i] == I[h] || A->flatRowIndex[i] == ITilde[h]) {
+                        if (A->flatRowIndex[i] == sortedI[h] || A->flatRowIndex[i] == ITilde[h]) {
                             keep = 0;
                         }
                     }
