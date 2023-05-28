@@ -56,32 +56,32 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         int iteration = 0;
         float residualNorm = 0.0;
 
-        int* J;
-        int* I;
+        int* unsortedI;
+        int* unsortedJ;
+        int* sortedI;
+        int* sortedJ;
         float* AHat;
         float* Q;
         float* R;
         float* mHat_k;
         float* residual;
-        int* sortedJ = (int*) malloc(sizeof(int) * M->m);
-        int* sortedI;
 
         // 1) Find the initial sparsity J of m_k
         // malloc space for the indeces from offset[k] to offset[k + 1]
         n2 = M->offset[k + 1] - M->offset[k];
-        J = (int*) malloc(sizeof(int) * n2);
+        sortedJ = (int*) malloc(sizeof(int) * n2);
 
         // iterate through row indeces from offset[k] to offset[k + 1] and take all elements from the flatRowIndex
         int h = 0;
         for (int i = M->offset[k]; i < M->offset[k + 1]; i++) {
-            J[h] = M->flatRowIndex[i];
+            sortedJ[h] = M->flatRowIndex[i];
             h++;
         }
 
         // print J
         printf("\nJ: ");
         for (int i = 0; i < n2; i++) {
-            printf("%d ", J[i]);
+            printf("%d ", sortedJ[i]);
         }
 
         // // printJ
@@ -92,22 +92,22 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // 2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-        I = (int*) malloc(sizeof(int) * A->m);
+        sortedI = (int*) malloc(sizeof(int) * A->m);
         for (int i = 0; i < A->m; i++) {
-            I[i] = -1;
+            sortedI[i] = -1;
         }
 
         n1 = 0;
         for (int j = 0; j < n2; j++) {
-            for (int i = A->offset[J[j]]; i < A->offset[J[j] + 1]; i++) {
+            for (int i = A->offset[sortedJ[j]]; i < A->offset[J[j] + 1]; i++) {
                 int keep = 1;
                 for (int h = 0; h < A->m; h++) {
-                    if (A->flatRowIndex[i] == I[h]) {
+                    if (A->flatRowIndex[i] == sortedI[h]) {
                         keep = 0;
                     }
                 }
                 if (keep == 1) {
-                    I[n1] = A->flatRowIndex[i];
+                    sortedI[n1] = A->flatRowIndex[i];
                     n1++;
                 }
             }
@@ -120,13 +120,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // print I
         printf("\nI: ");
         for (int i = 0; i < n1; i++) {
-            printf("%d ", I[i]);
+            printf("%d ", sortedI[i]);
         }
 
         // 3) Create Â = A(I, J)
         // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. 
         // For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
-        AHat = CSCToDense(A, I, J, n1, n2);
+        AHat = CSCToDense(A, sortedI, sortedJ, n1, n2);
 
         // print AHat
         printf("\nAhat:\n");
@@ -147,13 +147,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
         // overwrite AHat
         free(AHat);
-        AHat = CSCToDense(A, I, J, n1, n2);
+        AHat = CSCToDense(A, sortedI, sortedJ, n1, n2);
 
         // 5) Compute the solution m_k for the least squares problem
         mHat_k = (float*) malloc(n2 * sizeof(float));
         residual = (float*) malloc(A->m * sizeof(float));        
 
-        int invSuccess = LSProblem(cHandle, A, Q, R, &mHat_k, residual, I, J, n1, n2, k, &residualNorm);
+        int invSuccess = LSProblem(cHandle, A, Q, R, &mHat_k, residual, sortedI, sortedJ, n1, n2, k, &residualNorm);
 
         if (invSuccess != 0) {
             printf("LSProblem failed\n");
@@ -178,7 +178,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             residual[i] = 0.0;
             for (int j = 0; j < A->n; j++) {
                 for (int h = 0; h < n2; h++) {
-                    if (J[h] == j) {
+                    if (sortedJ[h] == j) {
                         residual[i] += ADense[i * A->n + j] * mHat_k[h];
                         printf("residual[%d] += AHat[%d * %d + %d] * mHat_k[%d]\n", i, i, n2, j, h);
                         printf("residual[%d] += %f * %f\n", i, ADense[i * A->n + j], mHat_k[h]);
@@ -205,14 +205,16 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         
         printf("residual norm: %f\n", residualNorm);
 
-        free(sortedJ);
-        sortedJ = (int*) malloc(n2 * sizeof(int));
-        for (int i = 0; i < n2; i++) {
-            sortedJ[i] = J[i];
-        }
-        sortedI = (int*) malloc(n1 * sizeof(int));
+        // set unsortedI and unsortedJ
+        unsortedI = (int*) malloc(sizeof(int) * n1);
+        unsortedJ = (int*) malloc(sizeof(int) * n2);
+        
         for (int i = 0; i < n1; i++) {
-            sortedI[i] = I[i];
+            unsortedI[i] = sortedI[i];
+        }
+        
+        for (int j = 0; j < n2; j++) {
+            unsortedJ[j] = sortedJ[j];
         }
 
         int somethingToBeDone = 1;
@@ -242,7 +244,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             printf("print I");
             for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
+                printf("%d ", sortedI[i]);
             }
 
             // 7) Set L to the set of indices where r(l) != 0
@@ -257,7 +259,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // check if k is in I
             for (int i = 0; i < n1; i++) {
-                if (k == I[i]) {
+                if (k == sortedI[i]) {
                     kNotInI = 0;
                 }
             }
@@ -344,7 +346,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             printf("\nJ: ");
             for(int i = 0; i < n2; i++) {
-                printf("%d ", J[i]);
+                printf("%d ", sortedJ[i]);
             }
             printf("\nJTilde: ");
             for (int i = 0; i < n2Tilde; i++) {
@@ -475,7 +477,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // print I
             printf("\nI: ");
             for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
+                printf("%d ", sortedI[i]);
             }
 
             // printf ITilde
@@ -518,7 +520,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             sortedJ = (int*) malloc(sizeof(int) * n2Union);
 
             // 13) Update the QR factorization of A(IUnion, JUnion)
-            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &sortedJ, &I, &J, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
+            int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &unsortedI, &unsortedJ, &sortedJ, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
 
             if (updateSuccess != 0) {
                 printf("update failed\n");
@@ -540,7 +542,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // print I
             printf("\nI: ");
             for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
+                printf("%d ", unsortedI[i]);
             }
             
             // free memory
@@ -574,7 +576,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // print J
         printf("\nJ: ");
         for (int i = 0; i < n2; i++) {
-            printf("%d ", J[i]);
+            printf("%d ", sortedJ[i]);
         }
         // print n2
         printf("\nn2: %d\n", n2);
@@ -583,9 +585,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         printf("\nM after updateKthColumnCSC:\n");
 
         // free memory
-        free(I);
+        free(unsortedI);
         printf("I freed\n");
-        free(J);
+        free(unsortedJ);
         printf("J freed\n");
         free(AHat);
         printf("AHat freed\n");
