@@ -33,7 +33,7 @@
 // residual = the residual vector
 // residualNorm = the norm of the residual vector
 // k = the current iteration
-int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
+int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** unsortedI, int** unsortedJ, int** sortedI, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -43,7 +43,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         printf("%d ", JTilde[i]);
     }
     
-    float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
+    float* AIJTilde = CSCToDense(A, (*sortedI), JTilde, n1, n2Tilde);
 
     // print AIJTilde
     printf("AIJTilde:\n");
@@ -352,7 +352,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     for (int i = 0; i < n2Union; i++) {
         (*sortedJ)[i] = 0;
         for (int j = 0; j < n2Union; j++) {
-            (*sortedJ)[i] += Pc[i * n2Union + j] * (*J)[j];
+            (*sortedJ)[i] += Pc[i * n2Union + j] * (*JUnion)[j];
         }
     }
 
@@ -375,34 +375,49 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         JDense[j] = j;
     }
 
-    free(*I);
+    // set sortedI and sortedJ to Pr * IUnion and Pc * JUnion
+    free(*sortedI);
     printf("free I\n");
-    free(*J);
+    free(*sortedJ);
     printf("free J\n");
-    (*I) = (int*) malloc(n1Union * sizeof(int));
+    (*sortedI) = (int*) malloc(n1Union * sizeof(int));
     printf("malloc I\n");
-    (*J) = (int*) malloc(n2Union * sizeof(int));
+    (*sortedJ) = (int*) malloc(n2Union * sizeof(int));
     printf("malloc J\n");
     
     // compute pr * I
     for (int i = 0; i < n1Union; i++) {
-        (*I)[i] = 0;
+        (*sortedI)[i] = 0;
         for (int j = 0; j < n1Union; j++) {
-            (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
+            (*sortedI)[i] += Pr[i * n1Union + j] * IUnion[j];
         }
     }
 
     printf("I (after pr * I):\n");
     for (int i = 0; i < n1Union; i++) {
-        printf("%d ", (*I)[i]);
+        printf("%d ", (*sortedI)[i]);
     }
 
     // compute Pc * J
     for (int i = 0; i < n2Union; i++) {
-        (*J)[i] = 0;
+        (*sortedJ)[i] = 0;
         for (int j = 0; j < n2Union; j++) {
-            (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
+            (*sortedJ)[i] += Pc[i * n2Union + j] * JUnion[j];
         }
+    }
+
+    // set unsortedI and unsortedJ to IUnion and JUnion
+    free(*unsortedI);
+    free(*unsortedJ);
+    (*unsortedI) = (int*) malloc(n1Union * sizeof(int));
+    (*unsortedJ) = (int*) malloc(n2Union * sizeof(int));
+    
+    for (int i = 0; i < n1Union; i++) {
+        (*unsortedI)[i] = IUnion[i];
+    }
+
+    for (int i = 0; i < n2Union; i++) {
+        (*unsortedJ)[i] = JUnion[i];
     }
 
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
@@ -411,7 +426,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         residual[i] = 0.0;
         for (int j = 0; j < A->n; j++) {
             for (int h = 0; h < n2Union; h++) {
-                if ((*J)[h] == j) {
+                if ((*sortedJ)[h] == j) {
                     residual[i] += ADense[i * A->n + j] * (*m_kOut)[h];
                 }
             }
@@ -498,22 +513,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         for (int j = 0; j < n2Union; j++) {
             (*R)[i * n2Union + j] = unsortedR[i * n2Union + j];
         }
-    }
-
-    // set I and J to IUnion and JUnion
-    free(*I);
-    printf("free I\n");
-    free(*J);
-    printf("free J\n");
-    (*I) = (int*) malloc(n1Union * sizeof(int));
-    printf("malloc I\n");
-    (*J) = (int*) malloc(n2Union * sizeof(int));
-    printf("malloc J\n");
-    for (int i = 0; i < n1Union; i++) {
-        (*I)[i] = IUnion[i];
-    }
-    for (int i = 0; i < n2Union; i++) {
-        (*J)[i] = JUnion[i];
     }
 
 
