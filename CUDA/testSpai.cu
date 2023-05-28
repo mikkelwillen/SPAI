@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
         initHwd();
         int m = 4;
         int n = 10;
-        float sparsity = 0.2;
+        float sparsity = 0.3;
         float tolerance = 0.01;
         int maxIterations = 9;
         int s = 1;
