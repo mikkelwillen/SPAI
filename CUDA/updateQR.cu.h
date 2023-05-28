@@ -33,7 +33,7 @@
 // residual = the residual vector
 // residualNorm = the norm of the residual vector
 // k = the current iteration
-int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
+int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
     // create AIJTilde
@@ -405,6 +405,16 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
     for (int i = 0; i < n2Union; i++) {
         (*J)[i] = JUnion[i];
+    }
+
+    // set sortedJ to Pc * J
+    free(*sortedJ);
+    (*sortedJ) = (int*) malloc(n2Union * sizeof(int));
+    for (int i = 0; i < n2Union; i++) {
+        (*sortedJ)[i] = 0;
+        for (int j = 0; j < n2Union; j++) {
+            (*sortedJ)[i] += Pc[i * n2Union + j] * JUnion[j];
+        }
     }
 
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
