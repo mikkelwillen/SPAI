@@ -446,12 +446,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 ITilde[i] = -1;
             }
 
-            int maxn1 = MAX(n1, n1Tilde);
             n1Tilde = 0;
             for (int j = 0; j < n2Union; j++) {
                 for (int i = A->offset[JUnion[j]]; i < A->offset[JUnion[j] + 1]; i++) {
                     int keep = 1;
-                    for (int h = 0; h < maxn1; h++) {
+                    for (int h = 0; h < n1; h++) {
                         if (A->flatRowIndex[i] == I[h] || A->flatRowIndex[i] == ITilde[h]) {
                             keep = 0;
                         }

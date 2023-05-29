@@ -64,10 +64,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
         int iteration = 0;
-        int** d_PointerI;
-        int** d_PointerJ;
+        
         int* d_n1;
         int* d_n2;
+        
+        int** d_PointerI;
+        int** d_PointerJ;
+        int** d_PointerSortedJ;
 
         // malloc space
         gpuAssert(
@@ -80,7 +83,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
         
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_PointerI, d_PointerJ, d_n1, d_n2, i, batchsize, A->n);
+        computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_PointerI, d_PointerJ, d_PointerSortedJ, d_n1, d_n2, i, batchsize, A->n);
 
         // find the max value of n1 and n2
         int* h_n1 = (int*) malloc(batchsize * sizeof(float));
@@ -282,6 +285,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
             computeRhoSquared<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerRhoSquared, d_PointerResidual, d_PointerJTilde, d_residualNorm, d_n2Tilde, maxn2Tilde, batchsize);
 
+            // find the smallest s values of rhoSquared
             int* d_newN2Tilde;
             int* d_smallestIndices;
             int** d_PointerSmallestIndices;
@@ -309,6 +313,37 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeSmallestIndices<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_PointerSmallestIndices, d_PointerSmallestJTilde, d_PointerJTilde, d_newN2Tilde, d_n2Tilde, s, batchsize);
+
+            // find ITilde and make IUnion and JUnion
+            int* d_n1Tilde;
+            int* d_n1Union;
+            int* d_n2Union;
+
+            int** d_PointerITilde;
+            int** d_PointerIUnion;
+            int** d_PointerJUnion;
+
+            gpuAssert(
+                cudaMalloc((void**) &d_n1Tilde, batchsize * sizeof(int)));
+            gpuAssert(
+                cudaMalloc((void**) &d_n1Union, batchsize * sizeof(int)));
+            gpuAssert(
+                cudaMalloc((void**) &d_n2Union, batchsize * sizeof(int)));
+            
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerITilde, batchsize * sizeof(int*)));
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerIUnion, batchsize * sizeof(int*)));
+            gpuAssert(
+                cudaMalloc((void**) &d_PointerJUnion, batchsize * sizeof(int*)));
+
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            computeITilde<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerI, d_PointerJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, batchsize);
+
+
+
+
+
 
 
             int* h_l = (int*) malloc(batchsize * sizeof(int));

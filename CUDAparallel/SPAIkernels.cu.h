@@ -15,39 +15,39 @@
 // d_n2         = device pointer to n2
 // currentBatch = the current batch
 // batchsize    = the size of the batch
-__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
+__global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int* d_n1, int* d_n2, int currentBatch, int batchsize, int maxN2) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         int index = currentBatch * batchsize + tid;
         if (index < maxN2) {
             int n2 = d_M->offset[index + 1] - d_M->offset[index];
-            int* J = (int*) malloc(n2 * sizeof(int));
+            int* d_J = (int*) malloc(n2 * sizeof(int));
 
             // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
             int h = 0;
             for (int i = d_M->offset[index]; i < d_M->offset[index + 1]; i++) {
-                J[h] = d_M->flatRowIndex[i];
+                d_J[h] = d_M->flatRowIndex[i];
                 h++;
             }
 
             // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
-            int* I = (int*) malloc(d_A->m * sizeof(int));
+            int* d_I = (int*) malloc(d_A->m * sizeof(int));
             for (int i = 0; i < d_A->m; i++) {
-                I[i] = -1;
+                d_I[i] = -1;
             }
 
             int n1 = 0;
             for (int j = 0; j < n2; j++) {
-                for (int i = d_A->offset[J[j]]; i < d_A->offset[J[j] + 1]; i++) {
+                for (int i = d_A->offset[d_J[j]]; i < d_A->offset[J[j] + 1]; i++) {
                     int keep = 1;
                     for (int k = 0; k < d_A->m; k++) {
-                        if (I[k] == d_A->flatRowIndex[i]) {
+                        if (d_I[k] == d_A->flatRowIndex[i]) {
                             keep = 0;
                             break;
                         }
                     }
                     if (keep) {
-                        I[n1] = d_A->flatRowIndex[i];
+                        d_I[n1] = d_A->flatRowIndex[i];
                         n1++;
                     }
                 }
@@ -55,13 +55,15 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
 
             // set device values
             // giver det mening at parallelisere dette?
-            d_PointerI[tid] = &I[0];
-            d_PointerJ[tid] = &J[0];
+            d_PointerI[tid] = d_I;
+            d_PointerJ[tid] = d_J;
+            d_PointerSortedJ[tid] = d_J;
             d_n1[tid] = n1;
             d_n2[tid] = n2;
         } else {
             d_PointerI[tid] = NULL;
             d_PointerJ[tid] = NULL;
+            d_PointerSortedJ[tid] = NULL;
             d_n1[tid] = 0;
             d_n2[tid] = 0;
         }
@@ -316,14 +318,14 @@ __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float**
     }
 }
 
-// kernel for finding the index of the maximum rho squared
-// d_PointerRhoSquared      = device pointer pointer to rhoSquared
-// d_PointerSmallestIndices = device pointer pointer to smallestIndices
-// d_PointerSmallestJTilde  = device pointer pointer to smallestJTilde
-// d_newN2Tilde             = device pointer to newN2Tilde
-// d_n2Tilde                = device pointer to n2Tilde
-// s                        = the number of indices to keep
-// batchsize                = the size of the batch
+/* kernel for finding the index of the maximum rho squared
+d_PointerRhoSquared      = device pointer pointer to rhoSquared
+d_PointerSmallestIndices = device pointer pointer to smallestIndices
+d_PointerSmallestJTilde  = device pointer pointer to smallestJTilde
+d_newN2Tilde             = device pointer to newN2Tilde
+d_n2Tilde                = device pointer to n2Tilde
+s                        = the number of indices to keep
+batchsize                = the size of the batch */
 __global__ void computeSmallestIndices(float** d_PointerRhoSquared, int** d_PointerSmallestIndices, int** d_PointerSmallestJTilde, int** d_PointerJTilde, int* d_newN2Tilde, int* d_n2Tilde, int s, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -356,6 +358,90 @@ __global__ void computeSmallestIndices(float** d_PointerRhoSquared, int** d_Poin
         for (int i = 0; i < d_newN2Tilde[tid]; i++) {
             d_smallestJTilde[i] = d_JTilde[d_smallestIndices[i]];
         }
+    }
+}
+
+/* kernel for finding ITilde and setting IUnion and JUnion
+d_A                 = device pointer to A
+d_PointerI          = device pointer pointer to I
+d_PointerJ          = device pointer pointer to J
+d_PointerITilde     = device pointer pointer to ITilde
+d_PointerJTilde     = device pointer pointer to JTilde
+d_PointerIUnion     = device pointer pointer to IUnion
+d_PointerJUnion     = device pointer pointer to JUnion
+d_n1                = device pointer to n1
+d_n2                = device pointer to n2
+d_n1Tilde           = device pointer to n1Tilde
+d_n2Tilde           = device pointer to n2Tilde
+d_n1Union           = device pointer to n1Union
+d_n2Union           = device pointer to n2Union
+batchsize           = the size of the batch */
+__global__ void computeITilde(CSC* d_A, int** d_PointerI, int** d_PointerJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        int n1 = d_n1[tid];
+        int n2 = d_n2[tid];
+        int n2Tilde = d_n2Tilde[tid];
+        int n2Union = d_n2Union[tid];
+
+        int* d_I = d_PointerI[tid];
+        int* d_J = d_PointerJ[tid];
+        int* d_JTilde = d_PointerJTilde[tid];
+        
+
+        // set d_n2Union and make JUnion
+        int n2Union = n2 + n2Tilde;
+        int* d_JUnion = (int*) malloc(n2Union* sizeof(int));
+        for (int i = 0; i < n2; i++) {
+            d_JUnion[i] = d_J[i];
+        }
+
+        for (int i = 0; i < n2Tilde; i++) {
+            d_JUnion[n2 + i] = d_JTilde[i];
+        }
+
+        // find ITilde 
+        int* d_ITilde = (int*) malloc(d_A->m * sizeof(int));
+        for (int i = 0; i < d_A->m; i++) {
+            d_ITilde[i] = -1;
+        }
+
+        int n1Tilde = 0;
+        for (int j = 0; j < n2Union, j++) {
+            for (int i = d_A->offset[d_JUnion[j]]; i < d_A->offset[d_JUnion[j] + 1]; i++) {
+                int keep = 1;
+                for (int h = 0; h < n1; h++) {
+                    if (d_A->flatRowIndex[i] == d_I[h] || d_A->flatRowIndex[i] == d_ITilde[h]) {
+                        keep = 0;
+                        break;
+                    }
+                }
+                if (keep) {
+                    d_ITilde[n1Tilde] = d_A->flatRowIndex[i];
+                    n1Tilde++;
+                }
+            }
+        }
+
+        // set d_n1Tilde and make IUnion
+        int n1Union = n1 + n1Tilde;
+        int* d_IUnion = (int*) malloc(n1Union * sizeof(int));
+        for (int i = 0; i < n1; i++) {
+            d_IUnion[i] = d_I[i];
+        }
+
+        for (int i = 0; i < n1Tilde; i++) {
+            d_IUnion[n1 + i] = d_ITilde[i];
+        }
+
+        // copy the values to array
+        d_n1Tilde[tid] = n1Tilde;
+        d_n1Union[tid] = n1Union;
+        d_n2Union[tid] = n2Union;
+
+        d_PointerITilde[tid] = d_ITilde;
+        d_PointerJUnion[tid] = d_JUnion;
+        d_PointerIUnion[tid] = d_IUnion;
     }
 }
 
