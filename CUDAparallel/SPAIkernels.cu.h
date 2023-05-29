@@ -443,4 +443,66 @@ __global__ void computeITilde(CSC* d_A, int** d_PointerI, int** d_PointerJ, int*
     }
 }
 
+// kører parallelt i batchsize * maxn1 * maxn2Tilde tråde
+/* kernel for computing ABreve = Q^T * A(I, JTilde)
+d_PointerQ        = device pointer pointer to Q
+d_PointerAIJTilde = device pointer pointer to AIJTilde
+d_PointerABreve   = device pointer pointer to ABreve
+d_n1              = device pointer to n1
+d_n2Tilde         = device pointer to n2Tilde
+maxn1             = the maximum value of n1 in the batch
+maxn2Tilde        = the maximum value of n2Tilde in the batch 
+batchsize         = the size of the batch */
+__global__ void computeABreve(float** d_PointerQ, float** d_PointerAIJTilde, float** d_PointerABreve, int* d_n1, int* d_n2Tilde, int maxn1, int maxn2Tilde, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1 * maxn2Tilde) {
+        int b = tid / (maxn1 * maxn2Tilde);
+        int i = (tid % (maxn1 * maxn2Tilde)) / maxn2Tilde;
+        int j = (tid % (maxn1 * maxn2Tilde)) % maxn2Tilde;
+
+        int n1 = d_n1[b];
+        int n2Tilde = d_n2Tilde[b];
+        
+        float* d_Q = d_PointerQ[b];
+        float* d_AIJTilde = d_PointerAIJTilde[b];
+        float* d_ABreve = d_PointerABreve[b];
+
+        if (i < n1 && j < n2Tilde) {
+            d_ABreve[i * maxn2Tilde + j] = 0;
+            for (int k = 0; k < n1; k++) {
+                d_ABreve[i * maxn2Tilde + j] += d_Q[k * n1 + i] * d_AIJTilde[k * maxn2Tilde + j];
+            }
+        }
+    }
+}
+
+// kører parallelt i batchsize * maxn2 * maxn2Tilde tråde
+/* kernel for setting B1 = ABreve[0:n2, 0:n2Tilde]
+d_PointerABreve = device pointer pointer to ABreve
+d_PointerB1     = device pointer pointer to B1
+d_n2            = device pointer to n2
+d_n2Tilde       = device pointer to n2Tilde
+maxn2           = the maximum value of n2 in the batch
+maxn2Tilde      = the maximum value of n2Tilde in the batch
+batchsize       = the size of the batch */
+__global__ void setB1(float** d_PointerABreve, float** d_PointerB1, int* d_n2, int* d_n2Tilde, int maxn2, int maxn2Tilde, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn2 * maxn2Tilde) {
+        int b = tid / (maxn2 * maxn2Tilde);
+        int i = (tid % (maxn2 * maxn2Tilde)) / maxn2;
+        int j = (tid % (maxn2 * maxn2Tilde)) % maxn2;
+
+        int n2 = d_n2[b];
+        int n2Tilde = d_n2Tilde[b];
+
+        float* d_ABreve = d_PointerABreve[b];
+        float* d_B1 = d_PointerB1[b];
+
+        if (i < n2 && j < n2Tilde) {
+            d_B1[i * maxn2Tilde + j] = d_ABreve[i * maxn2Tilde + j];
+        }
+    }
+}
+
+
 #endif

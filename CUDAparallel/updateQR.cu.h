@@ -89,6 +89,36 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
+    // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
+    float* d_ABreve;
+    float** d_PointerABreve;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_ABreve,  maxn1 * maxn2Tilde * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerABreve, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_ABreve, batchsize, maxn1 * maxn2Tilde);
+
+    numBlocks = (batchsize * maxn1 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeABreve<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerAIJTilde, d_PointerABreve, d_n1, d_n2Tilde, maxn1, maxn2Tilde, batchsize);
+
+    // 13.3) Set B1 = ABreve[0:n2, 0:n2Tilde]
+    float* d_B1;
+    float** d_PointerB1;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_B1,  maxn2 * maxn2Tilde * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB1, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB1, d_B1, batchsize, maxn2 * maxn2Tilde);
+
+    numBlocks = (batchsize * maxn2 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+    setB1<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_PointerB1, d_n2, d_n2Tilde, maxn2, maxn2Tilde, batchsize);
+
     
     printf("done with updateQR\n");
 

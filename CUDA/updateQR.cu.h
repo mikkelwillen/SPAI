@@ -131,7 +131,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         printf("\n");
     }
 
-    // 13.3) Compute B1 = ABreve[0 : n2, 0 : n2]
+    // 13.3) Compute B1 = ABreve[0 : n2, 0 : n2Tilde]
     float* B1 = (float*) malloc(n2 * n2Tilde * sizeof(float));
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2Tilde; j++) {
