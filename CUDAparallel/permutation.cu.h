@@ -19,7 +19,7 @@ batchsize = number of matrices in the batch */
 __global__ void createPr(float** d_PointerPr, int** d_PointerI, int* d_n1Union, int maxn1, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < batchsize) {
-        int* d_Pr = d_PointerPr[tid];
+        float* d_Pr = d_PointerPr[tid];
         int* d_I = d_PointerI[tid];
         int n1 = d_n1Union[tid];
 
@@ -30,7 +30,7 @@ __global__ void createPr(float** d_PointerPr, int** d_PointerI, int* d_n1Union, 
             int currentLowest = INT_MAX;
             for (int j = 0; j < n1; j++) {
                 if (d_I[j] > prevLowest && d_I[j] < currentLowest) {
-                    currentLowest = I[j];
+                    currentLowest = d_I[j];
                     IIndex[j] = i;
                 }
             }
@@ -46,7 +46,7 @@ __global__ void createPr(float** d_PointerPr, int** d_PointerI, int* d_n1Union, 
                 d_Pr[i * maxn1 + j] = 1;
             }
             else {
-                d_Pr[i * maxn2 + j] = 0;
+                d_Pr[i * maxn1 + j] = 0;
             }
         }
     }
@@ -62,7 +62,7 @@ batchsize = number of matrices in the batch */
 __global__ void createPc(float** d_PointerPc, int** d_PointerJ, int* d_n2Union, int maxn2, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < batchsize) {
-        int* d_Pc = d_PointerPc[tid];
+        float* d_Pc = d_PointerPc[tid];
         int* d_J = d_PointerJ[tid];
         int n2 = d_n2Union[tid];
 
