@@ -10,10 +10,10 @@
 #include "updateQR.cu.h"
 
 
-int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
+int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s, int batchsize) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
 
-    struct CSC* res = parallelSpai(cscA, tolerance, maxIterations, s);
+    struct CSC* res = parallelSpai(cscA, tolerance, maxIterations, s, batchsize);
     printf("After sequentialSpai\n");
     int* I = (int*) malloc(sizeof(int) * m);
     int* J = (int*) malloc(sizeof(int) * n);
@@ -84,6 +84,7 @@ int main(int argc, char** argv) {
         float tolerance = 0.01;
         int maxIterations = 9;
         int s = 1;
+        int batchsize = 2;
     
     
     
@@ -111,7 +112,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
 
-        runIdentityTest(cscA, n, n, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscA, n, n, sparsity, tolerance, maxIterations, s, batchsize);
     } else if (argc == 8) {
         // read args
         printf("hallo?\n");
