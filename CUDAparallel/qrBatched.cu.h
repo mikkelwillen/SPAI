@@ -296,6 +296,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             }
             printf("]\n");
         }
+        
         float* h_tempStorage = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_tempStorage, d_tempStorage, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
