@@ -80,12 +80,12 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerPc;
 
     gpuAssert(
-        cudaMalloc((void**) &d_Pc, batchsize * maxn2 * maxn2 * sizeof(float)));
+        cudaMalloc((void**) &d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(float*)));
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2 * maxn2);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2Union * maxn2Union);
 
     createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
@@ -156,13 +156,13 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2R, d_B2R, batchsize, maxn1Union * maxn2Tilde);
 
-    int qrSuccess = qrBatched(cHandle, d_PointerB2, d_PointerB2Q, d_PointerB2R, maxn1Union, maxn2Tilde, batchsize);
+    // int qrSuccess = qrBatched(cHandle, d_PointerB2, d_PointerB2Q, d_PointerB2R, maxn1Union, maxn2Tilde, batchsize);
 
-    if (qrSuccess != 0) {
-        printf("QR failed\n");
+    // if (qrSuccess != 0) {
+    //     printf("QR failed\n");
         
-        return 1;
-    }
+    //     return 1;
+    // }
 
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
