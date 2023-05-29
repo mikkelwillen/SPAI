@@ -178,7 +178,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     gpuAssert(
         cudaMalloc((void***) &d_PointerInvR, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
     
     // compute the invR matrices
     invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
