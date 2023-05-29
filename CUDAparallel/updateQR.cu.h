@@ -31,6 +31,12 @@ d_n1Union = pointer to n1Union in device memory
 d_n2Union = pointer to n2Union in device memory
 d_PointerMHat_k = pointer to mHat_k in device memory
 d_residualNorm = pointer to residualNorm in device memory
+maxn1 = maximum value of n1
+maxn2 = maximum value of n2
+maxn1Tilde = maximum value of n1Tilde
+maxn2Tilde = maximum value of n2Tilde
+maxn1Union = maximum value of n1Union
+maxn2Union = maximum value of n2Union
 i = current iteration
 batchsize = batchsize */
 int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float** d_PointerMHat_k, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
