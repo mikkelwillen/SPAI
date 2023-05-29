@@ -95,13 +95,16 @@ __global__ void createPc(float** d_PointerPc, int** d_PointerJ, int* d_n2Union, 
     }
 }
 
-// Function to create permutation matrices
-// I is the row permutation vector
-// J is the column permutation vector
-// n1 is the number of rows in the original matrix
-// n2 is the number of columns in the original matrix
-// Pr is the row permutation matrix output
-// Pc is the column permutation matrix output
+/* function for creating the permutation matrices
+d_PointerPr = pointer to the row permutation matrix (NULL if not needed)
+d_PointerPc = pointer to the column permutation matrix (NULL if not needed)
+d_PointerIUnion = pointer to the row permutation vector
+d_PointerJUnion = pointer to the column permutation vector
+d_n1Union = pointer to the number of rows in the original matrix
+d_n2Union = pointer to the number of columns in the original matrix
+maxn1 = maximum number of rows in the batch
+maxn2 = maximum number of columns in the batch
+batchsize = number of matrices in the batch */
 void* createPermutationMatrices(float** d_PointerPr, float** d_PointerPc, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1Union, int* d_n2Union, int maxn1, int maxn2, int batchsize) {
     int numBlocks;
 

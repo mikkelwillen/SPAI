@@ -75,31 +75,21 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAITildeJTilde, d_PointerITilde, d_PointerJTilde, d_n1Tilde, d_n2Tilde, maxn1Tilde, maxn2Tilde, A->m, batchsize);
 
-    // create permutation matrices Pr and Pc
-    float* d_Pr;
+    // create permutation matrices Pc (we dont need Pr, since we never permute the rows)
     float* d_Pc;
-
-    float** d_PointerPr;
     float** d_PointerPc;
 
     gpuAssert(
-        cudaMalloc((void**) &d_Pr,  maxn1 * maxn1 * sizeof(float)));
-    gpuAssert(
         cudaMalloc((void**) &d_Pc,  maxn2 * maxn2 * sizeof(float)));
-
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerPr, batchsize * sizeof(float*)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(float*)));
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPr, d_Pr, batchsize, maxn1 * maxn1);
-
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2 * maxn2);
 
     createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
-
+    
     printf("done with updateQR\n");
 
     return 0;
