@@ -149,7 +149,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     gpuAssert(
         cudaMalloc((void**) &d_PointerCHat, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn1);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn1);
     
     // set the cHat vector
     numBlocks = (maxn1 * maxn1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
