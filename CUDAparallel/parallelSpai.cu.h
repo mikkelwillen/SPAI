@@ -120,7 +120,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
 
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
+        CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
         
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
@@ -164,7 +164,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         // overwrite AHat, since qr overwrote it previously
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeAHat<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
+        CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
 
 
         // initialize mHat_k, residual, residualNorm
@@ -342,7 +342,44 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeITilde<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerI, d_PointerJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, batchsize);
 
+            // find maxn1Tilde, maxn1Union and maxn2Union
+            int maxn1Tilde = 0;
+            int maxn1Union = 0;
+            int maxn2Union = 0;
 
+            int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
+            int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
+            int* h_n2Union = (int*) malloc(batchsize * sizeof(int));
+
+            gpuAssert(
+                cudaMemcpy(h_n1Tilde, d_n1Tilde, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            gpuAssert(
+                cudaMemcpy(h_n1Union, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            gpuAssert(
+                cudaMemcpy(h_n2Union, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            
+            for (int b = 0; b < batchsize; b++) {
+                if (h_n1Tilde[b] > maxn1Tilde) {
+                    maxn1Tilde = h_n1Tilde[b];
+                }
+
+                if (h_n1Union[b] > maxn1Union) {
+                    maxn1Union = h_n1Union[b];
+                }
+                
+                if (h_n2Union[b] > maxn2Union) {
+                    maxn2Union = h_n2Union[b];
+                }
+            }
+
+            // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
+            int updateSuccess = updateQR(cHandle, A, d_A, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_PointerMHat_k, d_residualNorm, i, batchsize);
+
+            if (updateSuccess != 0) {
+                printf("updateQR failed\n");
+
+                return NULL;
+            }
 
 
 

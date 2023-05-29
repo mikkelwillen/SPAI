@@ -70,7 +70,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
     }
 }
 
-// kernel for computing Ahat
+// kernel for setting the dense matrices padded with zeros to make the uniform size
 // d_A          = device pointer to A
 // d_AHat       = device pointer pointer to AHat
 // d_PointerI   = device pointer pointer to I
@@ -82,7 +82,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
 // maxOffset    = the maximum value of offset
 // currentBatch = the current batch
 // batchsize    = the size of the batch
-__global__ void computeAHat(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
+__global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * maxOffset) {
         int b = (tid / (maxn1 * maxn2 * maxOffset));

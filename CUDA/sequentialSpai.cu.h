@@ -506,6 +506,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             if (updateSuccess != 0) {
                 printf("update failed\n");
+                
                 return NULL;
             }
 
