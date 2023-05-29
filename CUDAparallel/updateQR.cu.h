@@ -73,6 +73,27 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAITildeJTilde, d_PointerITilde, d_PointerJTilde, d_n1Tilde, d_n2Tilde, maxn1Tilde, maxn2Tilde, A->m, batchsize);
 
+    // create permutation matrices Pr and Pc
+    int* d_Pr;
+    int* d_Pc;
+
+    int** d_PointerPr;
+    int** d_PointerPc;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_Pr,  maxn1 * maxn1 * sizeof(int)));
+    gpuAssert(
+        cudaMalloc((void**) &d_Pc,  maxn2 * maxn2 * sizeof(int)));
+
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerPr, batchsize * sizeof(int*)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(int*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPr, d_Pr, batchsize, maxn1 * maxn1);
+
+    intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2 * maxn2);
 
 
     printf("done with updateQR\n");

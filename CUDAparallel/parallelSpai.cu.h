@@ -117,7 +117,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaMalloc((void**) &d_PointerAHat, batchsize * sizeof(float*)));
 
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
+        FloatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
 
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
@@ -150,7 +150,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_PointerQ, batchsize * sizeof(float*)));
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1 * maxn1);
 
 
         gpuAssert(
@@ -158,7 +158,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_PointerR, batchsize * sizeof(float*)));
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
         qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
 
@@ -181,13 +181,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_PointerMHat_k, batchsize * sizeof(float*)));
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2);
 
         gpuAssert(
             cudaMalloc((void**) &d_residual, batchsize * A->m * sizeof(float)));
         gpuAssert(
             cudaMalloc((void**) &d_PointerResidual, batchsize * sizeof(float*)));
-        deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residual, batchsize, A->m);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residual, batchsize, A->m);
 
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
@@ -239,7 +239,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerKeepArray, batchsize * sizeof(int*)));
             
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_KeepArray, batchsize, A->n);
+            intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_KeepArray, batchsize, A->n);
 
             numBlocks = (batchsize * A->n + BLOCKSIZE - 1) / BLOCKSIZE;
             computeKeepArray<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerKeepArray, d_PointerL, d_PointerJ, d_n2, d_l, batchsize);
@@ -282,7 +282,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerRhoSquared, batchsize * sizeof(float*)));
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            deviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_rhoSquared, batchsize, maxn2Tilde);
+            floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_rhoSquared, batchsize, maxn2Tilde);
             
             numBlocks = (batchsize * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
             computeRhoSquared<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerRhoSquared, d_PointerResidual, d_PointerJTilde, d_residualNorm, d_n2Tilde, maxn2Tilde, batchsize);
@@ -303,7 +303,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerSmallestIndices, batchsize * sizeof(int*)));
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestIndices, d_smallestIndices, batchsize, s);
+            intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestIndices, d_smallestIndices, batchsize, s);
 
             gpuAssert(
                 cudaMalloc((void**) &d_smallestJTilde, batchsize * s * sizeof(int)));
@@ -311,7 +311,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerSmallestJTilde, batchsize * sizeof(int*)));
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            iDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestJTilde, d_smallestJTilde, batchsize, s);
+            intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestJTilde, d_smallestJTilde, batchsize, s);
         
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeSmallestIndices<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_PointerSmallestIndices, d_PointerSmallestJTilde, d_PointerJTilde, d_newN2Tilde, d_n2Tilde, s, batchsize);
