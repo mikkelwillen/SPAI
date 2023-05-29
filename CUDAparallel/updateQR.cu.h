@@ -76,6 +76,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
 
     printf("done with updateQR\n");
+
+    return 0;
 }
 
 #endif
