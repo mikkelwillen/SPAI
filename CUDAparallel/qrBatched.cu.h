@@ -225,6 +225,8 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     float* d_tempStorage;
     float** d_PointerTempStorage;
 
+    printf("Malloc space for arrays and copy array start pointers to device\n");
+
     gpuAssert(
         cudaMalloc((void**) &d_v, n1 * batchsize * sizeof(float)));
     gpuAssert(
