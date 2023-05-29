@@ -10,6 +10,8 @@
 #include "constants.cu.h"
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
+#include "helperKernels.cu.h"
+#include "SPAIkernels.cu.h"
 
 /* Function for updating the QR decomposition
 cHandle = cublas handle
@@ -65,7 +67,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAITildeJTilde, d_PointerITilde, d_PointerJTilde, d_n1Tilde, d_n2Tilde, maxn1Tilde, maxn2Tilde, A->m, batchsize);
 
-    
+
 
     printf("done with updateQR\n");
 }
