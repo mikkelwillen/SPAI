@@ -156,13 +156,13 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2R, d_B2R, batchsize, maxn1Union * maxn2Tilde);
 
-    // int qrSuccess = qrBatched(cHandle, d_PointerB2, d_PointerB2Q, d_PointerB2R, maxn1Union, maxn2Tilde, batchsize);
+    int qrSuccess = qrBatched(cHandle, d_PointerB2, d_PointerB2Q, d_PointerB2R, maxn1Union, maxn2Tilde, batchsize);
 
-    // if (qrSuccess != 0) {
-    //     printf("QR failed\n");
+    if (qrSuccess != 0) {
+        printf("QR failed\n");
         
-    //     return 1;
-    // }
+        return 1;
+    }
 
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
