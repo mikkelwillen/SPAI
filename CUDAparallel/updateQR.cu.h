@@ -50,7 +50,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerAIJTilde;
 
     gpuAssert(
-        cudaMalloc((void**) &d_AIJTilde,  maxn1 * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_AIJTilde, batchsize * maxn1 * maxn2Tilde * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAIJTilde, batchsize * sizeof(float*)));
 
@@ -65,7 +65,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerAITildeJTilde;
 
     gpuAssert(
-        cudaMalloc((void**) &d_AITildeJTilde,  maxn1Tilde * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_AITildeJTilde, batchsize * maxn1Tilde * maxn2Tilde * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAITildeJTilde, batchsize * sizeof(float*)));
     
@@ -80,7 +80,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerPc;
 
     gpuAssert(
-        cudaMalloc((void**) &d_Pc,  maxn2 * maxn2 * sizeof(float)));
+        cudaMalloc((void**) &d_Pc, batchsize * maxn2 * maxn2 * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(float*)));
     
@@ -94,7 +94,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerABreve;
 
     gpuAssert(
-        cudaMalloc((void**) &d_ABreve,  maxn1 * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_ABreve, batchsize * maxn1 * maxn2Tilde * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerABreve, batchsize * sizeof(float*)));
     
@@ -109,7 +109,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerB1;
 
     gpuAssert(
-        cudaMalloc((void**) &d_B1,  maxn2 * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_B1, batchsize * maxn2 * maxn2Tilde * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerB1, batchsize * sizeof(float*)));
     
@@ -124,7 +124,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     float** d_PointerB2;
 
     gpuAssert(
-        cudaMalloc((void**) &d_B2,  maxn1Union * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_B2, batchsize * maxn1Union * maxn2Tilde * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerB2, batchsize * sizeof(float*)));
     
