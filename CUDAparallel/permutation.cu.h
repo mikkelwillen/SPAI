@@ -37,16 +37,16 @@ __global__ void createPr(float** d_PointerPr, int** d_PointerI, int* d_n1Union, 
 
             prevLowest = currentLowest;
         }
-    }
 
-    // create row permutation matrix of size n1 x n1
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n1; j++) {
-            if (IIndex[j] == i) {
-                d_Pr[i * maxn1 + j] = 1;
-            }
-            else {
-                d_Pr[i * maxn1 + j] = 0;
+        // create row permutation matrix of size n1 x n1
+        for (int i = 0; i < n1; i++) {
+            for (int j = 0; j < n1; j++) {
+                if (IIndex[j] == i) {
+                    d_Pr[i * maxn1 + j] = 1;
+                }
+                else {
+                    d_Pr[i * maxn1 + j] = 0;
+                }
             }
         }
     }
@@ -80,16 +80,16 @@ __global__ void createPc(float** d_PointerPc, int** d_PointerJ, int* d_n2Union, 
 
             prevLowest = currentLowest;
         }
-    }
 
-    // create column permutation matrix of size n2 x n2
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            if (JIndex[j] == i) {
-                d_Pc[i * maxn2 + j] = 1;
-            }
-            else {
-                d_Pc[i * maxn2 + j] = 0;
+        // create column permutation matrix of size n2 x n2
+        for (int i = 0; i < n2; i++) {
+            for (int j = 0; j < n2; j++) {
+                if (JIndex[j] == i) {
+                    d_Pc[i * maxn2 + j] = 1;
+                }
+                else {
+                    d_Pc[i * maxn2 + j] = 0;
+                }
             }
         }
     }
