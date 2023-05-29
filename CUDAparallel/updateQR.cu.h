@@ -119,7 +119,54 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     numBlocks = (batchsize * maxn2 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setB1<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_PointerB1, d_n2, d_n2Tilde, maxn2, maxn2Tilde, batchsize);
 
+    // 13.4) Set B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
+    float* d_B2;
+    float** d_PointerB2;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_B2,  maxn1Union * maxn2Tilde * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB2, batchsize * sizeof(float*)));
     
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2, d_B2, batchsize, maxn1Union * maxn2Tilde);
+
+    numBlocks = (batchsize * maxn1Union * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+    setB2<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_PointerAITildeJTilde, d_PointerB2, d_n1, d_n1Union, d_n2, d_n2Tilde, maxn1Union, maxn2Tilde, batchsize);
+
+    // 13.5) Do QR factorization of B2
+    float* d_B2Q;
+    float* d_B2R;
+
+    float** d_PointerB2Q;
+    float** d_PointerB2R;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_B2Q,  maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_B2R,  maxn1Union * maxn2Tilde * sizeof(float)));
+
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB2Q, batchsize * sizeof(float*)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB2R, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2Q, d_B2Q, batchsize, maxn1Union * maxn1Union);
+
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2R, d_B2R, batchsize, maxn1Union * maxn2Tilde);
+
+    int qrSuccess = qrBatched(cHandle, d_PointerB2, d_PointerB2Q, d_PointerB2R, maxn1Union, maxn2Tilde, batchsize);
+
+    if (qrSuccess != 0) {
+        printf("QR failed\n");
+        
+        return 1;
+    }
+
+    // 13.6) compute QB and RB from algorithm 17
+    // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
+
     printf("done with updateQR\n");
 
     return 0;

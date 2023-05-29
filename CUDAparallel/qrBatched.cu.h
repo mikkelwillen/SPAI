@@ -155,13 +155,15 @@ __global__ void computeQminusQvvt(float** d_PointerQ, float** d_PointerQvvt, int
     }
 }
 
-// Function to do QR decomposition of batch AHat matrices
-// AHat = an array of batch matrices
-// n1 = the max number of rows of the matrices
-// n2 = the max number of columns of the matrices
-// Q = an array of batch Q matrices
-// R = an array of batch R matrices
-int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ, float** d_PointerR, int batchsize, int n1, int n2) {
+/* Function to do QR decomposition of batch AHat matrices
+cHandle = cublas handle
+d_PointerAHat = an array of pointers to the start of each AHat matrix in d_AHat
+d_PointerQ = an array of pointers to the start of each Q matrix in d_Q
+d_PointerR = an array of pointers to the start of each R matrix in d_R
+n1 = the max number of rows of the matrices
+n2 = the max number of columns of the matrices
+batchsize = the number of matrices in the batch */
+int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ, float** d_PointerR, int n1, int n2, int batchsize) {
     printf("\nDo QR decomposition of AHat\n");
 
     // Set constants

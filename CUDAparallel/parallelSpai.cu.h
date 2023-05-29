@@ -160,7 +160,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1 * maxn2);
 
-        qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, batchsize, maxn1, maxn2);
+        int qrSuccess = qrBatched(cHandle, d_PointerAHat, d_PointerQ, d_PointerR, maxn1, maxn2, batchsize);
+
+        if (qrSuccess != 0) {
+            printf("QR failed\n");
+            
+            return NULL;
+        }
 
         // overwrite AHat, since qr overwrote it previously
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;

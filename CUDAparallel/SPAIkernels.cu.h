@@ -504,5 +504,45 @@ __global__ void setB1(float** d_PointerABreve, float** d_PointerB1, int* d_n2, i
     }
 }
 
+// kører parallelt i batchsize * maxn1Union * maxn2Tilde tråde
+/* kernel for setting B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
+d_PointerABreve        = device pointer pointer to ABreve
+d_PointerAITildeJTilde = device pointer pointer to AITildeJTilde
+d_PointerB2            = device pointer pointer to B2
+d_n1Union              = device pointer to n1Union
+d_n1                   = device pointer to n1
+d_n2                   = device pointer to n2
+d_n2Tilde              = device pointer to n2Tilde
+maxn1Union             = the maximum value of n1Union in the batch
+maxn2Tilde             = the maximum value of n2 in the batch
+batchsize              = the size of the batch */
+__global__ void setB2(float** d_PointerABreve, float** d_PointerAITildeJTilde, float** d_PointerB2, int* d_n1, int* d_n1Union, int* d_n2, int* d_n2Tilde, int maxn1Union, int maxn2Tilde, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1Union * maxn2Tilde) {
+        int b = tid / (maxn1Union * maxn2Tilde);
+        int i = (tid % (maxn1Union * maxn2Tilde)) / maxn2Tilde;
+        int j = (tid % (maxn1Union * maxn2Tilde)) % maxn2Tilde;
+
+        int n1 = d_n1[b];
+        int n1Union = d_n1Union[b];
+        int n2 = d_n2[b];
+        int n2Tilde = d_n2Tilde[b];
+
+        float* d_ABreve = d_PointerABreve[b];
+        float* d_AITildeJTilde = d_PointerAITildeJTilde[b];
+        float* d_B2 = d_PointerB2[b];
+
+        if (i < maxn1Union && j < maxn2Tilde) {
+            if (i < n1 - n2 && j < n2Tilde) {
+                d_B2[i * maxn2Tilde + j] = d_ABreve[(n2 + i) * maxn2Tilde + j];
+            } else if (i < n1Union && j < n2Tilde){
+                d_B2[i * maxn2Tilde + j] = d_AITildeJTilde[(i - (n1 - n2)) * maxn2Tilde + j];
+            } else {
+                d_B2[i * maxn2Tilde + j] = 0.0;
+            }
+        }
+    }
+}
+
 
 #endif
