@@ -38,7 +38,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
 
             int n1 = 0;
             for (int j = 0; j < n2; j++) {
-                for (int i = d_A->offset[d_J[j]]; i < d_A->offset[J[j] + 1]; i++) {
+                for (int i = d_A->offset[d_J[j]]; i < d_A->offset[d_J[j] + 1]; i++) {
                     int keep = 1;
                     for (int k = 0; k < d_A->m; k++) {
                         if (d_I[k] == d_A->flatRowIndex[i]) {
@@ -382,13 +382,11 @@ __global__ void computeITilde(CSC* d_A, int** d_PointerI, int** d_PointerJ, int*
         int n1 = d_n1[tid];
         int n2 = d_n2[tid];
         int n2Tilde = d_n2Tilde[tid];
-        int n2Union = d_n2Union[tid];
 
         int* d_I = d_PointerI[tid];
         int* d_J = d_PointerJ[tid];
         int* d_JTilde = d_PointerJTilde[tid];
         
-
         // set d_n2Union and make JUnion
         int n2Union = n2 + n2Tilde;
         int* d_JUnion = (int*) malloc(n2Union* sizeof(int));
@@ -407,7 +405,7 @@ __global__ void computeITilde(CSC* d_A, int** d_PointerI, int** d_PointerJ, int*
         }
 
         int n1Tilde = 0;
-        for (int j = 0; j < n2Union, j++) {
+        for (int j = 0; j < n2Union; j++) {
             for (int i = d_A->offset[d_JUnion[j]]; i < d_A->offset[d_JUnion[j] + 1]; i++) {
                 int keep = 1;
                 for (int h = 0; h < n1; h++) {
