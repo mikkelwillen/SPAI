@@ -233,13 +233,14 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_PointerV, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerV, d_v, batchsize, n1);
-
+    printf("d_v\n");
     gpuAssert(
         cudaMalloc((void**) &d_Qv, n1 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerQv, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel <<< numBlocks, BLOCKSIZE >>> (d_PointerQv, d_Qv, batchsize, n1);
+    printf("d_Qv\n");
 
     gpuAssert(
         cudaMalloc((void**) &d_Qvvt, n1 * n1 * batchsize * sizeof(float)));
@@ -247,6 +248,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_PointerQvvt, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
+    printf("d_Qvvt\n");
 
     gpuAssert(
         cudaMalloc((void**) &d_tempStorage, n1 * n1 * batchsize * sizeof(float)));
@@ -254,14 +256,17 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         cudaMalloc((void**) &d_PointerTempStorage, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerTempStorage, d_tempStorage, batchsize, n1 * n1);
+    printf("d_tempStorage\n");
 
     // copy R from AHat
     numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     copyRFromAHat <<<numBlocks, BLOCKSIZE >>> (d_PointerAHat, d_PointerR, n1, n2, batchsize);
+    printf("copyRFromAHat\n");
 
     // set Q to I
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
+    printf("setQToIdentity\n");
 
     for (int k = 0; k < n2; k++) {
         // make v
