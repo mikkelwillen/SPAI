@@ -5,6 +5,95 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <cuda.h>
+#include <cuda_runtime.h>
+#include "constants.cu.h"
+
+// kører parallelt batched
+/* function for creating the row permutation matrix
+d_PointerPr = pointer to the row permutation matrix
+d_PointerI = pointer to the row permutation vector
+d_n1Union = pointer to the number of rows in the original matrix
+maxn1 = maximum number of rows in the batch
+batchsize = number of matrices in the batch */
+__global__ void createPr(float** d_PointerPr, int** d_PointerI, int* d_n1Union, int maxn1, int batchsize) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < batchsize) {
+        int* d_Pr = d_PointerPr[tid];
+        int* d_I = d_PointerI[tid];
+        int n1 = d_n1Union[tid];
+
+        // create normalized index of I
+        int* IIndex = (int*) malloc(n1 * sizeof(int));
+        int prevLowest = -1;
+        for (int i = 0; i < n1; i++) {
+            int currentLowest = INT_MAX;
+            for (int j = 0; j < n1; j++) {
+                if (d_I[j] > prevLowest && d_I[j] < currentLowest) {
+                    currentLowest = I[j];
+                    IIndex[j] = i;
+                }
+            }
+
+            prevLowest = currentLowest;
+        }
+    }
+
+    // create row permutation matrix of size n1 x n1
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n1; j++) {
+            if (IIndex[j] == i) {
+                d_Pr[i * maxn1 + j] = 1;
+            }
+            else {
+                d_Pr[i * maxn2 + j] = 0;
+            }
+        }
+    }
+}
+
+// kører parallelt batched
+/* function for creating the column permutation matrix
+d_PointerPc = pointer to the column permutation matrix
+d_PointerJ = pointer to the column permutation vector
+d_n2Union = pointer to the number of columns in the original matrix
+maxn2 = maximum number of columns in the batch
+batchsize = number of matrices in the batch */
+__global__ void createPc(float** d_PointerPc, int** d_PointerJ, int* d_n2Union, int maxn2, int batchsize) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid < batchsize) {
+        int* d_Pc = d_PointerPc[tid];
+        int* d_J = d_PointerJ[tid];
+        int n2 = d_n2Union[tid];
+
+        // create normalized index of J
+        int* JIndex = (int*) malloc(n2 * sizeof(int));
+        int prevLowest = -1;
+        for (int i = 0; i < n2; i++) {
+            int currentLowest = INT_MAX;
+            for (int j = 0; j < n2; j++) {
+                if (d_J[j] > prevLowest && d_J[j] < currentLowest) {
+                    currentLowest = d_J[j];
+                    JIndex[j] = i;
+                }
+            }
+
+            prevLowest = currentLowest;
+        }
+    }
+
+    // create column permutation matrix of size n2 x n2
+    for (int i = 0; i < n2; i++) {
+        for (int j = 0; j < n2; j++) {
+            if (JIndex[j] == i) {
+                d_Pc[i * maxn2 + j] = 1;
+            }
+            else {
+                d_Pc[i * maxn2 + j] = 0;
+            }
+        }
+    }
+}
 
 // Function to create permutation matrices
 // I is the row permutation vector
@@ -13,62 +102,17 @@
 // n2 is the number of columns in the original matrix
 // Pr is the row permutation matrix output
 // Pc is the column permutation matrix output
-void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float* Pc) {
-    // create normalized index of I
-    int* IIndex = (int*) malloc(n1 * sizeof(int));
-    int prevLowest = -1;
-    for (int i = 0; i < n1; i++) {
-        int currentLowest = INT_MAX;
-        for (int j = 0; j < n1; j++) {
-            if (I[j] > prevLowest && I[j] < currentLowest) {
-                currentLowest = I[j];
-                IIndex[j] = i;
-            }
-        }
-        prevLowest = currentLowest;
-    }
-    // print IIndex
-    printf("IIndex:\n");
-    for (int i = 0; i < n1; i++) {
-        printf("%d ", IIndex[i]);
+void* createPermutationMatrices(float** d_PointerPr, float** d_PointerPc, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1Union, int* d_n2Union, int maxn1, int maxn2, int batchsize) {
+    int numBlocks;
+
+    if (d_PointerPr != NULL) {
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        createPr<<<numBlocks, BLOCKSIZE>>>(d_PointerPr, d_PointerIUnion, d_n1Union, maxn1, batchsize);
     }
 
-    // create row permutation matrix of size n1 x n1
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n1; j++) {
-            if (IIndex[j] == i) {
-                Pr[i*n1 + j] = 1;
-            }
-            else {
-                Pr[i*n1 + j] = 0;
-            }
-        }
-    }
-
-    // create normalized index of J
-    int* JIndex = (int*) malloc(n2 * sizeof(int));
-    prevLowest = -1;
-    for (int i = 0; i < n2; i++) {
-        int currentLowest = INT_MAX;
-        for (int j = 0; j < n2; j++) {
-            if (J[j] > prevLowest && J[j] < currentLowest) {
-                currentLowest = J[j];
-                JIndex[j] = i;
-            }
-        }
-        prevLowest = currentLowest;
-    }
-
-    // create column permutation matrix of size n2 x n2
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            if (JIndex[j] == i) {
-                Pc[i*n2 + j] = 1;
-            }
-            else {
-                Pc[i*n2 + j] = 0;
-            }
-        }
+    if (d_PointerPc != NULL) {
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        createPc<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_PointerJUnion, d_n2Union, maxn2, batchsize);
     }
 }
 

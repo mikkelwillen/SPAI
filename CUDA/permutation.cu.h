@@ -32,10 +32,10 @@ void* createPermutationMatrices(int* I, int* J, int n1, int n2, float* Pr, float
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
             if (IIndex[j] == i) {
-                Pr[i*n1 + j] = 1;
+                Pr[i * n1 + j] = 1;
             }
             else {
-                Pr[i*n1 + j] = 0;
+                Pr[i * n1 + j] = 0;
             }
         }
     }

@@ -23,6 +23,8 @@ d_PointerJ = pointer to J in device memory
 d_PointerSortedJ = pointer to sortedJ in device memory
 d_PointerITilde = pointer to ITilde in device memory
 d_PointerJTilde = pointer to JTilde in device memory
+d_PointerIUnion = pointer to IUnion in device memory
+d_PointerJUnion = pointer to JUnion in device memory
 d_n1 = pointer to n1 in device memory
 d_n2 = pointer to n2 in device memory
 d_n1Tilde = pointer to n1Tilde in device memory
@@ -39,7 +41,7 @@ maxn1Union = maximum value of n1Union
 maxn2Union = maximum value of n2Union
 i = current iteration
 batchsize = batchsize */
-int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float** d_PointerMHat_k, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
+int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float** d_PointerMHat_k, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
     printf("\n------UPDATE QR------\n");
     int numBlocks;
 
@@ -94,6 +96,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPr, d_Pr, batchsize, maxn1 * maxn1);
 
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2 * maxn2);
+
+    createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
 
     printf("done with updateQR\n");
