@@ -112,7 +112,7 @@ int main(int argc, char** argv) {
         struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
 
-        runIdentityTest(cscA, n, n, sparsity, tolerance, maxIterations, s, batchsize);
+        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
     } else if (argc == 8) {
         // read args
         printf("hallo?\n");
