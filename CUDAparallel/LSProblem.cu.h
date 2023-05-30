@@ -10,6 +10,7 @@
 #include "parallelSpai.cu.h"
 #include "invBatched.cu.h"
 #include "helperKernels.cu.h"
+#include "SPAIkernels.cu.h"
 
 
 // Function for setting the cHat vector, which is the k'th vector of the Q matrix
@@ -216,7 +217,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
             cudaMalloc((void**) &d_PointerTempMHat_k, batchsize * sizeof(float*)));
         
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_tempPointerMHat_k, d_tempMHat_k, batchsize, maxn2);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerTempMHat_k, d_tempMHat_k, batchsize, maxn2);
 
         numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         matrixMultiplication<<<numBlocks, BLOCKSIZE>>>( d_PointerPc, d_PointerMHat_k, d_PointerTempMHat_k, d_n2, d_n2, NULL, maxn2, maxn2, 1, batchsize);
