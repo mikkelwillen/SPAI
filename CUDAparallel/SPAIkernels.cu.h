@@ -551,5 +551,71 @@ __global__ void setB2(float** d_PointerABreve, float** d_PointerAITildeJTilde, f
     }
 }
 
+// parallelt i batchsize * maxn1Union * maxn1Union tråde
+/* kernel for setting the firstMatrix with Q in the upper left corner and identity in the lower right corner
+d_PointerFirstMatrix = device pointer pointer to firstMatrix
+d_PointerQ           = device pointer pointer to Q
+d_n1                 = device pointer to n1
+d_n1Union            = device pointer to n1Union
+maxn1Union           = the maximum value of n1Union in the batch
+batchsize            = the size of the batch */
+__global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1Union, batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1Union * maxn1Union) {
+        int b = tid / (maxn1Union * maxn1Union);
+        int i = (tid % (maxn1Union * maxn1Union)) / maxn1Union;
+        int j = (tid % (maxn1Union * maxn1Union)) % maxn1Union;
+
+        int n1 = d_n1[b];
+        int n1Union = d_n1Union[b];
+
+        float* d_FirstMatrix = d_PointerFirstMatrix[b];
+        float* d_Q = d_PointerQ[b];
+
+        if (i < n1Union && j < n1Union) {
+            if (i < n1 && j < n1) {
+                d_FirstMatrix[i * n1Union + j] = d_Q[i * n1 + j];
+            } else if (i == j) {
+                d_FirstMatrix[i * n1Union + j] = 1.0;
+            } else {
+                d_FirstMatrix[i * n1Union + j] = 0.0;
+            }
+        } 
+    }
+}
+
+// parallelt i batchsize * maxn1Union * maxn1Union tråde
+/* kernel for setting the secondMatrix with identity in the upper left corner and QB in the lower right corner
+d_PointerSecondMatrix = device pointer pointer to secondMatrix
+d_PointerQB           = device pointer pointer to QB
+d_n1Tilde             = device pointer to n1
+d_n1Union             = device pointer to n1Union
+maxn1Union            = the maximum value of n1Union in the batch
+batchsize             = the size of the batch */
+__global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_PointerB2Q, int* d_n1Tilde, int* d_n1Union, int* d_n2, int maxn1Union, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1Union * maxn1Union) {
+        int b = tid / (maxn1Union * maxn1Union);
+        int i = (tid % (maxn1Union * maxn1Union)) / maxn1Union;
+        int j = (tid % (maxn1Union * maxn1Union)) % maxn1Union;
+
+        int n1Tilde = d_n1Tilde[b];
+        int n1Union = d_n1Union[b];
+        int n2 = d_n2[b];
+
+        float* d_SecondMatrix = d_PointerSecondMatrix[b];
+        float* d_B2Q = d_PointerB2Q[b];
+
+        if (i < n1Union && j < n1Union) {
+            d_SecondMatrix[i * n1Union + j] = 0.0;
+            if (i < n1Union - n2 && j < n1Union - n2) {
+                d_SecondMatrix[(i + n2) * n1Union + (j + n2)] = d_B2Q[i * (n1Union - n2) + j];
+            } else if (i == j) {
+                d_SecondMatrix[(i - (n1Union - n2)) * n1Union + j - (n1Union - n2)] = 1.0;
+            } 
+        }
+    }
+}
+
 
 #endif

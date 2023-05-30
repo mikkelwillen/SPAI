@@ -188,9 +188,49 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
+    float* d_firstMatrix;
+    float** d_PointerFirstMatrix;
 
-    printf("done with updateQR\n");
+    gpuAssert(
+        cudaMalloc((void**) &d_firstMatrix, batchsize * maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerFirstMatrix, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_firstMatrix, batchsize, maxn1Union * maxn1Union);
 
+    numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    setFirstMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerQ, d_n1, d_n1Union, maxn1Union, batchsize)
+
+    // make second matrix with identity in the upper left corner and QB in the lower right corner of size n1Union x n1Union");
+    float* d_secondMatrix;
+    float** d_PointerSecondMatrix;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_secondMatrix, batchsize * maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerSecondMatrix, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_secondMatrix, batchsize, maxn1Union * maxn1Union);
+
+    numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_PointerB2Q, d_n1Tilde, d_n1Union, maxn1Union, batchsize)
+
+    // compute unsortedQ = firstMatrix * secondMatrix
+    float* d_unsortedQ;
+    float** d_PointerUnsortedQ;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_unsortedQ, batchsize * maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerUnsortedQ, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedQ, d_unsortedQ, batchsize, maxn1Union * maxn1Union);
+
+    // numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    // matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, maxn1Union, batchsize);
     return 0;
 }
 
