@@ -232,7 +232,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, maxn1Union, batchsize);
 
+    // set unsorted R
+    float* d_unsortedR;
+    float** d_PointerUnsortedR;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerUnsortedR, batchsize * sizeof(float*)));
     
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_unsortedR, batchsize, maxn1Union * maxn2Union);
+
+    numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2Union, batchsize);
+    
+
     return 0;
 }
 

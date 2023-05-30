@@ -647,4 +647,51 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
         }
     }
 }
+
+// parallelt i batchsize * maxn1Union * maxn2Union tråde
+/* kernel for setting unsorted R with R in the upper left corner, B1 in the upper right corner, B2R below B1 and zeros the rest
+d_PointerUnsortedR = device pointer pointer to unsorted R
+d_PointerR         = device pointer pointer to R
+d_PointerB1        = device pointer pointer to B1
+d_PointerB2R       = device pointer pointer to B2R
+d_n1               = device pointer to n1
+d_n1Union          = device pointer to n1Union
+d_n2               = device pointer to n2
+d_n2Union          = device pointer to n2Union
+d_n2Tilde          = device pointer to n2Tilde
+maxn1Union         = the maximum value of n1Union in the batch
+maxn2Union         = the maximum value of n2Union in the batch
+batchsize          = the size of the batch */
+__global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, float** d_PointerB1, float** d_PointerB2R, int* d_n1, int* d_n1Union, int* d_n2, int* d_n2Union, int* d_n2Tilde, int maxn1Union, int maxn2Union, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1Union * maxn2Union) {
+        int b = tid / (maxn1Union * maxn2Union);
+        int i = (tid % (maxn1Union * maxn2Union)) / maxn2Union;
+        int j = (tid % (maxn1Union * maxn2Union)) % maxn2Union;
+
+        int n1 = d_n1[b];
+        int n1Union = d_n1Union[b];
+        int n2 = d_n2[b];
+        int n2Union = d_n2Union[b];
+        int n2Tilde = d_n2Tilde[b];
+
+        float* d_UnsortedR = d_PointerUnsortedR[b];
+        float* d_R = d_PointerR[b];
+        float* d_B1 = d_PointerB1[b];
+        float* d_B2R = d_PointerB2R[b];
+
+        if (i < n1Union && j < n2Union) {
+            if (i < n1 && j < n2) {
+                d_UnsortedR[i * n2Union + j] = d_R[i * n2 + j];
+            } else if (i < n1 && j < n2Union && j > n2 - 1) {
+                d_UnsortedR[i * n2Union + (j + n2)] = d_B1[i * (n2Union - n2) + j];
+            } else if (i < n1Union && j < n2Union && j > n2 - 1) {
+                d_UnsortedR[(i + n1) * n2Union + j] = d_B2R[i * n2Union + j];
+            } else {
+                d_UnsortedR[i * n2Union + j] = 0.0;
+            }
+        }
+    }
+}
+
 #endif
