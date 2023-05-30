@@ -36,76 +36,10 @@
 int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     printf("\n------UPDATE QR------\n");
 
-    // create AIJTilde
-    // print JTilde
-    printf("JTilde:\n");
-    for (int i = 0; i < n2Tilde; i++) {
-        printf("%d ", JTilde[i]);
-    }
-    
+    // 13.1) Create A(I, JTilde) and A(ITilde, JTilde)
     float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
-
-    // print AIJTilde
-    printf("AIJTilde:\n");
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", AIJTilde[i * n2Tilde + j]);
-        }
-        printf("\n");
-    }
-
-    // print Q
-    printf("Q:\n");
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n1; j++) {
-            printf("%f ", (*Q)[i * n1 + j]);
-        }
-        printf("\n");
-    }
-
-
-    // 13.1) create AITildeJTilde of size n1Tilde x n2Tilde
-    float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
-
-    // // create ATilde of size n1Union x n2Union
-    // float* ATilde = (float*) malloc(n1Union * n2Union * sizeof(float));
     
-    // // set upper left square to AHat of size n1 x n2
-    // for (int i = 0; i < n1; i++) {
-    //     for (int j = 0; j < n2; j++) {
-    //         ATilde[i*n2Union + j] = (*AHat)[i * n2 + j];
-    //     }
-    // }
-
-    // // set upper right square to AIJTilde of size n1 x n2Tilde
-    // for (int i = 0; i < n1; i++) {
-    //     for (int j = 0; j < n2Tilde; j++) {
-    //         ATilde[i * n2Union + n2 + j] = AIJTilde[i * n2Tilde + j];
-    //     }
-    // }
-
-    // // set lower left square to zeros of size n1Tilde x n2
-    // for (int i = 0; i < n1Tilde; i++) {
-    //     for (int j = 0; j < n2; j++) {
-    //         ATilde[(n1 + i) * n2Union + j] = 0;
-    //     }
-    // }
-
-    // // set lower right square to AITildeJTilde of size n1Tilde x n2Tilde
-    // for (int i = 0; i < n1Tilde; i++) {
-    //     for (int j = 0; j < n2Tilde; j++) {
-    //         ATilde[(n1 + i) * n2Union + n2 + j] = AITildeJTilde[i * n2Tilde + j];
-    //     }
-    // }
-
-    // // print ATilde
-    // printf("ATilde:\n");
-    // for (int i = 0; i < n1Union; i++) {
-    //     for (int j = 0; j < n2Union; j++) {
-    //         printf("%f ", ATilde[i * n2Union + j]);
-    //     }
-    //     printf("\n");
-    // }
+    float* AITildeJTilde = CSCToDense(A, ITilde, JTilde, n1Tilde, n2Tilde);
 
     // Create permutation matrices Pr and Pc
     float* Pr = (float*)malloc(n1Union * n1Union * sizeof(float));
@@ -203,7 +137,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
         printf("\n");
     }
-
     
     // 13.6) Compute Q_B and R_B from algorithm 17
     // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
@@ -365,36 +298,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         JDense[j] = j;
     }
 
-    // free(*I);
-    // printf("free I\n");
-    // free(*J);
-    // printf("free J\n");
-    // (*I) = (int*) malloc(n1Union * sizeof(int));
-    // printf("malloc I\n");
-    // (*J) = (int*) malloc(n2Union * sizeof(int));
-    // printf("malloc J\n");
-    
-    // // compute pr * I
-    // for (int i = 0; i < n1Union; i++) {
-    //     (*I)[i] = 0;
-    //     for (int j = 0; j < n1Union; j++) {
-    //         (*I)[i] += Pr[i * n1Union + j] * IUnion[j];
-    //     }
-    // }
-
-    // printf("I (after pr * I):\n");
-    // for (int i = 0; i < n1Union; i++) {
-    //     printf("%d ", (*I)[i]);
-    // }
-
-    // // compute Pc * J
-    // for (int i = 0; i < n2Union; i++) {
-    //     (*J)[i] = 0;
-    //     for (int j = 0; j < n2Union; j++) {
-    //         (*J)[i] += Pc[i * n2Union + j] * JUnion[j];
-    //     }
-    // }
-
     // set I and J to IUnion and JUnion
     free(*I);
     free(*J);
@@ -418,7 +321,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
 
     float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
-    // compute residual
+    
+    // 14) Compute residual
     for (int i = 0; i < A->m; i++) {
         residual[i] = 0.0;
         for (int j = 0; j < A->n; j++) {
@@ -447,50 +351,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     *residualNorm = sqrt(*residualNorm);
     
     printf("residual norm: %f\n", *residualNorm);
-
-
-    // // sort unsortedQ and unsortedR into Q and R
-    // free(*Q);
-    // (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
-    // printf("malloc q\n");
-    // free(*R);
-    // (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
-    // printf("malloc r\n");
-
-    // // compute Pr * unsortedQ
-    // for (int i = 0; i < n1Union; i++) {
-    //     for (int j = 0; j < n1Union; j++) {
-    //         (*Q)[i * n1Union + j] = 0.0;
-    //         for (int k = 0; k < n1Union; k++) {
-    //             (*Q)[i * n1Union + j] += Pr[i * n1Union + k] * unsortedQ[k * n1Union + j];
-    //         }
-    //     }
-    // }
-    // printf("pr * unsortedQ\n");
-
-    // // compute unsortedR * Pc
-    // for (int i = 0; i < n1Union; i++) {
-    //     for (int j = 0; j < n2Union; j++) {
-    //         (*R)[i * n2Union + j] = 0.0;
-    //         for (int k = 0; k < n2Union; k++) {
-    //             (*R)[i * n2Union + j] += unsortedR[i * n2Union + k] * Pc[k * n2Union + j];
-    //         }
-    //     }
-    // }
-    // printf("unsortedR * Pc\n");
-
-    // // set AHat to Q * R
-    // free(*AHat);
-    // (*AHat) = (float*) malloc(n1Union * n2Union * sizeof(float));
-    // for (int i = 0; i < n1Union; i++) {
-    //     for (int j = 0; j < n2Union; j++) {
-    //         (*AHat)[i * n2Union + j] = 0.0;
-    //         for (int k = 0; k < n1Union; k++) {
-    //             (*AHat)[i * n2Union + j] += (*Q)[i * n1Union + k] * (*R)[k * n2Union + j];
-    //         }
-    //     }
-    // }
-    // printf("Q * R\n");
 
     // set Q and R to unsortedQ and unsortedR
     free(*Q);
