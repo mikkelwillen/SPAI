@@ -142,5 +142,5 @@ D = [[20, 0, 0],
 DSparse = scipy.sparse.csr_array(D)
 CSparse = scipy.sparse.csr_array(C)
 
-checkIdentityU(improvedSpai.printSPAI, A)
+checkIdentityU(improvedSpai.SPAI, A)
 
