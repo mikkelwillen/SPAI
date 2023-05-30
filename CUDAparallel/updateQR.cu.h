@@ -62,6 +62,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     numBlocks = (batchsize * maxn1 * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAIJTilde, d_PointerI, d_PointerJTilde, d_n1, d_n2Tilde, maxn1, maxn2Tilde, A->m, batchsize);
 
+    // print AIJTilde
+    float* h_AIJTilde = (float*) malloc(batchsize * maxn1 * maxn2Tilde * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_AIJTilde, d_AIJTilde, batchsize * maxn1 * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("AIJTilde:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("i = %d\n", i);
+        for (int j = 0; j < maxn1; j++) {
+            for (int k = 0; k < maxn2Tilde; k++) {
+                printf("%f ", h_AIJTilde[i * maxn1 * maxn2Tilde + j * maxn2Tilde + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
     // create AITildeJTilde
     float* d_AITildeJTilde;
     float** d_PointerAITildeJTilde;
