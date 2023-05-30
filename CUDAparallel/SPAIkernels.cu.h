@@ -559,7 +559,7 @@ d_n1                 = device pointer to n1
 d_n1Union            = device pointer to n1Union
 maxn1Union           = the maximum value of n1Union in the batch
 batchsize            = the size of the batch */
-__global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1Union, batchsize) {
+__global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1Union, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1Union * maxn1Union) {
         int b = tid / (maxn1Union * maxn1Union);
