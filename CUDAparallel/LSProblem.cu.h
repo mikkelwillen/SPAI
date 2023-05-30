@@ -76,11 +76,12 @@ __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, fl
 // maxn2             = the maximum number of columns in A
 // currentBatch      = the current batch
 // batchsize         = the batchsize
-__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int m, int batchsize) {
+__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int m, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < m * batchsize) {
         int b = tid / m;
         int i = tid % m;
+        int k = currentBatch * batchsize + b;
 
         int n1 = d_n1[b];
         int n2 = d_n2[b];
@@ -93,9 +94,9 @@ __global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_P
         d_residual[i] = 0.0;
 
         for (int j = 0; j < n2; j++) {
-            for (int k = d_A->offset[d_J[j]]; k < d_A->offset[d_J[j] + 1]; k++) {
-                if (d_A->flatRowIndex[k] == d_I[i]) {
-                    d_residual[i] += d_A->flatData[k] * d_mHat_k[j];
+            for (int h = d_A->offset[d_J[j]]; h < d_A->offset[d_J[j] + 1]; h++) {
+                if (d_A->flatRowIndex[h] == d_I[i]) {
+                    d_residual[i] += d_A->flatData[h] * d_mHat_k[j];
                 }
             }
         }
@@ -233,7 +234,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // compute residual vectors
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, batchsize);
+    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, i, batchsize);
 
     // compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
