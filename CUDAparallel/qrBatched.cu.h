@@ -163,7 +163,7 @@ d_PointerR = an array of pointers to the start of each R matrix in d_R
 n1 = the max number of rows of the matrices
 n2 = the max number of columns of the matrices
 batchsize = the number of matrices in the batch */
-int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ, float** d_PointerR, int n1, int n2, int batchsize) {
+int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ, float** d_PointerR, int* d_n1, int n1, int n2, int batchsize) {
     printf("\nDo QR decomposition of AHat\n");
 
     // Set constants
@@ -265,7 +265,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
     // set Q to I
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
+    setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_n1, n1, batchsize);
     printf("setQToIdentity\n");
 
     for (int k = 0; k < n2; k++) {

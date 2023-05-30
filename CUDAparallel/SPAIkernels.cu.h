@@ -475,9 +475,10 @@ __global__ void computeABreve(float** d_PointerQ, float** d_PointerAIJTilde, flo
         float* d_ABreve = d_PointerABreve[b];
 
         if (i < n1 && j < n2Tilde) {
-            d_ABreve[i * maxn2Tilde + j] = 0;
+            d_ABreve[i * maxn2Tilde + j] = 0.0;
             for (int k = 0; k < n1; k++) {
                 d_ABreve[i * maxn2Tilde + j] += d_Q[k * n1 + i] * d_AIJTilde[k * maxn2Tilde + j];
+                printf("%f = %f * %f\n", d_ABreve[i * maxn2Tilde + j], d_Q[k * n1 + i], d_AIJTilde[k * maxn2Tilde + j]);
             }
         }
     }
