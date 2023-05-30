@@ -4,7 +4,7 @@ import warnings
 warnings.filterwarnings("ignore")
 import permutation
 
-def SPAI(A, tol = 0.001, max_iter = 39, s = 5):
+def SPAI(A, tol = 0.001, max_iter = 39, s = 1):
 
     determinant = np.linalg.det(A.todense())
     if determinant == 0:    
@@ -12,7 +12,7 @@ def SPAI(A, tol = 0.001, max_iter = 39, s = 5):
         return None
     
 
-    M = scipy.sparse.identity(A.shape[1], format='csr')
+    M = scipy.sparse.identity(A.shape[1], format='csc')
 
     # index for the k'th column
     k = 0
@@ -88,7 +88,7 @@ def SPAI(A, tol = 0.001, max_iter = 39, s = 5):
                 rhoSq.append(rhoSq_j)
 
             # 10) Find the indices JTilde corresponding to the smallest s elements of rho^2
-            # smallestIndices = sorted(range(len(rhoSq)), key = lambda sub: rhoSq[sub])[:s]
+            # To be implemented in the future
 
             # 11) Determine the new indices ITilde
             J = np.array(J)
@@ -148,15 +148,11 @@ def SPAI(A, tol = 0.001, max_iter = 39, s = 5):
             # 13.7) Solve the augmented LS problem for mHat_k 
             R_1 = R[0:n2,:]  
 
-            eTilde_k = Pr.T * e_k[I]
-
-            cHat_k = Q.T * eTilde_k 
+            cHat_k = Q.T * e_k[I]
 
             invR_1 = np.linalg.inv(R_1)
 
-            mTilde_k = invR_1 * cHat_k[0:n2,:]
-
-            m_k[J] = Pc.T * mTilde_k
+            m_k[J] = invR_1 * cHat_k[0:n2,:]
 
             # 14) Compute residual r
             A_JDense = A[:,J].todense()
