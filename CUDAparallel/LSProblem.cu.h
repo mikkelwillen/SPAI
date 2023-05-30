@@ -76,22 +76,26 @@ __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, fl
 // maxn2             = the maximum number of columns in A
 // currentBatch      = the current batch
 // batchsize         = the batchsize
-__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int maxn2, int currentBatch, int batchsize) {
+__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int m, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    if (tid < d_A->m * batchsize) {
-        int b = tid / d_A->m;
-        int i = tid % d_A->m;
-        int k = currentBatch * batchsize + b;
+    if (tid < m * batchsize) {
+        int b = tid / m;
+        int i = tid % m;
 
+        int n1 = d_n1[b];
+        int n2 = d_n2[b];
+
+        int* d_J = d_PointerJ[b];
+        int* d_I = d_PointerI[b];
         float* d_residual = d_PointerResidual[b];
         float* d_mHat_k = d_PointerMHat_k[b];
 
         d_residual[i] = 0.0;
 
-        for (int j = 0; j < maxn2; j++) {
-            for (int h = d_A->offset[k]; h < d_A->offset[k + 1]; h++) {
-                if (i == d_A->flatRowIndex[h]) {
-                    d_residual[i] += d_A->flatData[h] * d_mHat_k[j];
+        for (int j = 0; j < n2; j++) {
+            for (int k = d_A->offset[d_J[j]]; k < d_A->offset[d_J[j] + 1]; k++) {
+                if (d_A->flatRowIndex[k] == d_I[i]) {
+                    d_residual[i] += d_A->flatData[k] * d_mHat_k[j];
                 }
             }
         }
@@ -229,7 +233,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // compute residual vectors
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, maxn2, currentBatch, batchsize);
+    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, batchsize);
 
     // compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
