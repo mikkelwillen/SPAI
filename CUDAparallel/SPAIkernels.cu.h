@@ -708,9 +708,9 @@ __global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, flo
             if (i < n2 && j < n2) {
                 d_UnsortedR[i * n2Union + j] = d_R[i * n2 + j];
             } else if (i < n2 && j < n2Union && j > n2 - 1) {
-                d_UnsortedR[i * n2Union + j] = d_B1[i * n2Tilde + n2 + j];
+                d_UnsortedR[i * n2Union + j] = d_B1[i * n2Tilde + j - n2];
             } else if (i < n1Union && j < n2Union && j > n2 - 1) {
-                d_UnsortedR[i * n2Union + j] = d_B2R[(i - n2) * n2Tilde + n2 + j];
+                d_UnsortedR[i * n2Union + j] = d_B2R[(i - n2) * n2Tilde + j - n2];
             } else {
                 d_UnsortedR[i * n2Union + j] = 0.0;
             }
