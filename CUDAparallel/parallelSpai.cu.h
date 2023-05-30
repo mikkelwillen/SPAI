@@ -389,6 +389,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
             // vi får sku noget illegal memory access:((
             // maxerne er ikke rigtige
+            // tjek I og J og ITilde og Jtilde
 
 
 
