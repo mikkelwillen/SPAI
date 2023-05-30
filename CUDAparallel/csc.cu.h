@@ -40,9 +40,9 @@ __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int*
 // flatData = The flat data array
 // flatRowIndex = The flat row index array
 __global__ void copyCSCDevicePointers(CSC* d_A, int** d_offset, float** d_flatData, int** d_flatRowIndex) {
-    (*d_offset) = d_A->offset;
-    (*d_flatData) = d_A->flatData;
-    (*d_flatRowIndex) = d_A->flatRowIndex;
+    memcpy(d_offset, d_A->offset, sizeof(int) * (d_A->n + 1));
+    memcpy(d_flatData, d_A->flatData, sizeof(float) * d_A->countNonZero);
+    memcpy(d_flatRowIndex, d_A->flatRowIndex, sizeof(int) * d_A->countNonZero);
 }
 
 // (DEPRECATED) er ikke sikker på den har de rigtige værdier
@@ -339,7 +339,14 @@ CSC* copyCSCFromDeviceToHost(CSC* d_A) {
     float* d_flatData;
     int* d_flatRowIndex;
 
-    copyCSCDevicePointers<<<1, 1>>>(d_A, &d_offset, &d_flatData, &d_flatRowIndex);
+    gpuAssert(
+        cudaMalloc((void**) &d_offset, sizeof(int) * (A->n + 1)));
+    gpuAssert(
+        cudaMalloc((void**) &d_flatData, sizeof(float) * A->countNonZero));
+    gpuAssert(
+        cudaMalloc((void**) &d_flatRowIndex, sizeof(int) * A->countNonZero));
+
+    copyCSCDevicePointers<<<1, 1>>>(d_A, d_offset, d_flatData, d_flatRowIndex);
 
     int* h_offset = (int*) malloc(sizeof(int) * (A->n + 1));
     float* h_flatData = (float*) malloc(sizeof(float) * A->countNonZero);
