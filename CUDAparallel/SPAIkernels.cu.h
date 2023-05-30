@@ -622,10 +622,10 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
 d_PointerA = device pointer pointer to matrix A
 d_PointerB = device pointer pointer to matrix B
 d_PointerC = device pointer pointer to the result matrix C
-d_dim1     = device pointer to the first dimension of A
-d_dim2     = device pointer to the second dimension of A and the first dimension of B
-d_dim3     = device pointer to the second dimension of B
-maxdim1    = the maximum value of the first dimension of A in the batch
+d_dim1     = device pointer to the first dimension of A (NULL if dim1 is 1)
+d_dim2     = device pointer to the second dimension of A and the first dimension of B (NULL if dim2 is 1)
+d_dim3     = device pointer to the second dimension of B (NULL if dim3 is 1)
+maxdim1    = the maximum value of the first dimension of A in the batch 
 maxdim2    = the maximum value of the second dimension of A and the first dimension of B in the batch
 maxdim3    = the maximum value of the second dimension of B in the batch
 batchsize  = the size of the batch */
@@ -636,9 +636,27 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
         int i = (tid % (maxdim1 * maxdim3)) / maxdim1;
         int j = (tid % (maxdim1 * maxdim3)) % maxdim1;
  
-        int dim1 = d_dim1[b];
-        int dim2 = d_dim2[b];
-        int dim3 = d_dim3[b];
+        int dim1;
+        int dim2;
+        int dim3;
+
+        if (d_dim1 == NULL) {
+            dim1 = 1;
+        } else {
+            dim1 = d_dim1[b];
+        }
+
+        if (d_dim2 == NULL) {
+            dim2 = 1;
+        } else {
+            dim2 = d_dim2[b];
+        }
+
+        if (d_dim3 == NULL) {
+            dim3 = 1;
+        } else {
+            dim3 = d_dim3[b];
+        }
 
         float* d_A = d_PointerA[b];
         float* d_B = d_PointerB[b];

@@ -211,15 +211,15 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
         float* d_tempMHat_k;
         float** d_PointerTempMHat_k;
         gpuAssert(
-            cudaMalloc((void**) &tempMHat_k, maxn2 * batchsize * sizeof(float)));
+            cudaMalloc((void**) &d_tempMHat_k, maxn2 * batchsize * sizeof(float)));
         gpuAssert(
-            cudaMalloc((void**) &tempPointerMHat_k, batchsize * sizeof(float*)));
+            cudaMalloc((void**) &d_tempPointerMHat_k, batchsize * sizeof(float*)));
         
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(tempPointerMHat_k, tempMHat_k, batchsize, maxn2);
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_tempPointerMHat_k, d_tempMHat_k, batchsize, maxn2);
 
-        numBlocks = (maxn2Union * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        matrixMultiplication<<<numBlocks, BLOCKSIZE>>>( d_PointerPc, d_PointerMHat_k, d_PointerTempMHat_k, d_n2Union, d_n2Union, NULL, maxn2Union, maxn2Union, 1, batchsize);
+        numBlocks = (d_n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        matrixMultiplication<<<numBlocks, BLOCKSIZE>>>( d_PointerPc, d_PointerMHat_k, d_PointerTempMHat_k, d_n2, d_n2, NULL, maxn2, maxn2, 1, batchsize);
 
         // copy the temporary mHat_k to the mHat_k vector
         gpuAssert(
