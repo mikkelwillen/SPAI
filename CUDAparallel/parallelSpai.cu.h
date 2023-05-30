@@ -412,6 +412,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             gpuAssert(
                 cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
             
+            // set maxn1 and maxn2 to maxn1Union and maxn2Union
+            maxn1 = maxn1Union;
+            maxn2 = maxn2Union;
+            
 
 
 
