@@ -91,6 +91,7 @@ int main(int argc, char** argv) {
         float* A = (float*) malloc(sizeof(float) * m * n);
         float* B = (float*) malloc(sizeof(float) * m * n);
         float* C = (float*) malloc(sizeof(float) * n * n);
+        float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
     
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < n; j++) {
@@ -106,13 +107,19 @@ int main(int argc, char** argv) {
         B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
         B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
         B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
-    
+        
+        m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
+        m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
+        m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
+        m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
+
         struct CSC* cscA = createCSC(A, m, n);
         struct CSC* cscB = createCSC(B, m, n);
         struct CSC* cscC = createRandomCSC(n, n, sparsity);
         struct CSC* cscD = createCSC(C, n, n);
+        struct CSC* cscM4 = createCSC(m4, 4, 4);
 
-        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
+        runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s, batchsize);
     } else if (argc == 8) {
         // read args
         printf("hallo?\n");
