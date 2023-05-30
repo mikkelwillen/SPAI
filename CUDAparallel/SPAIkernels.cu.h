@@ -718,4 +718,69 @@ __global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, flo
     }
 }
 
+// parallelt i batchsize * maxn2Union
+/* kernel for permuting J
+d_PointerSortedJ = device pointer pointer to sorted J
+d_PointerJ       = device pointer pointer to J
+d_PointerPc      = device pointer pointer to the permutation matrix
+d_n2             = device pointer to n2
+maxn2            = the maximum value of n2 in the batch
+batchsize        = the size of the batch */
+__global__ void permuteJ(int** d_PointerSortedJ, int** d_PointerJ, float** d_PointerPc, int* d_n2, int maxn2, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn2) {
+        int b = tid / maxn2;
+        int i = tid % maxn2;
+
+        int n2 = d_n2[b];
+
+        int* d_SortedJ = d_PointerSortedJ[b];
+        int* d_J = d_PointerJ[b];
+        float* d_Pc = d_PointerPc[b];
+
+        if (i < n2) {
+            d_SortedJ[i] = 0;
+            for (int j = 0; j < n2; j++) {
+                d_SortedJ[i] += (int) (d_Pc[i * n2 + j] + 0.05) * d_J[j];
+            }
+        }
+    }
+}
+
+// parallelt i batchsize 
+/* kernel for copying IUnion to I and JUnion to J
+d_PointerI      = device pointer pointer to I
+d_PointerJ      = device pointer pointer to J
+d_PointerIUnion = device pointer pointer to IUnion
+d_PointerJUnion = device pointer pointer to JUnion
+d_n1Union       = device pointer to n1Union
+d_n2Union       = device pointer to n2Union
+batchsize       = the size of the batch */
+__global__ void copyIandJ(int** d_PointerI, int** d_PointerJ, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1Union, int* d_n2Union, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize) {
+        int n1Union = d_n1Union[tid];
+        int n2Union = d_n2Union[tid];
+
+        int* d_I = d_PointerI[tid];
+        int* d_J = d_PointerJ[tid];
+        int* d_IUnion = d_PointerIUnion[tid];
+        int* d_JUnion = d_PointerJUnion[tid];
+
+        free(d_I);
+        free(d_J);
+        d_I = (int*) malloc(n1Union * sizeof(int));
+        d_J = (int*) malloc(n2Union * sizeof(int));
+        for (int i = 0; i < n1Union; i++) {
+            d_I[i] = d_IUnion[i];
+        }
+        for (int i = 0; i < n2Union; i++) {
+            d_J[i] = d_JUnion[i];
+        }
+
+        d_PointerI[tid] = d_I;
+        d_PointerJ[tid] = d_J;
+    }
+}
+
 #endif

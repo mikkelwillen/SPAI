@@ -43,7 +43,7 @@ maxn1Union = maximum value of n1Union
 maxn2Union = maximum value of n2Union
 i = current iteration
 batchsize = batchsize */
-int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float* d_mHat_k, float** d_PointerMHat_k, float** d_PointerResidual, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
+int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float* d_mHat_k, float** d_PointerMHat_k, float** d_PointerResidual, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
     printf("\n------UPDATE QR------\n");
     int numBlocks;
 
@@ -272,8 +272,76 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
         return 1;
     }
 
+    // permute J and store it in sortedJ
+    int* sortedJ;
+    gpuAssert(
+        cudaMalloc((void**) &sortedJ, batchsize * maxn2Union * sizeof(int)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, sortedJ, batchsize, maxn2Union);
 
+    numBlocks = (batchsize * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    permuteJ<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, d_PointerJUnion, d_PointerPc, d_n2Union, maxn2Union, batchsize);
 
+    // set Q and R to unsortedQ and unsortedR
+    gpuAssert(
+        cudaFree(d_Q));
+    gpuAssert(
+        cudaFree(d_R));
+
+    gpuAssert(
+        cudaMalloc((void**) &d_Q, batchsize * maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_R, batchsize * maxn1Union * maxn2Union * sizeof(float)));
+    
+    gpuAssert(
+        cudaMemcpy(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToDevice));
+    gpuAssert(
+        cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1Union * maxn1Union);
+
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1Union * maxn2Union);
+
+    // free memory
+    gpuAssert(
+        cudaFree(d_AIJTilde));
+    gpuAssert(
+        cudaFree(d_PointerAIJTilde));
+    gpuAssert(
+        cudaFree(d_AITildeJTilde));
+    gpuAssert(
+        cudaFree(d_PointerAITildeJTilde));
+    gpuAssert(
+        cudaFree(d_ABreve));
+    gpuAssert(
+        cudaFree(d_PointerABreve));
+    gpuAssert(
+        cudaFree(d_B1));
+    gpuAssert(
+        cudaFree(d_PointerB1));
+    gpuAssert(
+        cudaFree(d_B2));
+    gpuAssert(
+        cudaFree(d_PointerB2));
+    gpuAssert(
+        cudaFree(d_B2Q));
+    gpuAssert(
+        cudaFree(d_PointerB2Q));
+    gpuAssert(
+        cudaFree(d_B2R));
+    gpuAssert(
+        cudaFree(d_PointerB2R));
+    gpuAssert(
+        cudaFree(d_firstMatrix));
+    gpuAssert(
+        cudaFree(d_secondMatrix));
+    gpuAssert(
+        cudaFree(d_unsortedQ));
+    gpuAssert(
+        cudaFree(d_unsortedR));
+    
     return 0;
 }
 
