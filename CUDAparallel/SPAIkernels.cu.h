@@ -622,28 +622,34 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
 d_PointerA = device pointer pointer to matrix A
 d_PointerB = device pointer pointer to matrix B
 d_PointerC = device pointer pointer to the result matrix C
-d_n1Union  = device pointer to n1Union
-maxn1Union = the maximum value of n1Union in the batch
+d_dim1     = device pointer to the first dimension of A
+d_dim2     = device pointer to the second dimension of A and the first dimension of B
+d_dim3     = device pointer to the second dimension of B
+maxdim1    = the maximum value of the first dimension of A in the batch
+maxdim2    = the maximum value of the second dimension of A and the first dimension of B in the batch
+maxdim3    = the maximum value of the second dimension of B in the batch
 batchsize  = the size of the batch */
-__global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, float** d_PointerC, int* d_n1Union, int maxn1Union, int batchsize) {
+__global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, float** d_PointerC, int* d_dim1, int* d_dim2, int* d_dim3, int maxdim1, int maxdim2, int maxdim3, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    if (tid < batchsize * maxn1Union * maxn1Union) {
-        int b = tid / (maxn1Union * maxn1Union);
-        int i = (tid % (maxn1Union * maxn1Union)) / maxn1Union;
-        int j = (tid % (maxn1Union * maxn1Union)) % maxn1Union;
-
-        int n1Union = d_n1Union[b];
+    if (tid < batchsize * maxdim1 * maxdim3) {
+        int b = tid / (maxdim1 * maxdim3);
+        int i = (tid % (maxdim1 * maxdim3)) / maxdim1;
+        int j = (tid % (maxdim1 * maxdim3)) % maxdim1;
+ 
+        int dim1 = d_dim1[b];
+        int dim2 = d_dim2[b];
+        int dim3 = d_dim3[b];
 
         float* d_A = d_PointerA[b];
         float* d_B = d_PointerB[b];
         float* d_C = d_PointerC[b];
 
-        if (i < n1Union && j < n1Union) {
+        if (i < dim1 && j < dim3) {
             float sum = 0.0;
-            for (int k = 0; k < n1Union; k++) {
-                sum += d_A[i * n1Union + k] * d_B[k * n1Union + j];
+            for (int k = 0; k < dim2; k++) {
+                sum += d_A[i * dim2 + k] * d_B[k * dim3 + j];
             }
-            d_C[i * n1Union + j] = sum;
+            d_C[i * dim3 + j] = sum;
         }
     }
 }

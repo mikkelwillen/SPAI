@@ -198,7 +198,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
 
-        LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
+        LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
         
         // check if the tolerance is met
         int toleranceNotMet = 0;
@@ -389,7 +389,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
-            int updateSuccess = updateQR(cHandle, A, d_A, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_PointerMHat_k, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
+            int updateSuccess = updateQR(cHandle, A, d_A, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
 
             if (updateSuccess != 0) {
                 printf("updateQR failed\n");
@@ -397,9 +397,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 return NULL;
             }
 
-            // vi får sku noget illegal memory access:((
-            // maxerne er ikke rigtige
-            // tjek I og J og ITilde og Jtilde
 
 
 

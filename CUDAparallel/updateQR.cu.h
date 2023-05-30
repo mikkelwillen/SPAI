@@ -31,7 +31,9 @@ d_n1Tilde = pointer to n1Tilde in device memory
 d_n2Tilde = pointer to n2Tilde in device memory
 d_n1Union = pointer to n1Union in device memory
 d_n2Union = pointer to n2Union in device memory
+d_mHat_k = batched mHat_k in device memory
 d_PointerMHat_k = pointer to mHat_k in device memory
+d_PointerResidual = pointer to residual in device memory
 d_residualNorm = pointer to residualNorm in device memory
 maxn1 = maximum value of n1
 maxn2 = maximum value of n2
@@ -41,7 +43,7 @@ maxn1Union = maximum value of n1Union
 maxn2Union = maximum value of n2Union
 i = current iteration
 batchsize = batchsize */
-int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float** d_PointerMHat_k, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
+int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float** d_PointerR, int** d_PointerI, int** d_PointerJ, int** d_PointerSortedJ, int** d_PointerITilde, int** d_PointerJTilde, int** d_PointerIUnion, int** d_PointerJUnion, int* d_n1, int* d_n2, int* d_n1Tilde, int* d_n2Tilde, int* d_n1Union, int* d_n2Union, float* d_mHat_k, float** d_PointerMHat_k, float** d_PointerResidual, float* d_residualNorm, int maxn1, int maxn2, int maxn1Tilde, int maxn2Tilde, int maxn1Union, int maxn2Union, int i, int batchsize) {
     printf("\n------UPDATE QR------\n");
     int numBlocks;
 
@@ -230,7 +232,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedQ, d_unsortedQ, batchsize, maxn1Union * maxn1Union);
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, maxn1Union, batchsize);
+    matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, d_n1Union, d_n1Union, maxn1Union, maxn1Union, maxn1Union, batchsize);
 
     // set unsorted R
     float* d_unsortedR;
@@ -246,7 +248,31 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2Union, batchsize);
+
+    // free and malloc space for new mHat_k
+    gpuAssert(
+        cudaFree(d_mHat_k));
+    gpuAssert(
+        cudaMalloc((void**) &d_mHat_k, batchsize * maxn2Union * sizeof(float)));
     
+    gpuAssert(
+        cudaFree(d_PointerMHat_k));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerMHat_k, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2Union);
+
+    // 13.7) compute the new solution m_k with the least squares problem
+    int lsSuccess = LSProblem(cHandle, d_A, A, d_PointerUnsortedQ, d_PointerUnsortedR, d_PointerMHat_k, d_PointerPc, d_PointerResidual, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, i, d_residualNorm, batchsize);
+
+    if (lsSuccess != 0) {
+        printf("LSProblem failed\n");
+        
+        return 1;
+    }
+
+
 
     return 0;
 }

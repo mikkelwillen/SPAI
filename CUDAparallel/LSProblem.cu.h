@@ -127,6 +127,7 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
 // d_PointerQ        = the pointer to the Q matrix
 // d_PointerR        = the pointer to the R matrix
 // d_mHat_k          = the pointer to the mHat_k vector
+// d_PointerPc       = the pointer to the column permutation matrix (null if not used)
 // d_PointerResidual = the pointer to the residual vector
 // d_PointerI        = the pointer to the I vector
 // d_PointerJ        = the pointer to the J vector
@@ -135,7 +136,7 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
 // k                 = the index of the column to be added
 // residualNorm      = the norm of the residual
 // batchsize         = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
+int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
     // define the number of blocks
     int numBlocks;
 
@@ -203,6 +204,27 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     // compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeMHat_k<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_PointerInvR, d_PointerCHat, maxn2, batchsize);
+
+    // permute the mHat_k vectors, if necessary
+    if (d_PointerPc != NULL) {
+        // permute the vector and save it in a temporary vector
+        float* d_tempMHat_k;
+        float** d_PointerTempMHat_k;
+        gpuAssert(
+            cudaMalloc((void**) &tempMHat_k, maxn2 * batchsize * sizeof(float)));
+        gpuAssert(
+            cudaMalloc((void**) &tempPointerMHat_k, batchsize * sizeof(float*)));
+        
+        numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(tempPointerMHat_k, tempMHat_k, batchsize, maxn2);
+
+        numBlocks = (maxn2Union * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+        matrixMultiplication<<<numBlocks, BLOCKSIZE>>>( d_PointerPc, d_PointerMHat_k, d_PointerTempMHat_k, d_n2Union, d_n2Union, NULL, maxn2Union, maxn2Union, 1, batchsize);
+
+        // copy the temporary mHat_k to the mHat_k vector
+        gpuAssert(
+            cudaMemcpy(d_PointerMHat_k, d_PointerTempMHat_k, batchsize * sizeof(float*), cudaMemcpyDeviceToDevice));
+    }
 
     // compute residual vectors
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
