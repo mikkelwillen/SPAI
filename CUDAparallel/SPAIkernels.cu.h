@@ -617,5 +617,34 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
     }
 }
 
+// parallelt i batchsize * maxn1Union * maxn1Union tråde
+/* kernel for computing matrix multiplication
+d_PointerA = device pointer pointer to matrix A
+d_PointerB = device pointer pointer to matrix B
+d_PointerC = device pointer pointer to the result matrix C
+d_n1Union  = device pointer to n1Union
+maxn1Union = the maximum value of n1Union in the batch
+batchsize  = the size of the batch */
+__global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, float** d_PointerC, int* d_n1Union, int maxn1Union, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * maxn1Union * maxn1Union) {
+        int b = tid / (maxn1Union * maxn1Union);
+        int i = (tid % (maxn1Union * maxn1Union)) / maxn1Union;
+        int j = (tid % (maxn1Union * maxn1Union)) % maxn1Union;
 
+        int n1Union = d_n1Union[b];
+
+        float* d_A = d_PointerA[b];
+        float* d_B = d_PointerB[b];
+        float* d_C = d_PointerC[b];
+
+        if (i < n1Union && j < n1Union) {
+            float sum = 0.0;
+            for (int k = 0; k < n1Union; k++) {
+                sum += d_A[i * n1Union + k] * d_B[k * n1Union + j];
+            }
+            d_C[i * n1Union + j] = sum;
+        }
+    }
+}
 #endif
