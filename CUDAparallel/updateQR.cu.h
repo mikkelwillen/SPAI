@@ -215,7 +215,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_secondMatrix, batchsize, maxn1Union * maxn1Union);
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_PointerB2Q, d_n1Tilde, d_n1Union, maxn1Union, batchsize)
+    setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_PointerB2Q, d_n1Tilde, d_n1Union, d_n2, maxn1Union, batchsize);
 
     // compute unsortedQ = firstMatrix * secondMatrix
     float* d_unsortedQ;
