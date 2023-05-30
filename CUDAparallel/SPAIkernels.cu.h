@@ -96,6 +96,7 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         int* I = d_PointerI[b];
         int* J = d_PointerJ[b];
         if (i == 0 && j == 0 && l == 0) {
+            printf("batch: %d\n", b);
             // print I
             printf("I: ");
             for (int k = 0; k < d_n1[b]; k++) {
