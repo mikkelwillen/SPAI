@@ -39,7 +39,7 @@ __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int*
 // offset = The offset array
 // flatData = The flat data array
 // flatRowIndex = The flat row index array
-__global__ void copyCSCDevicePointers(CSC* d_A, int** d_offset, float** d_flatData, int** d_flatRowIndex) {
+__global__ void copyCSCDevicePointers(CSC* d_A, int* d_offset, float* d_flatData, int* d_flatRowIndex) {
     memcpy(d_offset, d_A->offset, sizeof(int) * (d_A->n + 1));
     memcpy(d_flatData, d_A->flatData, sizeof(float) * d_A->countNonZero);
     memcpy(d_flatRowIndex, d_A->flatRowIndex, sizeof(int) * d_A->countNonZero);
