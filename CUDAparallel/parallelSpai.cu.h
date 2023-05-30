@@ -389,7 +389,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
-            int updateSuccess = updateQR(cHandle, A, d_A, d_Q, d_R d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
+            int updateSuccess = updateQR(cHandle, A, d_A, d_Q, d_R, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
 
             if (updateSuccess != 0) {
                 printf("updateQR failed\n");
@@ -400,6 +400,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // set I and J to IUnion and JUnion
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
+
+            // set n1 and n2 to n1Union and n2Union
+
 
 
 
