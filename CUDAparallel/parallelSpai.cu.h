@@ -426,6 +426,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("cudaFree success\n");
 
             gpuAssert(
+                cudaMalloc((void**) &d_n1, batchsize * sizeof(int)));
+            gpuAssert(
+                cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
+
+            gpuAssert(
                 cudaMemcpy(d_n1, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
             gpuAssert(
                 cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
