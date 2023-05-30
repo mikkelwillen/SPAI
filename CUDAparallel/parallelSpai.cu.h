@@ -415,7 +415,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // set maxn1 and maxn2 to maxn1Union and maxn2Union
             maxn1 = maxn1Union;
             maxn2 = maxn2Union;
-            
+
+            // der sker sgu noget med memory. FIX!
 
 
 
