@@ -402,6 +402,16 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
 
             // set n1 and n2 to n1Union and n2Union
+            gpuAssert(
+                cudaFree(d_n1));
+            gpuAssert(
+                cudaFree(d_n2));
+            
+            gpuAssert(
+                cudaMemcpy(d_n1, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
+            gpuAssert(
+                cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
+            
 
 
 
