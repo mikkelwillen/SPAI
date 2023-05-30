@@ -39,10 +39,10 @@ __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int*
 // offset = The offset array
 // flatData = The flat data array
 // flatRowIndex = The flat row index array
-__global__ void cscDataDeviceToHost(CSC* d_A, int* offset, float* flatData, int* flatRowIndex) {
-    offset = d_A->offset;
-    flatData = d_A->flatData;
-    flatRowIndex = d_A->flatRowIndex;
+__global__ void copyCSCDevicePointers(CSC* d_A, int* d_offset, float* d_flatData, int* d_flatRowIndex) {
+    d_offset = d_A->offset;
+    d_flatData = d_A->flatData;
+    d_flatRowIndex = d_A->flatRowIndex;
 }
 
 // (DEPRECATED) er ikke sikker på den har de rigtige værdier
@@ -335,24 +335,26 @@ CSC* copyCSCFromDeviceToHost(CSC* d_A) {
     gpuAssert(
         cudaMemcpy(A, d_A, sizeof(CSC), cudaMemcpyDeviceToHost));
 
-    int* offset = (int*) malloc(sizeof(int) * (A->n + 1));
-    float* flatData = (float*) malloc(sizeof(float) * A->countNonZero);
-    int* flatRowIndex = (int*) malloc(sizeof(int) * A->countNonZero);
+    int* d_offset;
+    float* d_flatData;
+    int* d_flatRowIndex;
+
+    copyCSCDevicePointers<<<1, 1>>>(d_A, d_offset, d_flatData, d_flatRowIndex);
+
+    int* h_offset = (int*) malloc(sizeof(int) * (A->n + 1));
+    float* h_flatData = (float*) malloc(sizeof(float) * A->countNonZero);
+    int* h_flatRowIndex = (int*) malloc(sizeof(int) * A->countNonZero);
 
     gpuAssert(
-        cudaMemcpy(A->offset, d_A->offset, sizeof(int) * (A->n + 1), cudaMemcpyDeviceToHost));
-
+        cudaMemcpy(h_offset, d_offset, sizeof(int) * (A->n + 1), cudaMemcpyDeviceToHost));
     gpuAssert(
-        cudaMemcpy(A->flatData, d_A->flatData, sizeof(float) * A->countNonZero, cudaMemcpyDeviceToHost));
-
+        cudaMemcpy(h_flatData, d_flatData, sizeof(float) * A->countNonZero, cudaMemcpyDeviceToHost));
     gpuAssert(
-        cudaMemcpy(A->flatRowIndex, d_A->flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_flatRowIndex, d_flatRowIndex, sizeof(int) * A->countNonZero, cudaMemcpyDeviceToHost));
 
-    cscDataDeviceToHost<<<1, 1>>>(d_A, offset, flatData, flatRowIndex);
-
-    A->offset = offset;
-    A->flatData = flatData;
-    A->flatRowIndex = flatRowIndex;
+    A->offset = h_offset;
+    A->flatData = h_flatData;
+    A->flatRowIndex = h_flatRowIndex;
 
     return A;
 }
