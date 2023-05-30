@@ -93,10 +93,10 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         int n1 = d_n1[b];
         int n2 = d_n2[b];
 
-        int* I = d_PointerI[b];
-        int* J = d_PointerJ[b];
         if (tid == 0) {
             for (int h = 0; h < batchsize; h++) {
+                int* I = d_PointerI[h];
+                int* J = d_PointerJ[h];
                 printf("batch: %d\n", h);
                 // print I
                 printf("I: ");
@@ -114,6 +114,9 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
             }
         }
         __syncthreads();
+
+        int* I = d_PointerI[b];
+        int* J = d_PointerJ[b];
 
         float* AHat = d_AHat[b];
 
