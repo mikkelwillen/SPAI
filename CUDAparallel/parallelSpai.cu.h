@@ -411,21 +411,25 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
                 return NULL;
             }
+            printf("updateQR success\n");
 
             // set I and J to IUnion and JUnion
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
+            printf("copyIandJ success\n");
 
             // set n1 and n2 to n1Union and n2Union
             gpuAssert(
                 cudaFree(d_n1));
             gpuAssert(
                 cudaFree(d_n2));
-            
+            printf("cudaFree success\n");
+
             gpuAssert(
                 cudaMemcpy(d_n1, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
             gpuAssert(
                 cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
+            printf("cudaMemcpy success\n");
             
             // set maxn1 and maxn2 to maxn1Union and maxn2Union
             maxn1 = maxn1Union;
