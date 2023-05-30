@@ -326,7 +326,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, sortedJ, batchsize, maxn2Union);
-
+    printf("j sorted\n");
     numBlocks = (batchsize * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
     permuteJ<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, d_PointerJUnion, d_PointerPc, d_n2Union, maxn2Union, batchsize);
 
@@ -335,6 +335,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
         cudaFree(d_Q));
     gpuAssert(
         cudaFree(d_R));
+    printf("Q and R freed\n");
 
     gpuAssert(
         cudaMalloc((void**) &d_Q, batchsize * maxn1Union * maxn1Union * sizeof(float)));
@@ -345,11 +346,14 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
         cudaMemcpy(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToDevice));
     gpuAssert(
         cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
+    printf("Q and R set\n");
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1Union * maxn1Union);
+    printf("Q pointer set\n");
 
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerR, d_R, batchsize, maxn1Union * maxn2Union);
+    printf("R pointer set\n");
 
     // free memory
     gpuAssert(
