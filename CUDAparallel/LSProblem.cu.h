@@ -234,7 +234,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // compute residual vectors
     numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, i, batchsize);
+    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, batchsize);
 
     // compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
