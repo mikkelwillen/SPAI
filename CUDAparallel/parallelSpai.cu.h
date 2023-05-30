@@ -322,6 +322,16 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeSmallestIndices<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_PointerSmallestIndices, d_PointerSmallestJTilde, d_PointerJTilde, d_newN2Tilde, d_n2Tilde, s, batchsize);
 
+            // find maxn2Tilde after finding the smallest s values
+            maxn2Tilde = 0;
+            gpuAssert(
+                cudaMemcpy(h_n2Tilde, d_newN2Tilde, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            for (int b = 0; b < batchsize; b++) {
+                if (h_n2Tilde[b] > maxn2Tilde) {
+                    maxn2Tilde = h_n2Tilde[b];
+                }
+            }
+
             // find ITilde and make IUnion and JUnion
             int* d_n1Tilde;
             int* d_n1Union;
