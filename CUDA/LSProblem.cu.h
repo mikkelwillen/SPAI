@@ -24,7 +24,7 @@
 // k is the index of the column of mHat
 // residualNorm is the norm of the residual vector
 int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k, float* residual, int* I, int* J, int n1, int n2, int k, float* residualNorm) {
-    // e) compute cHat = Q^T * ê_k
+    // 5.1) compute cHat = Q^T * ê_k
     // make e_k and set index k to 1.0
     float* e_k = (float*) malloc(n1 * sizeof(float));
     for (int i = 0; i < n1; i++) {
@@ -50,8 +50,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     }
     printf("\n");
 
-    printf("n1: %d\n", n1);
-    printf("n2: %d\n", n2);
     // print R
     printf("R:\n");
     for (int i = 0; i < n2; i++) {
@@ -60,12 +58,10 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         }
         printf("\n");
     }
-    printf("after print R\n");
 
-    // f) compute mHat_k = R^-1 * cHat
-    // make the inverse of R of size n2 x n2
+    // 5.2) make the inverse of R of size n2 x n2
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
-    printf("malloc invR\n");
+
     int invSuccess = invBatched(cHandle, &R, n2, &invR);
 
     if (invSuccess != 0) {
@@ -80,6 +76,8 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         }
         printf("\n");
     }
+
+    // 5.3) compute mHat_k = R^-1 * cHat
     for (int i = 0; i < n2; i++) {
         (*mHat_k)[i] = 0.0;
         for (int j = 0; j < n2; j++) {
@@ -90,46 +88,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
     for (int i = 0; i < n2; i++) {
         printf("%f ", (*mHat_k)[i]);
     }
-
-    printf("after m_hat\n");
-    // // g) compute residual = A * mHat_k - e_k
-    // // malloc space for residual
-    // // do matrix multiplication
-    // int* IDense = (int*) malloc(A->m * sizeof(int));
-    // int* JDense = (int*) malloc(A->n * sizeof(int));
-    // for (int i = 0; i < A->m; i++) {
-    //     IDense[i] = i;
-    // }
-    // for (int j = 0; j < A->n; j++) {
-    //     JDense[j] = j;
-    // }
-
-    // float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
-    // // compute residual
-    // for (int i = 0; i < A->m; i++) {
-    //     residual[i] = 0.0;
-    //     for (int j = 0; j < A->n; j++) {
-    //         residual[i] += ADense[i * A->n + j] * (*mHat_k)[j];
-    //     }
-    //     if (i == k) {
-    //         residual[i] -= 1.0;
-    //     }
-    // }
-    
-    // printf("residual:\n");
-    // for (int i = 0; i < A->m; i++) {
-    //     printf("%f ", residual[i]);
-    // }
-    // printf("\n");
-
-    // // compute the norm of the residual
-    // *residualNorm = 0.0;
-    // for (int i = 0; i < A->m; i++) {
-    //     *residualNorm += residual[i] * residual[i];
-    // }
-    // *residualNorm = sqrt(*residualNorm);
-    
-    // printf("residual norm: %f\n", *residualNorm);
 
     // free memory
     free(e_k);

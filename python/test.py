@@ -2,7 +2,7 @@ import spai
 import spaiUpdate
 import numpy as np
 import random
-import improvedSpai
+import python.SPAI as SPAI
 import scipy
 
 # Function for generating an array with random 
@@ -142,5 +142,5 @@ D = [[20, 0, 0],
 DSparse = scipy.sparse.csr_array(D)
 CSparse = scipy.sparse.csr_array(C)
 
-checkIdentityU(improvedSpai.SPAI, A)
+checkIdentityU(SPAI.SPAI, A)
 

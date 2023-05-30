@@ -84,12 +84,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             printf("%d ", J[i]);
         }
 
-        // // printJ
-        // printf("\nJ: ");
-        // for (int i = 0; i < n2; i++) {
-        //     printf("%d ", J[i]);
-        // }
-
         // 2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         // We initialize I to -1, and the iterate through all elements of J. Then we iterate through the row indeces of A from the offset J[j] to J[j] + 1. If the row index is already in I, we dont do anything, else we add it to I.
         I = (int*) malloc(sizeof(int) * A->m);
