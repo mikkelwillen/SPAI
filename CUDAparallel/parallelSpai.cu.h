@@ -168,6 +168,21 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             return NULL;
         }
 
+        // print Q
+        float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn1; j++) {
+                for (int k = 0; k < maxn1; k++) {
+                    printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+
         // overwrite AHat, since qr overwrote it previously
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);

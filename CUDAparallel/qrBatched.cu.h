@@ -332,21 +332,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, batchsize);
     }
 
-    // print Q
-    float* h_Q = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
-    gpuAssert(
-        cudaMemcpy(h_Q, d_Q, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-    for (int b = 0; b < batchsize; b++) {
-        printf("Q[%d] = [", b);
-        for (int i = 0; i < n1; i++) {
-            for (int j = 0; j < n1; j++) {
-                printf("%f, ", h_Q[b * n1 * n1 + i * n1 + j]);
-            }
-            printf("\n");
-        }
-        printf("]\n");
-    }
-
     // free arrays and destroy cHandle
     gpuAssert(
         cudaFree(d_tau));
