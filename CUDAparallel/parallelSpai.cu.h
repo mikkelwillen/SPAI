@@ -508,12 +508,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         
     }
 
+    // copy M back to host
+    M = copyCSCFromDeviceToHost(d_M);
+
     // free memory
     freeDeviceCSC(d_A);
     freeDeviceCSC(d_M);
-    freeCSC(M);
+
 
     cublasDestroy(cHandle);
+
+    return M;
 }
 
 #endif

@@ -231,6 +231,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float** d_PointerQ, float
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, maxn1Union, batchsize);
+
+    
     return 0;
 }
 
