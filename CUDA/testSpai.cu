@@ -137,6 +137,7 @@ int runcuBLAStest(CSC* cscA, int n) {
         }
     }
 
+    printf("Error: %f%\n", error);
 }
 
 int main(int argc, char** argv) {
@@ -184,7 +185,7 @@ int main(int argc, char** argv) {
     
         // run test
         // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
-        runcuBLAStest(cscM4, 4);
+        runcuBLAStest(cscC, n);
         printf("after running cuBLAS test\n");
     
         // free memory
