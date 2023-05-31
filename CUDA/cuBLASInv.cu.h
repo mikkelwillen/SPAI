@@ -1,5 +1,5 @@
-#ifndef CUSOLVER_INV_H
-#define CUSOLVER_INV_H
+#ifndef CUBLAS_INV_H
+#define CUBLAS_INV_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +21,7 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
     }
 }
 
-CSC* inversion(CSC* A, int n) {
+CSC* cuBLASinversion(CSC* cscA, int n) {
     // Create cublas handle
     cublasHandle_t cHandle;
     cublasStatus_t stat;
@@ -34,33 +34,28 @@ CSC* inversion(CSC* A, int n) {
     } 
 
     // Densify A
-    int* IDense = (int*) malloc(A->m * sizeof(int));
-    int* JDense = (int*) malloc(A->n * sizeof(int));
-    for (int i = 0; i < A->m; i++) {
+    int* IDense = (int*) malloc(n * sizeof(int));
+    int* JDense = (int*) malloc(n * sizeof(int));
+    for (int i = 0; i < n; i++) {
         IDense[i] = i;
     }
-    for (int j = 0; j < A->n; j++) {
+    for (int j = 0; j < n; j++) {
         JDense[j] = j;
     }
 
-    float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
+    float* A = CSCToDense(cscA, IDense, JDense, n, n);
 
     // Create array AInv
     float* AInv = (float*) malloc(n * n * sizeof(float));
 
     // Do inversion
-    int invSuccess = invBatched(cHandle, &ADense, n, &AInv);
-
-    if (invSuccess != 0) {
-        printf("Error inverting R\n");
-        return 1;
-    }
+    int invSuccess = invBatched(cHandle, &A, n, &AInv);
 
     // Create CSC from AInv
-    createCSC(AInv, n, n);
+    CSC* cscAInv = createCSC(AInv, n, n);
 
     // return CSC AInv
-    return AInv;
+    return cscAInv;
 }
 
 // Function to do inversion of batch matrices

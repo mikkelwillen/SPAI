@@ -8,6 +8,7 @@
 #include "invBatched.cu.h"
 #include "permutation.cu.h"
 #include "updateQR.cu.h"
+#include "cuBLASInv.cu.h"
 
 int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
@@ -75,6 +76,69 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
 }
 
 
+int runcuBLAStest(CSC* cscA, int n) {
+    struct CSC* res = cuBLASinversion(cscA, n);
+    printf("After cuBLASinversion\n");
+    int* I = (int*) malloc(sizeof(int) * n);
+    int* J = (int*) malloc(sizeof(int) * n);
+    for (int i = 0; i < n; i++) {
+        I[i] = i;
+    }
+    for (int i = 0; i < n; i++) {
+        J[i] = i;
+    }
+
+    float* A = CSCToDense(cscA, I, J, n, n);
+    float* inv = CSCToDense(res, I, J, n, n);
+    
+    // identity = A * inv
+    float* identity = (float*) malloc (sizeof(float) * n * n);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            identity[i * n + j] = 0.0;
+            for (int k = 0; k < n; k++) {
+                identity[i * n + j] += A[i * n + k] * inv[k * n + j];
+            }
+        }
+    }
+
+    // print A
+    printf("A:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", A[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print inv
+    printf("inv:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", inv[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print identity
+    printf("identity:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", identity[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // calculate error
+    float error = 0.0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            error += (identity[i * n + j] - (i == j ? 1.0 : 0.0)) * (identity[i * n + j] - (i == j ? 1.0 : 0.0));
+        }
+    }
+
+}
+
 int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
@@ -119,7 +183,9 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
+        // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
+        runcuBLAStest(cscM4, 4);
+        printf("after running cuBLAS test\n");
     
         // free memory
         freeCSC(cscA);
