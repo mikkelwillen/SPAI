@@ -267,6 +267,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
     printf("setQToIdentity\n");
+    
 
     for (int k = 0; k < n2; k++) {
         // make v
@@ -284,6 +285,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             }
             printf("]\n");
         }
+        free(h_v);
 
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -298,6 +300,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             }
             printf("]\n");
         }
+        free(h_Qv);
         
         float* h_tempStorage = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
@@ -311,6 +314,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
                 printf("]\n");
             }
         }
+        free(h_tempStorage);
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -328,6 +332,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             }
             printf("]\n");
         }
+        free(h_Qvvt);
 
         // compute Q - Qvvt
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
