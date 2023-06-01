@@ -13,6 +13,7 @@ n             = the number of elements in each array
 batchsize     = the size of the batch */
 __global__ void printPointerArray(float** d_PointerArray, int m, int n, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("printing pointer array\n");
     if (tid == 0) {
         for (int b = 0; b < batchsize; b++) {
             printf("batch: %d\n", b);
