@@ -98,7 +98,7 @@ __global__ void updateBatchColumnsCSC(CSC* d_csc, float** d_PointernewValues, in
             d_csc->flatRowIndex = (int*) malloc(sizeof(int) * (d_csc->countNonZero));
 
             // copy the old values before k to the new arrays
-            for (int i = 0; i < d_csc->offset[k] + 1; i++) {
+            for (int i = 0; i < oldOffset[k] + 1; i++) {
                 d_csc->flatData[i] = oldFlatData[i];
                 d_csc->flatRowIndex[i] = oldFlatRowIndex[i];
             }
