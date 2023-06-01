@@ -159,6 +159,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     numBlocks = (batchsize * maxn2 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setB1<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_PointerB1, d_n2, d_n2Tilde, maxn2, maxn2Tilde, batchsize);
 
+    // print B1
+    float* h_B1 = (float*) malloc(batchsize * maxn2 * maxn2Tilde * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_B1, d_B1, batchsize * maxn2 * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
+
+    printf("\nB1:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("\nBatch %d:\n", i);
+        for (int j = 0; j < maxn2; j++) {
+            for (int k = 0; k < maxn2Tilde; k++) {
+                printf("%f ", h_B1[i * maxn2 * maxn2Tilde + j * maxn2Tilde + k]);
+            }
+            printf("\n");
+        }
+    }
+
     // 13.4) Set B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
     float* d_B2;
     float** d_PointerB2;
