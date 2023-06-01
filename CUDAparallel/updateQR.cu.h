@@ -106,11 +106,14 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     float* h_Pc = (float*) malloc(batchsize * maxn2Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMalloc((void**) &d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float)));
+    printf("Pc:\n");
     for (int b = 0; b < batchsize; b++) {
+        printf("b = %d\n", b);
         for (int i = 0; i < maxn2Union; i++) {
             for (int j = 0; j < maxn2Union; j++) {
                 printf("%f ", h_Pc[b * maxn2Union * maxn2Union + i * maxn2Union + j]);
             }
+            printf("\n");
         }
     }
     
