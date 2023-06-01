@@ -190,29 +190,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     numBlocks = (batchsize * maxn1Union * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setB2<<<numBlocks, BLOCKSIZE>>>(d_PointerABreve, d_PointerAITildeJTilde, d_PointerB2, d_n1, d_n1Union, d_n2, d_n2Tilde, maxn1Union, maxn2Tilde, batchsize);
 
-    // 13.5) Do QR factorization of B2
-    float* d_B2Q;
-    float* d_B2R;
-
-    float** d_PointerB2Q;
-    float** d_PointerB2R;
-
-    gpuAssert(
-        cudaMalloc((void**) &d_B2Q,  batchsize *maxn1Union * maxn1Union * sizeof(float)));
-    gpuAssert(
-        cudaMalloc((void**) &d_B2R,  batchsize * maxn1Union * maxn2Tilde * sizeof(float)));
-
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerB2Q, batchsize * sizeof(float*)));
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerB2R, batchsize * sizeof(float*)));
-
-    printf("maxn1 = %d\n", maxn1);
-    printf("maxn2 = %d\n", maxn2);
-    printf("maxn1Tilde = %d\n", maxn1Tilde);
-    printf("maxn2Tilde = %d\n", maxn2Tilde);
-    printf("maxn1Union = %d\n", maxn1Union);
-    printf("maxn2Union = %d\n", maxn2Union);
     float* h_B2 = (float*) malloc(batchsize * maxn1Union * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_B2, d_B2, batchsize * maxn1Union * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
@@ -228,6 +205,29 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
         printf("\n");
     }
 
+    // 13.5) Do QR factorization of B2
+    float* d_B2Q;
+    float* d_B2R;
+
+    float** d_PointerB2Q;
+    float** d_PointerB2R;
+
+    gpuAssert(
+        cudaMalloc((void**) &d_B2Q,  batchsize * maxn1Union * maxn1Union * sizeof(float)));
+    gpuAssert(
+        cudaMalloc((void**) &d_B2R,  batchsize * maxn1Union * maxn2Tilde * sizeof(float)));
+
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB2Q, batchsize * sizeof(float*)));
+    gpuAssert(
+        cudaMalloc((void**) &d_PointerB2R, batchsize * sizeof(float*)));
+
+    printf("maxn1 = %d\n", maxn1);
+    printf("maxn2 = %d\n", maxn2);
+    printf("maxn1Tilde = %d\n", maxn1Tilde);
+    printf("maxn2Tilde = %d\n", maxn2Tilde);
+    printf("maxn1Union = %d\n", maxn1Union);
+    printf("maxn2Union = %d\n", maxn2Union);
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB2Q, d_B2Q, batchsize, maxn1Union * maxn1Union);
