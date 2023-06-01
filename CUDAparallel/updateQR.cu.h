@@ -101,8 +101,18 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
         cudaMalloc((void**) &d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(float*)));
-    printf("--d_PointerPc\n");
-    printPointerArray<<<1, 1>>>(d_PointerPc, maxn2Union, maxn2Union, batchsize);
+
+    // print Pc
+    float* h_Pc = (float*) malloc(batchsize * maxn2Union * maxn2Union * sizeof(float));
+    gpuAssert(
+        cudaMalloc((void**) &d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float)));
+    for (int b = 0; b < batchsize; b++) {
+        for (int i = 0; i < maxn2Union; i++) {
+            for (int j = 0; j < maxn2Union; j++) {
+                printf("%f ", h_Pc[b * maxn2Union * maxn2Union + i * maxn2Union + j]);
+            }
+        }
+    }
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2Union * maxn2Union);
