@@ -268,17 +268,15 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
     // Destroy handles
     cusolverDnDestroy(handle);
+    if (stat != CUSOLVER_STATUS_SUCCESS) {
+        printf("CUSOLVER handle destruction failed with status: %d\n", stat);
+
+        return NULL;
+    }
+    printf("Handle destroyed\n");
 
     // return AInv
     return AInv;
-
-    // Free memory
-    cudaFree(d_A);
-    cudaFree(workspace);
-    cudaFree(devIpiv);
-    cudaFree(d_info);
-    cudaFree(d_L);
-    cudaFree(d_U);
 
 }
 
