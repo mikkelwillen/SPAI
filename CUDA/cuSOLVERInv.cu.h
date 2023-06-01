@@ -210,6 +210,22 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                                         lda,
                                         &workspaceInBytesOnDevice,
                                         &workspaceInBytesOnHost);
+    printf("After U buffer size\n");
+    
+    gpuAssert(
+        cudaFree(bufferOnDevice));
+    gpuAssert(
+        cudaFree(bufferOnHost));
+    printf("Buffers freed\n");
+    
+    void* bufferOnDevice;
+    gpuAssert(
+        cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
+    void* bufferOnHost;
+    gpuAssert(
+        cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
+    printf("Buffers allocated to U\n");
+
 
     // Do inversion of U
     stat = cusolverDnXtrtri(handle,
