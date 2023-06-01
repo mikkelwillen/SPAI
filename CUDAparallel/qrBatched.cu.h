@@ -212,7 +212,12 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         return stat;
     }
-
+    // print d_PointerA
+    printPointerArray <<<1, 1>>>(d_PointerAHat, n1, n2, batchsize);
+    
+    printf("n1: %d\n", n1);
+    printf("n2: %d\n", n2);
+    
     // malloc space for arrays and copy array start pointers to device
     float* d_v;
     float** d_PointerV;
@@ -269,12 +274,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
     printf("setQToIdentity\n");
 
-
-    // print d_PointerA
-    printPointerArray <<<1, 1>>>(d_PointerAHat, n1, n2, batchsize);
-    
-    printf("n1: %d\n", n1);
-    printf("n2: %d\n", n2);
 
     for (int k = 0; k < n2; k++) {
         // make v
