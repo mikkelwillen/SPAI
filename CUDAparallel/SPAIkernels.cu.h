@@ -16,11 +16,11 @@ __global__ void printPointerArray(float** d_PointerArray, int m, int n, int batc
     printf("printing pointer array\n");
     if (tid == 0) {
         for (int b = 0; b < batchsize; b++) {
+            float* d_Array = d_PointerArray[b];
             printf("batch: %d\n", b);
             for (int i = 0; i < m; i++) {
-                printf("i: %d\n", i);
                 for (int j = 0; j < n; j++) {
-                    printf("%f ", d_PointerArray[b * m * n + i * n + j]);
+                    printf("%f ", d_Array[b * m * n + i * n + j]);
                 }
                 printf("\n");
             }
