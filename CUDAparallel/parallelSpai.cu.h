@@ -446,13 +446,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
 
 
-            int* h_l = (int*) malloc(batchsize * sizeof(int));
-            gpuAssert(
-                cudaMemcpy(h_l, d_l, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
-            printf("--printing h_l--\n");
-            for (int b = 0; b < batchsize; b++) {
-                printf("b: %d, l: %d\n", b, h_l[b]);
-            }
+            // int* h_l = (int*) malloc(batchsize * sizeof(int));
+            // gpuAssert(
+            //     cudaMemcpy(h_l, d_l, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
+            // printf("--printing h_l--\n");
+            // for (int b = 0; b < batchsize; b++) {
+            //     printf("b: %d, l: %d\n", b, h_l[b]);
+            // }
 
             float* h_rhoSquared = (float*) malloc(batchsize * maxn2Tilde * sizeof(float));
             gpuAssert(
