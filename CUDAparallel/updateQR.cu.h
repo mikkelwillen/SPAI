@@ -101,6 +101,11 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
         cudaMalloc((void**) &d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerPc, batchsize * sizeof(float*)));
+    
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2Union * maxn2Union);
+
+    createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
     // print Pc
     float* h_Pc = (float*) malloc(batchsize * maxn2Union * maxn2Union * sizeof(float));
@@ -116,11 +121,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
             printf("\n");
         }
     }
-    
-    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerPc, d_Pc, batchsize, maxn2Union * maxn2Union);
-
-    createPermutationMatrices(NULL, d_PointerPc, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, batchsize);
 
     // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* d_ABreve;
