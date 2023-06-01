@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
         int n = 4;
         float sparsity = 1.0;
         float tolerance = 0.01;
-        int maxIterations = 1;
+        int maxIterations = 3;
         int s = 1;
         int batchsize = 2;
     
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
 
-        runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s, batchsize);
+        runIdentityTest(cscC, 4, 4, sparsity, tolerance, maxIterations, s, batchsize);
     } else if (argc == 8) {
         // read args
         printf("hallo?\n");
