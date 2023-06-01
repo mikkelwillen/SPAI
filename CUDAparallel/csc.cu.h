@@ -6,13 +6,13 @@
 #include <cuda_runtime.h>
 #include "constants.cu.h"
 
-// A struct representing a sparse matrix
-// int m;
-// int n;
-// int countNonZero;
-// int* offset;
-// float* flatData;
-// int* flatRowIndex;
+/* A struct representing a sparse matrix in compressed sparse column format
+m = number of rows
+n = number of columns
+countNonZero = number of non-zero elements in the matrix
+offset = The offset array
+flatData = The flat data array
+flatRowIndex = The flat row index array */
 typedef struct CSC {
     int m;
     int n;
@@ -22,7 +22,7 @@ typedef struct CSC {
     int* flatRowIndex;
 } CSC;
 
-// function for setting device arrays for a CSC matrix
+// kernel for setting device arrays for a CSC matrix
 // d_A = The device CSC matrix
 // offset = The offset array
 // flatData = The flat data array
@@ -33,25 +33,98 @@ __global__ void cscDataHostToDevice(CSC* d_A, int* offset, float* flatData, int*
     d_A->flatRowIndex = flatRowIndex;
 }
 
-// (DEPRECATED) tror ikke den kopiere rigtigt
-// function for setting host arrays for a CSC matrix 
-// d_A = The device CSC matrix
-// offset = The offset array
-// flatData = The flat data array
-// flatRowIndex = The flat row index array
+/* kernel for copying device arrays of a CSC matrix to device arrays
+d_A = The device CSC matrix
+offset = The offset array
+flatData = The flat data array
+flatRowIndex = The flat row index array */
 __global__ void copyCSCDevicePointers(CSC* d_A, int* d_offset, float* d_flatData, int* d_flatRowIndex) {
     memcpy(d_offset, d_A->offset, sizeof(int) * (d_A->n + 1));
     memcpy(d_flatData, d_A->flatData, sizeof(float) * d_A->countNonZero);
     memcpy(d_flatRowIndex, d_A->flatRowIndex, sizeof(int) * d_A->countNonZero);
 }
 
-// (DEPRECATED) er ikke sikker på den har de rigtige værdier
-// function for freeing the device arrays of a CSC matrix 
+// kernel for freeing the device arrays of a CSC matrix 
 // d_A = The device CSC matrix
 __global__ void cscDataFree(CSC* d_A) {
     free(d_A->offset);
     free(d_A->flatData);
     free(d_A->flatRowIndex);
+}
+
+/* kernel for updating batch number of columns in a device CSC matrix
+d_CSC = The device CSC matrix
+d_updatedCSC = The device CSC matrix with updated columns
+d_newValues = The new values to be inserted
+d_J = the row indices of the new values
+currentBatch = the current batch number
+batchsize = the number of columns to be updated */
+__global__ void updateBatchColumnsCSC(CSC* d_csc, float** d_PointernewValues, int** d_PointerJ, int* d_n2, int maxn2, int currentBatch, int batchsize) {
+    int tid = threadIdx.x + blockIdx.x * blockDim.x;
+    if (tid == 0) {
+        for (int b = 0; b < batchsize; b++) {
+            int n2 = d_n2[b];
+            float* d_newValues = d_PointernewValues[b];
+            int* d_J = d_PointerJ[b];
+            int k = currentBatch * batchsize + b;
+
+            int* oldOffset = d_csc->offset;
+            float* oldFlatData = d_csc->flatData;
+            int* oldFlatRowIndex = d_csc->flatRowIndex;
+
+            // compute the new number of nonzeros
+            int deltaNonZeros = 0;
+            for (int i = 0; i < n2; i++) {
+                if (d_newValues[i] != 0.0) {
+                    deltaNonZeros++;
+                }
+            }
+
+            deltaNonZeros -= (oldOffset[k + 1] - oldOffset[k]);
+
+            // set the new number of nonzeros
+            d_csc->countNonZero += deltaNonZeros;
+
+            // compte the new offset values for k and onwards
+            for (int i = k + 1; i < d_csc->n + 1; i++) {
+                d_csc->offset[i] += deltaNonZeros;
+            }
+
+            // free and malloc space for flatData and flatRowIndex
+            free(d_csc->flatData);
+            free(d_csc->flatRowIndex);
+
+            d_csc->flatData = (float*) malloc(sizeof(float) * (d_csc->countNonZero));
+            d_csc->flatRowIndex = (int*) malloc(sizeof(int) * (d_csc->countNonZero));
+
+            // copy the old values before k to the new arrays
+            for (int i = 0; i < d_csc->offset[k] + 1; i++) {
+                d_csc->flatData[i] = oldFlatData[i];
+                d_csc->flatRowIndex[i] = oldFlatRowIndex[i];
+            }
+
+            // insert the new values into the new arrays from k
+            int index = 0;
+            for (int i = 0; i < n2 + 1; i++) {
+                if (d_newValues[i] != 0.0) {
+                    d_csc->flatData[d_csc->offset[k] + index] = d_newValues[i];
+                    d_csc->flatRowIndex[d_csc->offset[k] + index] = d_J[i];
+                    index++;
+                }
+            }
+
+            // copy the old values after k to the new arrays
+            for (int i = d_csc->offset[k + 1]; i < d_csc->countNonZero; i++) {
+                d_csc->flatData[i] = oldFlatData[i - deltaNonZeros];
+                d_csc->flatRowIndex[i] = oldFlatRowIndex[i - deltaNonZeros];
+            }
+
+            // free the old arrays
+            free(oldOffset);
+            free(oldFlatData);
+            free(oldFlatRowIndex);
+        }
+    }
 }
 
 // Function for creating a compressed sparse column matrix
