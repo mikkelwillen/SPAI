@@ -163,14 +163,14 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, d_n2, maxn1, maxn2, currentBatch, batchsize);
 
     // print the cHat vector
-    float* h_cHat = (float*) malloc(maxn1 * batchsize * sizeof(float));
+    float* h_cHat = (float*) malloc(maxn2 * batchsize * sizeof(float));
     gpuAssert(
-        cudaMemcpy(h_cHat, d_cHat, maxn1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_cHat, d_cHat, maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
     printf("--printing cHat--\n");
     for (int b = 0; b < batchsize; b++) {
         printf("batch %d\n", b);
-        for (int i = 0; i < maxn1; i++) {
-            printf("%f ", h_cHat[b * maxn1 + i]);
+        for (int i = 0; i < maxn2; i++) {
+            printf("%f ", h_cHat[b * maxn2 + i]);
         }
         printf("\n");
     }
