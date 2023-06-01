@@ -8,7 +8,7 @@
 #include "invBatched.cu.h"
 #include "permutation.cu.h"
 #include "updateQR.cu.h"
-#include "cuBLASInv.cu.h"
+#include "cuSOLVERInv.cu.h"
 
 int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
@@ -76,20 +76,8 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
 }
 
 
-int runcuBLAStest(CSC* cscA, int n) {
-    struct CSC* res = cuBLASinversion(cscA, n);
-    printf("After cuBLASinversion\n");
-    int* I = (int*) malloc(sizeof(int) * n);
-    int* J = (int*) malloc(sizeof(int) * n);
-    for (int i = 0; i < n; i++) {
-        I[i] = i;
-    }
-    for (int i = 0; i < n; i++) {
-        J[i] = i;
-    }
-
-    float* A = CSCToDense(cscA, I, J, n, n);
-    float* inv = CSCToDense(res, I, J, n, n);
+int runcuSOLVERTest(float* A, int n) {
+    float* inv = cuSOLVERInversion(A, n, n);
     
     // identity = A * inv
     float* identity = (float*) malloc (sizeof(float) * n * n);
@@ -144,7 +132,7 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 100;
+        int n = 20;
         float sparsity = 0.4;
         float tolerance = 0.01;
         int maxIterations = 19;
@@ -185,7 +173,7 @@ int main(int argc, char** argv) {
     
         // run test
         // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
-        runcuBLAStest(cscC, n);
+        runcuSOLVERTest(m4, 4);
         printf("after running cuBLAS test\n");
     
         // free memory
