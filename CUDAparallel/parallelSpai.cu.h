@@ -525,7 +525,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     printf("\n");
         // }
 
-        
+        updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerJ, d_n2, maxn2, i, batchsize);
 
 
         // free memory
