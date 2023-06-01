@@ -133,8 +133,8 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 20;
-        float sparsity = 0.4;
+        int n = 4;
+        float sparsity = 1.0;
         float tolerance = 0.01;
         int maxIterations = 19;
         int s = 1;
@@ -178,7 +178,7 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscC, 4, 4, sparsity, tolerance, maxIterations, s);
         // runcuSOLVERTest(m4, 4);
         // printf("after running cuSOLVER test\n");
     
