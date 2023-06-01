@@ -160,6 +160,11 @@ int main(int argc, char** argv) {
         B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
         B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
 
+        // m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
+        // m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
+        // m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
+        // m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
+
         m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
         m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
         m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
@@ -173,9 +178,9 @@ int main(int argc, char** argv) {
         struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
-        runcuSOLVERTest(m4, 4);
-        printf("after running cuSOLVER test\n");
+        runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s);
+        // runcuSOLVERTest(m4, 4);
+        // printf("after running cuSOLVER test\n");
     
         // free memory
         freeCSC(cscA);
