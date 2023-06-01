@@ -275,13 +275,13 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         float* h_v = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_v, d_v, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-        for (int b = 0; b < batchsize; b++) {
-            printf("v[%d] = [", b);
-            for (int i = 0; i < n1; i++) {
-                printf("%f, ", h_v[b * n1 + i]);
-            }
-            printf("]\n");
-        }
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("v[%d] = [", b);
+        //     for (int i = 0; i < n1; i++) {
+        //         printf("%f, ", h_v[b * n1 + i]);
+        //     }
+        //     printf("]\n");
+        // }
 
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -289,26 +289,26 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         float* h_Qv = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-        for (int b = 0; b < batchsize; b++) {
-            printf("Qv[%d] = [", b);
-            for (int i = 0; i < n1; i++) {
-                printf("%f, ", h_Qv[b * n1 + i]);
-            }
-            printf("]\n");
-        }
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("Qv[%d] = [", b);
+        //     for (int i = 0; i < n1; i++) {
+        //         printf("%f, ", h_Qv[b * n1 + i]);
+        //     }
+        //     printf("]\n");
+        // }
         
         float* h_tempStorage = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_tempStorage, d_tempStorage, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-        for (int b = 0; b < batchsize; b++) {
-            printf("tempStorage[%d] = [", b);
-            for (int i = 0; i < n1; i++) {
-                for (int j = 0; j < n1; j++) {
-                    printf("%f, ", h_tempStorage[b * n1 * n1 + i * n1 + j]);
-                }
-                printf("]\n");
-            }
-        }
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("tempStorage[%d] = [", b);
+        //     for (int i = 0; i < n1; i++) {
+        //         for (int j = 0; j < n1; j++) {
+        //             printf("%f, ", h_tempStorage[b * n1 * n1 + i * n1 + j]);
+        //         }
+        //         printf("]\n");
+        //     }
+        // }
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -316,16 +316,16 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         float* h_Qvvt = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qvvt, d_Qvvt, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-        for (int b = 0; b < batchsize; b++) {
-            printf("Qvvt[%d] = [", b);
-            for (int i = 0; i < n1; i++) {
-                for (int j = 0; j < n1; j++) {
-                    printf("%f, ", h_Qvvt[b * n1 * n1 + i * n1 + j]);
-                }
-                printf("\n");
-            }
-            printf("]\n");
-        }
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("Qvvt[%d] = [", b);
+        //     for (int i = 0; i < n1; i++) {
+        //         for (int j = 0; j < n1; j++) {
+        //             printf("%f, ", h_Qvvt[b * n1 * n1 + i * n1 + j]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     printf("]\n");
+        // }
 
         // compute Q - Qvvt
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
