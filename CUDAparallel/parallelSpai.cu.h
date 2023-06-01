@@ -418,7 +418,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
             printf("copyIandJ success\n");
 
-            intPrintPointerArray<<<1, 1>>>(d_PointerIUnion, maxn1, 1, batchsize);
+            printf("--I--\n");
+            intPrintPointerArray<<<1, 1>>>(d_PointerI, 1, maxn1Union, batchsize);
+
+            printf("--J--\n");
+            intPrintPointerArray<<<1, 1>>>(d_PointerJ, 1, maxn2Union, batchsize);
+
+            printf("--SortedJ--\n");
+            intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2Union, batchsize);
 
             // set n1 and n2 to n1Union and n2Union
             gpuAssert(
@@ -522,7 +529,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("\n");
         }
 
-        updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerJ, d_n2, maxn2, i, batchsize);
+        updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerSortedJ, d_n2, maxn2, i, batchsize);
 
 
         // free memory
