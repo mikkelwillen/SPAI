@@ -78,6 +78,7 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
 
 int runcuSOLVERTest(float* A, int n) {
     float* inv = cuSOLVERInversion(A, n, n);
+    printf("After cuSOLVERInversion\n")
     
     // identity = A * inv
     float* identity = (float*) malloc (sizeof(float) * n * n);
