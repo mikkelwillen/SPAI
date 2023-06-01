@@ -267,6 +267,9 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setQToIdentity <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, n1, batchsize);
     printf("setQToIdentity\n");
+
+    // print d_PointerA
+    printPointerArray <<<1, 1>>>(d_PointerAHat, n1, n2, batchsize);
     
 
     for (int k = 0; k < n2; k++) {
