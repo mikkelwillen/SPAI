@@ -281,7 +281,7 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     printf("AInv copied to host\n");
 
     // return AInv
-    return AInv;
+    return h_AInv;
 
 }
 
