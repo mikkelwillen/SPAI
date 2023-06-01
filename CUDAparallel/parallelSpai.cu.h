@@ -475,17 +475,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
         
-        printf("--printing h_Q--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < maxn1; j++) {
-                for (int k = 0; k < maxn1; k++) {
-                    printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
+        // printf("--printing h_Q--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < maxn1; j++) {
+        //         for (int k = 0; k < maxn1; k++) {
+        //             printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     printf("\n");
+        // }
 
         printf("--printing h_R--\n");
         for (int b = 0; b < batchsize; b++) {
