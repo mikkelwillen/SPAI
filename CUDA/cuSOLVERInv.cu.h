@@ -238,6 +238,7 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                             bufferOnHost,
                             workspaceInBytesOnHost,
                             d_info);
+    printf("After U inversion\n");  
 
     // error handling
     gpuAssert(
@@ -258,10 +259,12 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     float* AInv;
     gpuAssert(
         cudaMalloc((void**) &AInv, m * n * sizeof(float)));
+    printf("AInv allocated\n");
 
     // Compute AInv = U^-1 * L^-1
     numBlocks = (m * n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     matrixMultiplication<<<numBlocks, BLOCK_SIZE>>>(d_L, d_U, AInv, m, n, n);
+    printf("AInv computed\n");
 
     // Destroy handles
     cusolverDnDestroy(handle);
