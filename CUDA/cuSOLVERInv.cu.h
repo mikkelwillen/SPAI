@@ -237,7 +237,7 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
     // Compute AInv = U^-1 * L^-1
     numBlocks = (m * n + BLOCK_SIZE - 1) / BLOCK_SIZE;
-    matrixMultiplication<<<numBlocks, BLOCK_SIZE>>>(d_L, d_U, AInv, m, n);
+    matrixMultiplication<<<numBlocks, BLOCK_SIZE>>>(d_L, d_U, AInv, m, n, n);
 
     // Destroy handles
     cusolverDnDestroy(handle);
