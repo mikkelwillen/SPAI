@@ -272,9 +272,11 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         // make v
         numBlocks = (n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         makeV <<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_PointerV, n1, k, batchsize);
+        printf("makeV\n");
         float* h_v = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_v, d_v, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("v\n");
         for (int b = 0; b < batchsize; b++) {
             printf("v[%d] = [", b);
             for (int i = 0; i < n1; i++) {
