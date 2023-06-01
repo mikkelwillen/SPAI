@@ -182,9 +182,9 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     float** d_PointerB2R;
 
     gpuAssert(
-        cudaMalloc((void**) &d_B2Q,  maxn1Union * maxn1Union * sizeof(float)));
+        cudaMalloc((void**) &d_B2Q,  batchsize *maxn1Union * maxn1Union * sizeof(float)));
     gpuAssert(
-        cudaMalloc((void**) &d_B2R,  maxn1Union * maxn2Tilde * sizeof(float)));
+        cudaMalloc((void**) &d_B2R,  batchsize * maxn1Union * maxn2Tilde * sizeof(float)));
 
     gpuAssert(
         cudaMalloc((void**) &d_PointerB2Q, batchsize * sizeof(float*)));
