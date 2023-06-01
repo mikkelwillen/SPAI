@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
         // run test
         // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
         runcuSOLVERTest(m4, 4);
-        printf("after running cuBLAS test\n");
+        printf("after running cuSOLVER test\n");
     
         // free memory
         freeCSC(cscA);
