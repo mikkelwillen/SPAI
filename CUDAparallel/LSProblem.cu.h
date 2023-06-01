@@ -21,26 +21,26 @@
 // currentBatch  = the current batch
 // batchsize     = the batchsize for the cublas handle
 // maxn1         = the maximum number of rows in A
-__global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int currentBatch, int batchsize, int maxn1) {
+__global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int* d_n2, int maxn1, int maxn2, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    if (tid < maxn1 * maxn1 * batchsize) {
-        int b = tid / (maxn1 * maxn1);
-        int i = (tid % (maxn1 * maxn1)) / maxn1;
-        int j = (tid % (maxn1 * maxn1)) % maxn1;
+    if (tid < maxn1 * maxn2 * batchsize) {
+        int b = tid / (maxn1 * maxn2);
+        int i = (tid % (maxn1 * maxn2)) / maxn2;
+        int j = (tid % (maxn1 * maxn1)) % maxn2;
         int k = currentBatch * batchsize + b;
 
         float* d_cHat = d_PointerCHat[b];
         float* d_Q = d_PointerQ[b];
         int* d_I = d_PointerI[b];
 
-        if (j == 0) {
-            d_cHat[i] = 0.0;
+        if (i == 0) {
+            d_cHat[j] = 0.0;
         }
         __syncthreads();
 
-        if (i < d_n1[b]) {
+        if (i < d_n2[b]) {
             if (k == d_I[i]) {
-                d_cHat[j] = d_Q[i * d_n1[b] + j];
+                d_cHat[j] = d_Q[i * maxn1 + j];
             }
         }
     }
@@ -152,15 +152,15 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
 
     // allocate device memory for the cHat vector
     gpuAssert(
-        cudaMalloc((void**) &d_cHat, maxn1 * batchsize * sizeof(float)));
+        cudaMalloc((void**) &d_cHat, maxn2 * batchsize * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerCHat, batchsize * sizeof(float*)));
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn1);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn2);
     
     // set the cHat vector
-    numBlocks = (maxn1 * maxn1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, currentBatch, batchsize, maxn1);
+    numBlocks = (maxn1 * maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, d_n2, maxn1, maxn2, currentBatch, batchsize);
 
     // print the cHat vector
     float* h_cHat = (float*) malloc(maxn1 * batchsize * sizeof(float));
