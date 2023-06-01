@@ -217,11 +217,9 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     gpuAssert(
         cudaFree(bufferOnHost));
     printf("Buffers freed\n");
-    
-    void* bufferOnDevice;
+
     gpuAssert(
         cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
-    void* bufferOnHost;
     gpuAssert(
         cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
     printf("Buffers allocated to U\n");
