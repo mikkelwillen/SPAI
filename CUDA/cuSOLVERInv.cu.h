@@ -145,12 +145,6 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     // Variables
     size_t workspaceInBytesOnDevice;
     size_t workspaceInBytesOnHost;
-    void* bufferOnDevice;
-    gpuAssert(
-        cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
-    void* bufferOnHost;
-    gpuAssert(
-        cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
 
     // Do inversion of L and U
     printf("Ready to invert L and U\n");
@@ -166,6 +160,13 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                                         &workspaceInBytesOnDevice,
                                         &workspaceInBytesOnHost);
 
+    void* bufferOnDevice;
+    gpuAssert(
+        cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
+    void* bufferOnHost;
+    gpuAssert(
+        cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
+    printf("Buffers allocated\n");
 
     // Do inversion of L
     stat = cusolverDnXtrtri(handle,
