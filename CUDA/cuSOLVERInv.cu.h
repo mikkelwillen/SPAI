@@ -181,10 +181,12 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                             bufferOnHost,
                             workspaceInBytesOnHost,
                             d_info);
+    printf("After L inversion\n");
 
     // error handling
     gpuAssert(
         cudaMemcpy(&h_info, d_info, sizeof(int), cudaMemcpyDeviceToHost));
+    printf("L inverted\n");
     
     if (h_info < 0) {
         printf("The %d'th paramter is wrong\n", -h_info);
