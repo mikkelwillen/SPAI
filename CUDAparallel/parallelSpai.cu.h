@@ -529,6 +529,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("\n");
         }
 
+        printf("--SortedJ--\n");
+        intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2, batchsize);
+        
+        printf("maxn2: %d\n", maxn2);
+
+        printf("--printing mHat_k--\n");
+        printPointerArray<<<1, 1>>>(d_PointerMHat_k, 1, maxn2, batchsize);
+        
         updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerSortedJ, d_n2, maxn2, i, batchsize);
 
 
