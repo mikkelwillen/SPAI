@@ -565,7 +565,7 @@ __global__ void setB2(float** d_PointerABreve, float** d_PointerAITildeJTilde, f
         if (i < maxn1Union && j < maxn2Tilde) {
             if (i < n1 - n2 && j < n2Tilde) {
                 d_B2[i * maxn2Tilde + j] = d_ABreve[(n2 + i) * maxn2Tilde + j];
-            } else if (i < n1Union && j < n2Tilde){
+            } else if (i < n1Union - n2 && j < n2Tilde){
                 d_B2[i * maxn2Tilde + j] = d_AITildeJTilde[(i - (n1 - n2)) * maxn2Tilde + j];
             } else {
                 d_B2[i * maxn2Tilde + j] = 0.0;
