@@ -487,17 +487,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     printf("\n");
         // }
 
-        printf("--printing h_R--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < maxn1; j++) {
-                for (int k = 0; k < maxn2; k++) {
-                    printf("%f ", h_R[b * maxn1 * maxn2 + j * maxn2 + k]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
+        // printf("--printing h_R--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < maxn1; j++) {
+        //         for (int k = 0; k < maxn2; k++) {
+        //             printf("%f ", h_R[b * maxn1 * maxn2 + j * maxn2 + k]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     printf("\n");
+        // }
 
         float* h_mHat_k = (float*) malloc(batchsize * maxn2 * sizeof(float));
         gpuAssert(
