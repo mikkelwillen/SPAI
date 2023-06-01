@@ -440,11 +440,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             maxn1 = maxn1Union;
             maxn2 = maxn2Union;
 
-            // der sker sgu noget med memory. FIX!
-
-
-
-
 
             // int* h_l = (int*) malloc(batchsize * sizeof(int));
             // gpuAssert(
@@ -516,16 +511,16 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
         
-        // printf("--printing h_residual--\n");
-        // for (int b = 0; b < batchsize; b++) {
-        //     printf("b: %d\n", b);
-        //     for (int j = 0; j < A->m; j++) {
-        //         printf("%f ", h_residual[b * A->m + j]);
-        //     }
-        //     printf("\n");
-        // }
+        printf("--printing h_residual--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < A->m; j++) {
+                printf("%f ", h_residual[b * A->m + j]);
+            }
+            printf("\n");
+        }
 
-        updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerJ, d_n2, maxn2, i, batchsize);
+        // updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerJ, d_n2, maxn2, i, batchsize);
 
 
         // free memory
