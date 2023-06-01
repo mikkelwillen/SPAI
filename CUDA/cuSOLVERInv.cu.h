@@ -275,6 +275,11 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     }
     printf("Handle destroyed\n");
 
+    float* h_AInv = (float*) malloc(m * n * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_AInv, AInv, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("AInv copied to host\n");
+
     // return AInv
     return AInv;
 
