@@ -68,9 +68,13 @@ __global__ void updateBatchColumnsCSC(CSC* d_csc, float** d_PointernewValues, in
             int* d_J = d_PointerJ[b];
             int k = currentBatch * batchsize + b;
 
-            int* oldOffset = d_csc->offset;
-            float* oldFlatData = d_csc->flatData;
-            int* oldFlatRowIndex = d_csc->flatRowIndex;
+            int* oldOffset = (int*) malloc(sizeof(int) * (d_csc->n + 1));
+            float* oldFlatData = (float*) malloc(sizeof(float) * d_csc->countNonZero);
+            int* oldFlatRowIndex = (int*) malloc(sizeof(int) * d_csc->countNonZero);
+
+            memcpy(oldOffset, d_csc->offset, sizeof(int) * (d_csc->n + 1));
+            memcpy(oldFlatData, d_csc->flatData, sizeof(float) * d_csc->countNonZero);
+            memcpy(oldFlatRowIndex, d_csc->flatRowIndex, sizeof(int) * d_csc->countNonZero);
 
             // compute the new number of nonzeros
             int deltaNonZeros = 0;
