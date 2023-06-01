@@ -9,6 +9,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 #include "helperKernels.cu.h"
+#include "SPAIkernels.cu.h"
 
 // kernel for copying R from AHat
 // d_PointerAHat = an array of pointers to the start of each AHat matrix in d_AHat
