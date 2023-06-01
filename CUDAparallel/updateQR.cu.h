@@ -137,6 +137,13 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_Q, float* d_R, f
     //     }
     // }
 
+    printf("maxn1: %d\n", maxn1);
+    printf("maxn2: %d\n", maxn2);
+    printf("maxn1Tilde: %d\n", maxn1Tilde);
+    printf("maxn2Tilde: %d\n", maxn2Tilde);
+    printf("maxn1Union: %d\n", maxn1Union);
+    printf("maxn2Union: %d\n", maxn2Union);
+
     // 13.3) Set B1 = ABreve[0:n2, 0:n2Tilde]
     float* d_B1;
     float** d_PointerB1;
