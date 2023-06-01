@@ -28,6 +28,28 @@ __global__ void printPointerArray(float** d_PointerArray, int m, int n, int batc
     }
 }
 
+/* kernel for printing int pointerArrays
+d_PointerArray = device pointer to the pointer array
+m              = the number of elements in the pointer array
+n             = the number of elements in each array
+batchsize     = the size of the batch */
+__global__ void intPrintPointerArray(int** d_PointerArray, int m, int n, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    printf("printing pointer array\n");
+    if (tid == 0) {
+        for (int b = 0; b < batchsize; b++) {
+            int* d_Array = d_PointerArray[b];
+            printf("batch: %d\n", b);
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    printf("%d ", d_Array[i * n + j]);
+                }
+                printf("\n");
+            }
+        }
+    }
+}
+
 // kernel for computing I, J n1 and n2
 // d_A          = device pointer to A
 // d_M          = device pointer to M
