@@ -26,7 +26,7 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
     if (tid < maxn1 * maxn2 * batchsize) {
         int b = tid / (maxn1 * maxn2);
         int i = (tid % (maxn1 * maxn2)) / maxn2;
-        int j = (tid % (maxn1 * maxn1)) % maxn2;
+        int j = (tid % (maxn1 * maxn2)) % maxn2;
         int k = currentBatch * batchsize + b;
 
         float* d_cHat = d_PointerCHat[b];
@@ -38,7 +38,8 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
         }
         __syncthreads();
 
-        if (i < d_n2[b]) {
+        if (i < d_n1[b]) {
+            printf("j in setCHat: %d\n", j);
             if (k == d_I[i]) {
                 d_cHat[j] = d_Q[i * maxn1 + j];
             }
@@ -76,32 +77,32 @@ __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, fl
 // maxn2             = the maximum number of columns in A
 // currentBatch      = the current batch
 // batchsize         = the batchsize
-__global__ void computeResidual(CSC* d_A, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int m, int currentBatch, int batchsize) {
+__global__ void computeResidual(float* d_ADense, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerJ, int* d_n2, int m, int n, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
-    if (tid < m * batchsize) {
-        int b = tid / m;
-        int i = tid % m;
+    if (tid < m * n * batchsize) {
+        int b = tid / (m * n);
+        int i = (tid % (m * n)) / n;
+        int j = (tid % (m * n)) % n;
         int k = currentBatch * batchsize + b;
 
-        int n1 = d_n1[b];
         int n2 = d_n2[b];
 
         int* d_J = d_PointerJ[b];
-        int* d_I = d_PointerI[b];
         float* d_residual = d_PointerResidual[b];
         float* d_mHat_k = d_PointerMHat_k[b];
 
         d_residual[i] = 0.0;
 
-        for (int j = 0; j < n2; j++) {
-            for (int h = d_A->offset[d_J[j]]; h < d_A->offset[d_J[j] + 1]; h++) {
-                if (d_A->flatRowIndex[h] == d_I[i]) {
-                    d_residual[i] += d_A->flatData[h] * d_mHat_k[j];
+        for (int h = 0; h < n2; h++) {
+            if (j == d_J[h]) {
+                d_residual[i] += d_ADense[i * n + j] * d_mHat_k[h];
+                if (b == 0) {
+                    printf("%f = %f * %f\n", d_residual[i], d_ADense[i * n + j], d_mHat_k[h]);
                 }
             }
         }
 
-        if (i == k) {
+        if (i == k && j == 0) {
             d_residual[i] -= 1.0;
         }
     }
@@ -142,7 +143,7 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
 // k                 = the index of the column to be added
 // residualNorm      = the norm of the residual
 // batchsize         = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
+int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
     // define the number of blocks
     int numBlocks;
 
@@ -166,14 +167,14 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     float* h_cHat = (float*) malloc(maxn2 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_cHat, d_cHat, maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("--printing cHat--\n");
-    // for (int b = 0; b < batchsize; b++) {
-    //     printf("batch %d\n", b);
-    //     for (int i = 0; i < maxn2; i++) {
-    //         printf("%f ", h_cHat[b * maxn2 + i]);
-    //     }
-    //     printf("\n");
-    // }
+    printf("--printing cHat--\n");
+    for (int b = 0; b < batchsize; b++) {
+        printf("batch %d\n", b);
+        for (int i = 0; i < maxn2; i++) {
+            printf("%f ", h_cHat[b * maxn2 + i]);
+        }
+        printf("\n");
+    }
 
     // create the invR matrices
     float* d_invR;
@@ -195,27 +196,22 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
     float* h_invR = (float*) malloc(maxn2 * maxn2 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_invR, d_invR, maxn2 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("--printing invR--\n");
-    // for (int b = 0; b < batchsize; b++) {
-    //     printf("batch %d\n", b);
-    //     for (int i = 0; i < maxn2; i++) {
-    //         for (int j = 0; j < maxn2; j++) {
-    //             printf("%f ", h_invR[b * maxn2 * maxn2 + i * maxn2 + j]);
-    //         }
-    //         printf("\n");
-    //     }
-    //     printf("\n");
-    // }
+    printf("--printing invR--\n");
+    for (int b = 0; b < batchsize; b++) {
+        printf("batch %d\n", b);
+        for (int i = 0; i < maxn2; i++) {
+            for (int j = 0; j < maxn2; j++) {
+                printf("%f ", h_invR[b * maxn2 * maxn2 + i * maxn2 + j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
 
     // compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeMHat_k<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_PointerInvR, d_PointerCHat, maxn2, batchsize);
     printf("after mHat_k\n");
-
-    // compute residual vectors
-    numBlocks = (A->m * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerResidual, d_PointerMHat_k, d_PointerI, d_PointerJ, d_n1, d_n2, A->m, currentBatch, batchsize);
-    printf("after residual\n");
 
     // permute the mHat_k vectors, if necessary
     if (d_PointerPc != NULL) {
@@ -237,6 +233,12 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float** d_PointerQ, floa
         gpuAssert(
             cudaMemcpy(d_PointerMHat_k, d_PointerTempMHat_k, batchsize * sizeof(float*), cudaMemcpyDeviceToDevice));
     }
+
+    // compute residual vectors
+    numBlocks = (A->m * A->n * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    computeResidual<<<numBlocks, BLOCKSIZE>>>(d_ADense, d_PointerResidual, d_PointerMHat_k, d_PointerJ, d_n2, A->m, A->n, currentBatch, batchsize);
+    printf("after residual\n");
+    
 
     // compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;

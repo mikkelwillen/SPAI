@@ -619,13 +619,15 @@ __global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ,
 
         if (i < n1Union && j < n1Union) {
             if (i < n1 && j < n1) {
-                d_FirstMatrix[i * n1Union + j] = d_Q[i * n1 + j];
+                d_FirstMatrix[i * maxn1Union + j] = d_Q[i * maxn1Union + j];
             } else if (i == j) {
-                d_FirstMatrix[i * n1Union + j] = 1.0;
+                d_FirstMatrix[i * maxn1Union + j] = 1.0;
             } else {
-                d_FirstMatrix[i * n1Union + j] = 0.0;
+                d_FirstMatrix[i * maxn1Union + j] = 0.0;
             }
-        } 
+        } else {
+            d_FirstMatrix[i * maxn1Union + j] = 0.0;
+        }
     }
 }
 
@@ -654,10 +656,12 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
         if (i < n1Union && j < n1Union) {
             d_SecondMatrix[i * n1Union + j] = 0.0;
             if (i < n1Union - n2 && j < n1Union - n2) {
-                d_SecondMatrix[(i + n2) * n1Union + (j + n2)] = d_B2Q[i * (n1Union - n2) + j];
+                d_SecondMatrix[(i + n2) * maxn1Union + (j + n2)] = d_B2Q[i * maxn1Union + j];
             } else if (i == j) {
-                d_SecondMatrix[(i - (n1Union - n2)) * n1Union + j - (n1Union - n2)] = 1.0;
+                d_SecondMatrix[(i - (n1Union - n2)) * maxn1Union + j - (n1Union - n2)] = 1.0;
             } 
+        } else {
+            d_SecondMatrix[i * maxn1Union + j] = 0.0;
         }
     }
 }
@@ -710,9 +714,9 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
         if (i < dim1 && j < dim3) {
             float sum = 0.0;
             for (int k = 0; k < dim2; k++) {
-                sum += d_A[i * dim2 + k] * d_B[k * dim3 + j];
+                sum += d_A[i * maxdim2 + k] * d_B[k * maxdim3 + j];
             }
-            d_C[i * dim3 + j] = sum;
+            d_C[i * maxdim3 + j] = sum;
         }
     }
 }

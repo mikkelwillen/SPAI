@@ -51,8 +51,28 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     // initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
+
+    // make A dense and copy to device
+    int* I = (int*) malloc(A->m * sizeof(int));
+    int* J = (int*) malloc(A->n * sizeof(int));
+    for (int i = 0; i < A->m; i++) {
+        I[i] = i;
+    }
+    for (int i = 0; i < A->n; i++) {
+        J[i] = i;
+    }
+    float* h_ADense = CSCToDense(A, I, J, A->m, A->n);
+    float* d_ADense;
+    gpuAssert(
+        cudaMalloc((void**) &d_ADense, A->m * A->n * sizeof(float)));
+    gpuAssert(
+        cudaMemcpy(d_ADense, h_ADense, A->m * A->n * sizeof(float), cudaMemcpyHostToDevice));
+    
+    free(I);
+    free(J);
+    free(h_ADense);
+
     // copy A to device
-    // de her skal lige fixes
     CSC* d_A = copyCSCFromHostToDevice(A);
     printf("after d_A\n");
     CSC* d_M = copyCSCFromHostToDevice(M);
@@ -213,7 +233,18 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
 
-        LSProblem(cHandle, d_A, A, d_PointerQ, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
+        LSProblem(cHandle, d_A, A, d_ADense, d_PointerQ, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
+        float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("--printing h_residual--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < A->m; j++) {
+                printf("%f ", h_residual[b * A->m + j]);
+            }
+            printf("\n");
+        }
         
         // check if the tolerance is met
         int toleranceNotMet = 0;
@@ -237,7 +268,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         while (toleranceNotMet && maxIterations > iteration) {
             printf("\n-------Iteration: %d-------\n", iteration);
             iteration++;
-
+        
             // compute the length of L and set L
             int* d_l;
             int** d_PointerL;
@@ -404,7 +435,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
-            int updateSuccess = updateQR(cHandle, A, d_A, d_Q, d_R, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
+            int updateSuccess = updateQR(cHandle, A, d_A, d_ADense, d_Q, d_R, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
 
             if (updateSuccess != 0) {
                 printf("updateQR failed\n");
@@ -412,6 +443,21 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 return NULL;
             }
             printf("updateQR success\n");
+
+            float* h_Q = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(h_Q, d_Q, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToHost));
+            printf("--printing h_Q--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("b: %d\n", b);
+                for (int j = 0; j < maxn1Union; j++) {
+                    for (int k = 0; k < maxn1Union; k++) {
+                        printf("%f ", h_Q[b * maxn1Union * maxn1Union + j * maxn1Union + k]);
+                    }
+                    printf("\n");
+                }
+                printf("\n");
+            }
 
             // set I and J to IUnion and JUnion
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -469,6 +515,41 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             //     }
             //     printf("\n");
             // }
+            
+            float* h_mHat_k = (float*) malloc(batchsize * maxn2 * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(h_mHat_k, d_mHat_k, batchsize * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+            
+            printf("--printing h_mHat_k--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("b: %d\n", b);
+                for (int j = 0; j < maxn2; j++) {
+                    printf("%f ", h_mHat_k[b * maxn2 + j]);
+                }
+                printf("\n");
+            }
+
+            float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
+            
+            printf("--printing h_residual--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("b: %d\n", b);
+                for (int j = 0; j < A->m; j++) {
+                    printf("%f ", h_residual[b * A->m + j]);
+                }
+                printf("\n");
+            }
+
+            float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
+            gpuAssert(
+                cudaMemcpy(h_residualNorm, d_residualNorm, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+            
+            printf("--printing h_residualNorm--\n");
+            for (int b = 0; b < batchsize; b++) {
+                printf("%f ", h_residualNorm[b]);
+            }
         }
 
         free(h_Q);
@@ -515,8 +596,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
             printf("\n");
         }
-
-        float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
+        
+        free(h_residual);
+        h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
         
