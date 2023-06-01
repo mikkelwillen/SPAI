@@ -144,7 +144,11 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     size_t workspaceInBytesOnDevice;
     size_t workspaceInBytesOnHost;
     void* bufferOnDevice;
+    gpuAssert(
+        cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
     void* bufferOnHost;
+    gpuAssert(
+        cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
 
     // Do inversion of L and U
 
