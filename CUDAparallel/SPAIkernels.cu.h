@@ -20,7 +20,7 @@ __global__ void printPointerArray(float** d_PointerArray, int m, int n, int batc
             printf("batch: %d\n", b);
             for (int i = 0; i < m; i++) {
                 for (int j = 0; j < n; j++) {
-                    printf("%f ", d_Array[b * m * n + i * n + j]);
+                    printf("%f ", d_Array[i * n + j]);
                 }
                 printf("\n");
             }
