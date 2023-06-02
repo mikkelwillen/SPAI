@@ -79,12 +79,12 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 10;
+        int n = 4;
         float sparsity = 1.0;
         float tolerance = 0.01;
-        int maxIterations = 9;
+        int maxIterations = 3;
         int s = 1;
-        int batchsize = 5;
+        int batchsize = 1;
     
     
     
@@ -108,9 +108,9 @@ int main(int argc, char** argv) {
         B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
         B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
         
-        m4[0] = 10.0; m4[1] = 10.0; m4[2] = 0.0; m4[3] = 14.0;
+        m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
         m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
-        m4[8] = 13.0; m4[9] = 0.0; m4[10] = 0.0; m4[11] = 1.0;
+        m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
         m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
 
         struct CSC* cscA = createCSC(A, m, n);
