@@ -75,13 +75,18 @@ def testErrorAndSpeed(algo, A):
 
 # For n = 10, 100, 1000, 10000, 100000, 1000000, 100000:
 size = [10, 100]
+den = [0.1, 0.3, 0.5]
 for n in size:
-    print("Testing for n = %a" % n)
-    A = scipy.sparse.random(n, n, density=0.3, format='csc', random_state=1)
+    for d in den:
+        print("\nTesting for n = %a" % n)
+        if n > 10 or d > 0.1:
+            A = scipy.sparse.random(n, n, density=d, format='csc', random_state=1)
 
-    AInv = scipy.sparse.linalg.inv(A)
+            AInv = scipy.sparse.linalg.inv(A)
 
-    testErrorAndSpeed(SPAI.SPAI, A)
+            testErrorAndSpeed(SPAI.SPAI, A)
+        else:
+            print("A is singular")
 
 # B = [[0, 0, 24.1, 0, 0, 0, 0, 0, 61.24, 13.48], 
 #      [0, 45.95, 0, 0, 85.9, 0, 67.39, 0, 0, 97.53],
