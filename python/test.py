@@ -67,24 +67,34 @@ def testErrorAndSpeed(algo, A):
 
     stop = timeit.default_timer()
 
-    print('Time: ', stop - start)  
+    print('Time of SPAI: ', stop - start)  
 
-    print("Norm of implementation:", np.linalg.norm(A * M - np.identity(M.shape[1])))
+    print("Norm of SPAI-implementation:", np.linalg.norm(A * M - np.identity(M.shape[1])))
 
-    print("Norm of library-implementation: ", np.linalg.norm(A * AInv - np.identity(M.shape[1])))
+def testofScipy(A):
+    start = timeit.default_timer()
+
+    AInv = scipy.sparse.linalg.inv(A)
+
+    stop = timeit.default_timer()
+
+    print('Time of Scipy: ', stop - start)  
+
+    print("Norm of Scipy-implementation: ", np.linalg.norm(A * AInv - np.identity(AInv.shape[1])))
 
 # For n = 10, 100, 1000, 10000, 100000, 1000000, 100000:
 size = [10, 100]
 den = [0.1, 0.3, 0.5]
 for n in size:
     for d in den:
-        print("\nTesting for n = %a" % n)
+        print("\nTesting for n = %a and density = %a" % (n, d))
         if n > 10 or d > 0.1:
             A = scipy.sparse.random(n, n, density=d, format='csc', random_state=1)
 
-            AInv = scipy.sparse.linalg.inv(A)
+            testofScipy(A)
 
             testErrorAndSpeed(SPAI.SPAI, A)
+            
         else:
             print("A is singular")
 
