@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
         float tolerance = 0.01;
         int maxIterations = 3;
         int s = 1;
-        int batchsize = 1;
+        int batchsize = 4;
     
     
     
