@@ -18,7 +18,7 @@ def SPAI(A, tol = 0.001, max_iter = 39, s = 1):
     k = 0
     
     for m_k in M.T:
-        print("_______________NEW COLUMN: %a_______________" %k)
+        # print("_______________NEW COLUMN: %a_______________" %k)
 
         # 1) Find initial sparsity J of m_k
         m_k = M[:,k]
@@ -62,8 +62,8 @@ def SPAI(A, tol = 0.001, max_iter = 39, s = 1):
         iter = 0
 
         while np.linalg.norm(residual) > tol and iter < max_iter:
-            print("_______________NEW ITERATION: %a_______________" %iter)
-            print("\n")
+            # print("_______________NEW ITERATION: %a_______________" %iter)
+            # print("\n")
             iter += 1
 
             # 7) Set L set of indices, where r(l) =/= 0
