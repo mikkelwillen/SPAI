@@ -721,6 +721,8 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
                 sum += d_A[i * maxdim2 + k] * d_B[k * maxdim3 + j];
             }
             d_C[i * maxdim3 + j] = sum;
+        } else {
+            d_C[i * maxdim3 + j] = 0.0;
         }
     }
 }
