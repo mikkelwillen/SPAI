@@ -39,7 +39,6 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
         __syncthreads();
 
         if (i < d_n1[b]) {
-            printf("j in setCHat: %d\n", j);
             if (k == d_I[i]) {
                 d_cHat[j] = d_Q[i * maxn1 + j];
             }
