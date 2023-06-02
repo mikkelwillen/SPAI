@@ -218,6 +218,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
+    // var n1, tror det er n2
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2; j++) {
             unsortedR[i * n2Union + j] = (*R)[i * n2 + j];

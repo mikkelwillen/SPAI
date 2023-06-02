@@ -395,6 +395,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
 
     // print R
+    float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("R:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("batch = %d\n", i);
+        for (int j = 0; j < maxn1; j++) {
+            for (int k = 0; k < maxn2; k++) {
+                printf("%f ", h_R[i * maxn1 * maxn2 + j * maxn2 + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
+    // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_unsortedR, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
@@ -432,6 +448,10 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         
         return 1;
     }
+
+    // restore R
+    numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
     
     // permute J and store it in sortedJ
     int* sortedJ;
@@ -461,6 +481,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     gpuAssert(
         cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
     printf("Q and R set\n");
+
+    free(h_R);
+    h_R = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
+    gpuAssert(
+        cudaMemcpy(h_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("R after memcpy:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("batch = %d\n", i);
+        for (int j = 0; j < maxn1Union; j++) {
+            for (int k = 0; k < maxn2Union; k++) {
+                printf("%f ", h_R[i * maxn1Union * maxn2Union + j * maxn2Union + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1Union * maxn1Union);

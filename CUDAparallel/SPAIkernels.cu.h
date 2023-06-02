@@ -686,8 +686,8 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxdim1 * maxdim3) {
         int b = tid / (maxdim1 * maxdim3);
-        int i = (tid % (maxdim1 * maxdim3)) / maxdim1;
-        int j = (tid % (maxdim1 * maxdim3)) % maxdim1;
+        int i = (tid % (maxdim1 * maxdim3)) / maxdim3;
+        int j = (tid % (maxdim1 * maxdim3)) % maxdim3;
  
         int dim1;
         int dim2;
@@ -758,7 +758,7 @@ __global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, flo
         float* d_B2R = d_PointerB2R[b];
 
         if (i < n1Union && j < n2Union) {
-            if (i < n1 && j < n2) {
+            if (i < n2 && j < n2) {
                 d_UnsortedR[i * maxn2Union + j] = d_R[i * maxn2 + j];
             } else if (i < n2 && j < n2Union && j > n2 - 1) {
                 d_UnsortedR[i * maxn2Union + j] = d_B1[i * maxn2Tilde + j - n2];

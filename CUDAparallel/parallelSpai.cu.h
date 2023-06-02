@@ -81,7 +81,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     // compute the number of batches
     int numberOfBatches = (A->n + batchsize - 1) / batchsize;
 
-    for (int i = 1; i < numberOfBatches; i++) {
+    for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
         int iteration = 0;
         
@@ -549,6 +549,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("--printing h_residualNorm--\n");
             for (int b = 0; b < batchsize; b++) {
                 printf("%f ", h_residualNorm[b]);
+            }
+
+            toleranceNotMet = 0;
+            for (int b = 0; b < batchsize; b++) {
+                if (h_residualNorm[b] > tolerance) {
+                    toleranceNotMet = 1;
+                }
             }
         }
 

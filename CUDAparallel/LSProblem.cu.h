@@ -234,6 +234,18 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
         numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         matrixMultiplication<<<numBlocks, BLOCKSIZE>>>( d_PointerPc, d_PointerMHat_k, d_PointerTempMHat_k, d_n2, d_n2, NULL, maxn2, maxn2, 1, batchsize);
 
+        float* h_tempMHat_k = (float*) malloc(maxn2 * batchsize * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_tempMHat_k, d_tempMHat_k, maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("--printing tempMHat_k--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("batch %d\n", b);
+            for (int i = 0; i < maxn2; i++) {
+                printf("%f ", h_tempMHat_k[b * maxn2 + i]);
+            }
+            printf("\n");
+        }
+
         // copy the temporary mHat_k to the mHat_k vector
         gpuAssert(
             cudaMemcpy(d_PointerMHat_k, d_PointerTempMHat_k, batchsize * sizeof(float*), cudaMemcpyDeviceToDevice));
