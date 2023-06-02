@@ -541,8 +541,8 @@ __global__ void setB1(float** d_PointerABreve, float** d_PointerB1, int* d_n2, i
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn2 * maxn2Tilde) {
         int b = tid / (maxn2 * maxn2Tilde);
-        int i = (tid % (maxn2 * maxn2Tilde)) / maxn2;
-        int j = (tid % (maxn2 * maxn2Tilde)) % maxn2;
+        int i = (tid % (maxn2 * maxn2Tilde)) / maxn2Tilde;
+        int j = (tid % (maxn2 * maxn2Tilde)) % maxn2Tilde;
 
         int n2 = d_n2[b];
         int n2Tilde = d_n2Tilde[b];
