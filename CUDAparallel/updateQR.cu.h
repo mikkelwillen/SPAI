@@ -301,7 +301,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_firstMatrix, batchsize, maxn1Union * maxn1Union);
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    setFirstMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerQ, d_n1, d_n1Union, maxn1Union, batchsize);
+    setFirstMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerQ, d_n1, d_n1Union, maxn1, maxn1Union, batchsize);
 
     float* h_firstMatrix = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
     gpuAssert(
@@ -392,23 +392,23 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_unsortedR, batchsize, maxn1Union * maxn2Union);
 
     numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2Union, batchsize);
+    setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
 
     // print R
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_unsortedR, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("R:\n");
-    // for (int i = 0; i < batchsize; i++) {
-    //     printf("batch = %d\n", i);
-    //     for (int j = 0; j < maxn1Union; j++) {
-    //         for (int k = 0; k < maxn2Union; k++) {
-    //             printf("%f ", h_unsortedR[i * maxn1Union * maxn2Union + j * maxn2Union + k]);
-    //         }
-    //         printf("\n");
-    //     }
-    //     printf("\n");
-    // }
+    printf("unsortedR:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("batch = %d\n", i);
+        for (int j = 0; j < maxn1Union; j++) {
+            for (int k = 0; k < maxn2Union; k++) {
+                printf("%f ", h_unsortedR[i * maxn1Union * maxn2Union + j * maxn2Union + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
 
     // free and malloc space for new mHat_k
     gpuAssert(

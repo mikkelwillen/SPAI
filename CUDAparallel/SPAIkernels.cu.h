@@ -604,7 +604,7 @@ d_n1                 = device pointer to n1
 d_n1Union            = device pointer to n1Union
 maxn1Union           = the maximum value of n1Union in the batch
 batchsize            = the size of the batch */
-__global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1Union, int batchsize) {
+__global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1, int maxn1Union, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1Union * maxn1Union) {
         int b = tid / (maxn1Union * maxn1Union);
@@ -617,9 +617,13 @@ __global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ,
         float* d_FirstMatrix = d_PointerFirstMatrix[b];
         float* d_Q = d_PointerQ[b];
 
+        if (tid == 0) {
+            printf("n1 for batch 1 = %d\n", d_n1[1]);
+            printf("maxn1Union = %d\n", maxn1Union);
+        }
         if (i < n1Union && j < n1Union) {
             if (i < n1 && j < n1) {
-                d_FirstMatrix[i * maxn1Union + j] = d_Q[i * maxn1Union + j];
+                d_FirstMatrix[i * maxn1Union + j] = d_Q[i * maxn1 + j];
             } else if (i == j) {
                 d_FirstMatrix[i * maxn1Union + j] = 1.0;
             } else {
@@ -735,7 +739,7 @@ d_n2Tilde          = device pointer to n2Tilde
 maxn1Union         = the maximum value of n1Union in the batch
 maxn2Union         = the maximum value of n2Union in the batch
 batchsize          = the size of the batch */
-__global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, float** d_PointerB1, float** d_PointerB2R, int* d_n1, int* d_n1Union, int* d_n2, int* d_n2Union, int* d_n2Tilde, int maxn1Union, int maxn2Union, int batchsize) {
+__global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, float** d_PointerB1, float** d_PointerB2R, int* d_n1, int* d_n1Union, int* d_n2, int* d_n2Union, int* d_n2Tilde, int maxn1Union, int maxn2, int maxn2Tilde, int maxn2Union, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1Union * maxn2Union) {
         int b = tid / (maxn1Union * maxn2Union);
@@ -754,14 +758,14 @@ __global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, flo
         float* d_B2R = d_PointerB2R[b];
 
         if (i < n1Union && j < n2Union) {
-            if (i < n2 && j < n2) {
-                d_UnsortedR[i * n2Union + j] = d_R[i * n2 + j];
+            if (i < n1 && j < n2) {
+                d_UnsortedR[i * maxn2Union + j] = d_R[i * maxn2 + j];
             } else if (i < n2 && j < n2Union && j > n2 - 1) {
-                d_UnsortedR[i * n2Union + j] = d_B1[i * n2Tilde + j - n2];
+                d_UnsortedR[i * maxn2Union + j] = d_B1[i * maxn2Tilde + j - n2];
             } else if (i < n1Union && j < n2Union && j > n2 - 1) {
-                d_UnsortedR[i * n2Union + j] = d_B2R[(i - n2) * n2Tilde + j - n2];
+                d_UnsortedR[i * maxn2Union + j] = d_B2R[(i - n2) * maxn2Tilde + j - n2];
             } else {
-                d_UnsortedR[i * n2Union + j] = 0.0;
+                d_UnsortedR[i * maxn2Union + j] = 0.0;
             }
         }
     }
