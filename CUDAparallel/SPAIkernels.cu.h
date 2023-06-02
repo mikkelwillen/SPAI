@@ -658,7 +658,7 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
         float* d_B2Q = d_PointerB2Q[b];
 
         if (i < n1Union && j < n1Union) {
-            d_SecondMatrix[i * n1Union + j] = 0.0;
+            d_SecondMatrix[i * maxn1Union + j] = 0.0;
             if (i < n1Union - n2 && j < n1Union - n2) {
                 d_SecondMatrix[(i + n2) * maxn1Union + (j + n2)] = d_B2Q[i * maxn1Union + j];
             } else if (i == j) {
