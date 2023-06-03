@@ -135,38 +135,36 @@ float* cuSOLVERInversion(float* A, int m, int n) {
         cudaMalloc((void**) &d_L, m * n * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_U, m * n * sizeof(float)));
-    printf("L and U allocated\n");
     
     int numBlocks = (m * n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     getLAndU<<<numBlocks, BLOCK_SIZE>>>(d_A, d_L, d_U, m, n);
-    printf("L and U set\n");
 
-    float* h_L = (float*) malloc(m * n * sizeof(float));
-    float* h_U = (float*) malloc(m * n * sizeof(float));
-    gpuAssert(
-        cudaMemcpy(h_L, d_L, m * n * sizeof(float), cudaMemcpyDeviceToHost));
-    gpuAssert(
-        cudaMemcpy(h_U, d_U, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    // float* h_L = (float*) malloc(m * n * sizeof(float));
+    // float* h_U = (float*) malloc(m * n * sizeof(float));
+    // gpuAssert(
+    //     cudaMemcpy(h_L, d_L, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    // gpuAssert(
+    //     cudaMemcpy(h_U, d_U, m * n * sizeof(float), cudaMemcpyDeviceToHost));
 
-    // print h_L
-    printf("L:\n");
-    for (int i = 0; i < m; i++) {
-        printf("[");
-        for (int j = 0; j < n; j++) {
-            printf("%f ", h_L[i * n + j]);
-        }
-        printf("]\n");
-    }
+    // // print h_L
+    // printf("L:\n");
+    // for (int i = 0; i < m; i++) {
+    //     printf("[");
+    //     for (int j = 0; j < n; j++) {
+    //         printf("%f ", h_L[i * n + j]);
+    //     }
+    //     printf("]\n");
+    // }
 
-    // print h_U
-    printf("U:\n");
-    for (int i = 0; i < m; i++) {
-        printf("[");
-        for (int j = 0; j < n; j++) {
-            printf("%f ", h_U[i * n + j]);
-        }
-        printf("]\n");
-    }
+    // // print h_U
+    // printf("U:\n");
+    // for (int i = 0; i < m; i++) {
+    //     printf("[");
+    //     for (int j = 0; j < n; j++) {
+    //         printf("%f ", h_U[i * n + j]);
+    //     }
+    //     printf("]\n");
+    // }
 
 
     // Variables
@@ -174,7 +172,6 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     size_t workspaceInBytesOnHost;
 
     // Do inversion of L and U
-    printf("Ready to invert L and U\n");
 
     // Compute buffersize of L
     stat = cusolverDnXtrtri_bufferSize(handle,
@@ -193,7 +190,6 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     void* bufferOnHost;
     gpuAssert(
         cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
-    printf("Buffers allocated\n");
 
     // Do inversion of L
     stat = cusolverDnXtrtri(handle,
@@ -208,12 +204,10 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                             bufferOnHost,
                             workspaceInBytesOnHost,
                             d_info);
-    printf("After L inversion\n");
 
     // error handling
     gpuAssert(
         cudaMemcpy(&h_info, d_info, sizeof(int), cudaMemcpyDeviceToHost));
-    printf("L inverted\n");
     
     if (h_info < 0) {
         printf("The %d'th paramter is wrong\n", -h_info);
@@ -237,20 +231,16 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                                         lda,
                                         &workspaceInBytesOnDevice,
                                         &workspaceInBytesOnHost);
-    printf("After U buffer size\n");
     
     gpuAssert(
         cudaFree(bufferOnDevice));
     gpuAssert(
         cudaFree(bufferOnHost));
-    printf("Buffers freed\n");
 
     gpuAssert(
         cudaMalloc((void**) &bufferOnDevice, workspaceInBytesOnDevice));
     gpuAssert(
         cudaMallocHost((void**) &bufferOnHost, workspaceInBytesOnHost));
-    printf("Buffers allocated to U\n");
-
 
     // Do inversion of U
     stat = cusolverDnXtrtri(handle,
@@ -265,7 +255,6 @@ float* cuSOLVERInversion(float* A, int m, int n) {
                             bufferOnHost,
                             workspaceInBytesOnHost,
                             d_info);
-    printf("After U inversion\n");  
 
     // error handling
     gpuAssert(
@@ -286,12 +275,10 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     float* AInv;
     gpuAssert(
         cudaMalloc((void**) &AInv, m * n * sizeof(float)));
-    printf("AInv allocated\n");
 
     // Compute AInv = U^-1 * L^-1
     numBlocks = (m * n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     matrixMultiplication<<<numBlocks, BLOCK_SIZE>>>(d_L, d_U, AInv, m, n, n);
-    printf("AInv computed\n");
 
     // Destroy handles
     cusolverDnDestroy(handle);
@@ -300,12 +287,10 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
         return NULL;
     }
-    printf("Handle destroyed\n");
 
     float* h_AInv = (float*) malloc(m * n * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AInv, AInv, m * n * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("AInv copied to host\n");
 
     // return AInv
     return h_AInv;
