@@ -17,7 +17,6 @@
 #define NUM_BLOCKS          1
 #define BLOCKSIZE           256
 #define ELEMS_PER_THREAD    12
-#define BATCHSIZE           1
 
 #define MIN(a, b) a < b ? a : b
 #define MAX(a, b) a > b ? a : b
