@@ -566,13 +566,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
-        free(h_Q);
-        h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
-        float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
-        gpuAssert(
-            cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
-        gpuAssert(
-            cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+        // free(h_Q);
+        // h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
+        // float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        // gpuAssert(
+        //     cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
+        // gpuAssert(
+        //     cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
         
         // printf("--printing h_Q--\n");
         // for (int b = 0; b < batchsize; b++) {
