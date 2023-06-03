@@ -184,6 +184,10 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerInvR, d_invR, batchsize, maxn2 * maxn2);
     
+    printf("maxn1 before invBatched: %d\n", maxn1);
+    printf("maxn2 before invBatched: %d\n", maxn2);
+    printf("batchsize before invBatched: %d\n", batchsize);
+    
     // compute the invR matrices
     invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
 
