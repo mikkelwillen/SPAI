@@ -153,7 +153,7 @@ int main(int argc, char** argv) {
             printf("hej\n");
             for (int j = 0; j < 3; j++) {
                 printf("hello\n");
-                if (sizeArray[i] == 10 && sparsityArray[j] == 0.1) {
+                if (sizeArray[i] != 10 && sparsityArray[j] != 0.1) {
                     printf("hej IGEN\n");
                     int n = sizeArray[i];
                     int maxIterations = n - 1;
