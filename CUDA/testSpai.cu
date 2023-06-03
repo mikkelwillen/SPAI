@@ -149,11 +149,11 @@ int main(int argc, char** argv) {
         sparsityArray[2] = 0.5;
 
         for (int i = 0; i < 1; i++) {
-            if (i > 10) {
-                for (int j = 0; j < 3; j++) {
+            for (int j = 0; j < 3; j++) {
+                if (sizeArray[i] == 10 && sparsityArray[j] == 0.1) {
                     int n = sizeArray[i];
                     int maxIterations = n - 1;
-                    int success;;
+                    int success;
 
                     printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
                     float* test = (float*) malloc(sizeof(float) * n * n);
