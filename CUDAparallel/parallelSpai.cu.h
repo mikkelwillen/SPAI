@@ -454,31 +454,31 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             float* h_Q = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
             gpuAssert(
                 cudaMemcpy(h_Q, d_Q, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToHost));
-            printf("--printing h_Q--\n");
-            for (int b = 0; b < batchsize; b++) {
-                printf("b: %d\n", b);
-                for (int j = 0; j < maxn1Union; j++) {
-                    for (int k = 0; k < maxn1Union; k++) {
-                        printf("%f ", h_Q[b * maxn1Union * maxn1Union + j * maxn1Union + k]);
-                    }
-                    printf("\n");
-                }
-                printf("\n");
-            }
+            // printf("--printing h_Q--\n");
+            // for (int b = 0; b < batchsize; b++) {
+            //     printf("b: %d\n", b);
+            //     for (int j = 0; j < maxn1Union; j++) {
+            //         for (int k = 0; k < maxn1Union; k++) {
+            //             printf("%f ", h_Q[b * maxn1Union * maxn1Union + j * maxn1Union + k]);
+            //         }
+            //         printf("\n");
+            //     }
+            //     printf("\n");
+            // }
 
             // set I and J to IUnion and JUnion
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
             printf("copyIandJ success\n");
 
-            printf("--I--\n");
-            intPrintPointerArray<<<1, 1>>>(d_PointerI, 1, maxn1Union, batchsize);
+            // printf("--I--\n");
+            // intPrintPointerArray<<<1, 1>>>(d_PointerI, 1, maxn1Union, batchsize);
 
-            printf("--J--\n");
-            intPrintPointerArray<<<1, 1>>>(d_PointerJ, 1, maxn2Union, batchsize);
+            // printf("--J--\n");
+            // intPrintPointerArray<<<1, 1>>>(d_PointerJ, 1, maxn2Union, batchsize);
 
-            printf("--SortedJ--\n");
-            intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2Union, batchsize);
+            // printf("--SortedJ--\n");
+            // intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2Union, batchsize);
 
             // set n1 and n2 to n1Union and n2Union
             gpuAssert(
