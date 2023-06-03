@@ -165,7 +165,7 @@ int main(int argc, char** argv) {
                 CSC* cscTest = createRandomCSC(n, n, sparsity);
 
                 success = sequentialTest(cscTest, tolerance, maxIterations, s);
-                printf("Done with test");  
+                printf("Done with test for size: %d and sparsity: %f \n", n, sparsity);  
                 // }
             }
         }
