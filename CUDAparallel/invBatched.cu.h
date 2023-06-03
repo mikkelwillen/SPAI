@@ -31,10 +31,11 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
-    
+    printf("malloc info\n");
     // malloc space for pivot array
     gpuAssert(
         cudaMalloc((void**) &d_PivotArray, maxn2 * batchsize * sizeof(int)));
+    printf("malloc pivot array\n");
 
     // run batched LU factorization from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -57,6 +58,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // copy info back to host
     gpuAssert(
         cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    printf("copy info back to host\n");
     
     for (int i = 0; i < BATCHSIZE; i++) {
         if (h_info[i] != 0) {
