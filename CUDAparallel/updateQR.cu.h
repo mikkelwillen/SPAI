@@ -59,6 +59,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAIJTilde, d_AIJTilde, batchsize, maxn1 * maxn2Tilde);
 
+    
     numBlocks = (batchsize * maxn1 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAIJTilde, maxn1, maxn2Tilde, batchsize);
     
@@ -108,6 +109,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         }
         printf("\n");
     }
+
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAITildeJTilde, maxn1Tilde, maxn2Tilde, batchsize);
 

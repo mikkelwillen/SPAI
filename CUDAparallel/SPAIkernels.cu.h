@@ -123,8 +123,8 @@ __global__ void setMatrixZero(float** d_PointerA, int m, int n, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * m * n) {
         int b = tid / (m * n);
-        int i = (tid / (m * n)) / n;
-        int j = (tid / (m * n)) % n;
+        int i = (tid % (m * n)) / n;
+        int j = (tid % (m * n)) % n;
 
         float* d_A = d_PointerA[b];
         d_A[i * n + j] = 0.0;
