@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
         initHwd();
         float tolerance = 0.01;
         int s = 1;
-        int m = 10;
+        int m = 100;
 
         int* sizeArray = (int*) malloc(sizeof(int) * 5);
         sizeArray[0] = 10;
