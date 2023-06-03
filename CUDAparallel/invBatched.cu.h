@@ -57,11 +57,11 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
         cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
     printf("copy info back to host\n");
     
-    for (int i = 0; i < BATCHSIZE; i++) {
-        if (h_info[i] != 0) {
-            printf("\nError in LU: Matrix %d is singular\n", i);
-        }
-    }
+    // for (int i = 0; i < BATCHSIZE; i++) {
+    //     if (h_info[i] != 0) {
+    //         printf("\nError in LU: Matrix %d is singular\n", i);
+    //     }
+    // }
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
