@@ -156,6 +156,7 @@ int main(int argc, char** argv) {
                     int success;
 
                     printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
+                    
                     float* test = (float*) malloc(sizeof(float) * n * n);
                     CSC* cscTest = createRandomCSC(n, n, sparsity);
 
