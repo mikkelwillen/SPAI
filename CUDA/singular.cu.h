@@ -43,16 +43,6 @@ int checkSingularity(CSC* cscA) {
     // densify A
     float* A = CSCToDense(cscA, I, J, m, n);
 
-    // print A
-    printf("A:\n");
-    for (int i = 0; i < m; i++) {
-        printf("[");
-        for (int j = 0; j < n; j++) {
-            printf("%f ", A[i * n + j]);
-        }
-        printf("]\n");
-    }
-    
     float* d_A;
     int lda = MAX(1, m);
     int Lwork;
