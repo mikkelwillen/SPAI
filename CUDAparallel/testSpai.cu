@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
         int n = 10;
         float sparsity = 1.0;
         float tolerance = 0.01;
-        int maxIterations = 8;
+        int maxIterations = 9;
         int s = 1;
-        int batchsize = 5;
+        int batchsize = 2;
     
     
     
