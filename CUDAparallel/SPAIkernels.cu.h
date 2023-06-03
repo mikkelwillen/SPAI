@@ -155,26 +155,26 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         int n1 = d_n1[b];
         int n2 = d_n2[b];
 
-        if (tid == 0) {
-            for (int h = 0; h < batchsize; h++) {
-                int* I = d_PointerI[h];
-                int* J = d_PointerJ[h];
-                printf("batch: %d\n", h);
-                // print I
-                printf("I: ");
-                for (int k = 0; k < d_n1[h]; k++) {
-                    printf("%d ", I[k]);
-                } 
-                printf("\n");
+        // if (tid == 0) {
+        //     for (int h = 0; h < batchsize; h++) {
+        //         int* I = d_PointerI[h];
+        //         int* J = d_PointerJ[h];
+        //         printf("batch: %d\n", h);
+        //         // print I
+        //         printf("I: ");
+        //         for (int k = 0; k < d_n1[h]; k++) {
+        //             printf("%d ", I[k]);
+        //         } 
+        //         printf("\n");
 
-                // print J
-                printf("J: ");
-                for (int k = 0; k < d_n2[h]; k++) {
-                    printf("%d ", J[k]);
-                }
-                printf("\n");
-            }
-        }
+        //         // print J
+        //         printf("J: ");
+        //         for (int k = 0; k < d_n2[h]; k++) {
+        //             printf("%d ", J[k]);
+        //         }
+        //         printf("\n");
+        //     }
+        // }
         __syncthreads();
 
         int* I = d_PointerI[b];
@@ -625,10 +625,10 @@ __global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ,
         float* d_FirstMatrix = d_PointerFirstMatrix[b];
         float* d_Q = d_PointerQ[b];
 
-        if (tid == 0) {
-            printf("n1 for batch 1 = %d\n", d_n1[1]);
-            printf("maxn1Union = %d\n", maxn1Union);
-        }
+        // if (tid == 0) {
+        //     printf("n1 for batch 1 = %d\n", d_n1[1]);
+        //     printf("maxn1Union = %d\n", maxn1Union);
+        // }
         if (i < n1Union && j < n1Union) {
             if (i < n1 && j < n1) {
                 d_FirstMatrix[i * maxn1Union + j] = d_Q[i * maxn1 + j];
