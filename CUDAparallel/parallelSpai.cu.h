@@ -602,31 +602,31 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMemcpy(h_mHat_k, d_mHat_k, batchsize * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
-        printf("--printing h_mHat_k--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < maxn2; j++) {
-                printf("%f ", h_mHat_k[b * maxn2 + j]);
-            }
-            printf("\n");
-        }
+        // printf("--printing h_mHat_k--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < maxn2; j++) {
+        //         printf("%f ", h_mHat_k[b * maxn2 + j]);
+        //     }
+        //     printf("\n");
+        // }
         
         free(h_residual);
         h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
         
-        printf("--printing h_residual--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < A->m; j++) {
-                printf("%f ", h_residual[b * A->m + j]);
-            }
-            printf("\n");
-        }
+        // printf("--printing h_residual--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < A->m; j++) {
+        //         printf("%f ", h_residual[b * A->m + j]);
+        //     }
+        //     printf("\n");
+        // }
 
-        printf("--SortedJ--\n");
-        intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2, batchsize);
+        // printf("--SortedJ--\n");
+        // intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2, batchsize);
         
         printf("maxn2: %d\n", maxn2);
 
