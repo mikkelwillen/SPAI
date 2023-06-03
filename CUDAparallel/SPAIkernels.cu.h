@@ -126,7 +126,7 @@ __global__ void setMatrixZero(float** d_PointerA, int m, int n, int batchsize) {
         int i = (tid / (m * n)) / n;
         int j = (tid / (m * n)) % n;
 
-        d_A = d_PointerA[b];
+        float* d_A = d_PointerA[b];
         d_A[i * n + j] = 0.0;
         
     }
