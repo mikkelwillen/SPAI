@@ -178,7 +178,6 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
             if (i == 10 && j == 0 && b == 1 && l == 0) {
                 printf("inside\n");
             }
-            }
             if (l < offsetDiff) {
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
                     AHat[i * maxn2 + j] += d_A->flatData[l + offset];
