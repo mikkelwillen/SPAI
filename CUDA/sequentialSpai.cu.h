@@ -163,14 +163,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             residualNorm += residual[i] * residual[i];
         }
         residualNorm = sqrt(residualNorm);
-        
-        printf("residual norm: %f\n", residualNorm);
-
+    
         int somethingToBeDone = 1;
 
         // while norm of residual > tolerance do
         while (residualNorm > tolerance && maxIteration > iteration && somethingToBeDone) {
-            printf("\n\n------Iteration: %d------\n", iteration);
             iteration++;
 
             // variables
@@ -190,11 +187,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             float* rhoSq;
             int* smallestIndices;
             int* smallestJTilde;
-
-            printf("print I");
-            for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
-            }
 
             // 7) Set L to the set of indices where r(l) != 0
             // count the numbers of nonzeros in residual
@@ -229,17 +221,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // print L
-            printf("\nL: ");
-            for (int i = 0; i < l; i++) {
-                printf("%d ", L[i]);
-            }
-            printf("\n");
 
             // 8) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
             // check what indeces we should keep
             keepArray = (int*) malloc(A->n * sizeof(int));
-            printf("after malloc\n");
             // set all to 0
             for (int i = 0; i < A->n; i++) {
                 keepArray[i] = 0;
@@ -247,7 +232,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
             // index fra 0 til A->n i keep array er en boolean for, om vi skal tilføje den til JTilde
             // kig på repræsentationen af A
-            printf("after set to 0\n");
             for (int i = 0; i < A->n; i++) {
                 for (int j = 0; j < l; j++) {
                     for (int h = A->offset[i]; h < A->offset[i + 1]; h++) {
@@ -257,21 +241,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                     }
                 }
             }
-            printf("after keepArray\n");
-
 
             // remove the indeces that are already in J
             for (int i = 0; i < n2; i++) {
                 keepArray[J[i]] = 0;
             }
-            printf("after remove\n");
-
-            // print keepArray
-            printf("\nkeepArray: ");
-            for (int i = 0; i < A->n; i++) {
-                printf("%d ", keepArray[i]);
-            }
-            printf("\n");
 
             // compute the length of JTilde
             n2Tilde = 0;
@@ -293,16 +267,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            printf("\nJ: ");
-            for(int i = 0; i < n2; i++) {
-                printf("%d ", J[i]);
-            }
-            printf("\nJTilde: ");
-            for (int i = 0; i < n2Tilde; i++) {
-                printf("%d ", JTilde[i]);
-            }
-            printf("\n");
-
             // 9) for each j in JTilde, solve the minimization problem
             // Malloc space for rhoSq
             rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
@@ -321,17 +285,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
             }
 
-            //print rhoSq
-            printf("\nrhoSq: ");
-            for (int i = 0; i < n2Tilde; i++) {
-                printf("%f ", rhoSq[i]);
-            }
-            printf("\n");
-
             // 10) find the s indeces of the column with the smallest rhoSq
             int newN2Tilde = MIN(s, n2Tilde);
             smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
-            printf("\nnewN2Tilde: %d", newN2Tilde);
 
             for (int i = 0; i < newN2Tilde; i++) {
                 smallestIndices[i] = -1;

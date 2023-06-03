@@ -34,8 +34,6 @@
 // residualNorm = the norm of the residual vector
 // k = the current iteration
 int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
-    printf("\n------UPDATE QR------\n");
-
     // 13.1) Create A(I, JTilde) and A(ITilde, JTilde)
     float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
     
@@ -55,14 +53,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
                 ABreve[i * n2Tilde + j] += (*Q)[k * n1 + i] * AIJTilde[k * n2Tilde + j];
             }
         }
-    }
-
-    printf("ABreve:\n");
-    for (int i = 0; i < n1; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", ABreve[i * n2Tilde + j]);
-        }
-        printf("\n");
     }
 
     // 13.3) Compute B1 = ABreve[0 : n2, 0 : n2Tilde]
@@ -96,48 +86,12 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             }
         }
     }
-    
-    // print AITildeJTilde
-    printf("AITildeJTilde:\n");
-    for (int i = 0; i < n1Tilde; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", AITildeJTilde[i * n2Tilde + j]);
-        }
-        printf("\n");
-    }
-
-    // print B2
-    printf("B2:\n");
-    for (int i = 0; i < n1Union - n2; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B2[i * n2Tilde + j]);
-        }
-        printf("\n");
-    }
-
+   
     // 13.5) Do QR factorization of B2
     float* B2Q = (float*)malloc((n1Union - n2) * (n1Union - n2) * sizeof(float));
     float* B2R = (float*)malloc((n1Union - n2) * n2Tilde * sizeof(float));
     int qrSuccess = qrBatched(cHandle, &B2, n1Union - n2, n2Tilde, &B2Q, &B2R);
 
-    // print B2Q
-    printf("B2Q:\n");
-    for (int i = 0; i < n1Union - n2; i++) {
-        for (int j = 0; j < n1Union - n2; j++) {
-            printf("%f ", B2Q[i * (n1Union - n2) + j]);
-        }
-        printf("\n");
-    }
-
-    // print B2R
-    printf("B2R:\n");
-    for (int i = 0; i < n1Union - n2; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B2R[i * n2Tilde + j]);
-        }
-        printf("\n");
-    }
-    
     // 13.6) Compute Q_B and R_B from algorithm 17
     // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
     float* firstMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
@@ -154,16 +108,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     for (int i = 0; i < n1Tilde; i++) {
         firstMatrix[(n1 + i) * n1Union + n1 + i] = 1.0;
     }
-
-    // print firstMatrix
-    printf("firstMatrix:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n1Union; j++) {
-            printf("%f ", firstMatrix[i * n1Union + j]);
-        }
-        printf("\n");
-    }
-
 
     // make second matrix with identity in the upper left corner and B2Q in the lower right corner of size n1Union x n1Union
     float* secondMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
