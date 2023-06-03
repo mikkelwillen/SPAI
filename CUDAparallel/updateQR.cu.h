@@ -98,17 +98,17 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_AITildeJTilde = (float*) malloc(batchsize * maxn1Tilde * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AITildeJTilde, d_AITildeJTilde, batchsize * maxn1Tilde * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("AITildeJTilde:\n");
-    for (int i = 0; i < batchsize; i++) {
-        printf("i = %d\n", i);
-        for (int j = 0; j < maxn1Tilde; j++) {
-            for (int k = 0; k < maxn2Tilde; k++) {
-                printf("%f ", h_AITildeJTilde[i * maxn1Tilde * maxn2Tilde + j * maxn2Tilde + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("AITildeJTilde:\n");
+    // for (int i = 0; i < batchsize; i++) {
+    //     printf("i = %d\n", i);
+    //     for (int j = 0; j < maxn1Tilde; j++) {
+    //         for (int k = 0; k < maxn2Tilde; k++) {
+    //             printf("%f ", h_AITildeJTilde[i * maxn1Tilde * maxn2Tilde + j * maxn2Tilde + k]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAITildeJTilde, maxn1Tilde, maxn2Tilde, batchsize);
