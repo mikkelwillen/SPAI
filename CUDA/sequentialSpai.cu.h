@@ -314,22 +314,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            printf("\nsmallestIndices: ");
-            for (int i = 0; i < newN2Tilde; i++) {
-                printf("%d ", smallestIndices[i]);
-            }
-            printf("\n");
-
             smallestJTilde = (int*) malloc(sizeof(int) * newN2Tilde);
             for (int i = 0; i < newN2Tilde; i++) {
                 smallestJTilde[i] = JTilde[smallestIndices[i]];
             }
-            
-            printf("\nsmallestJTilde: ");
-            for (int i = 0; i < newN2Tilde; i++) {
-                printf("%d ", smallestJTilde[i]);
-            }
-            printf("\n");
 
             free(JTilde);
             JTilde = (int*) malloc(sizeof(int) * newN2Tilde);
@@ -341,22 +329,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             // Denote by ITilde the new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
             n2Tilde = newN2Tilde;
             n2Union = n2 + n2Tilde;
-            printf("n2Union: %d\n", n2Union);
             JUnion = (int*) malloc(sizeof(int) * n2Union);
-            printf("after JUnion\n");
             for (int i = 0; i < n2; i++) {
                 JUnion[i] = J[i];
             }
             for (int i = 0; i < n2Tilde; i++) {
                 JUnion[n2 + i] = JTilde[i];
             }
-
-            // print JUnion
-            printf("\nJUnion: ");
-            for (int i = 0; i < n2Union; i++) {
-                printf("%d ", JUnion[i]);
-            }
-            printf("\n");
 
             ITilde = (int*) malloc(sizeof(int) * A->m);
             for (int i = 0; i < A->m; i++) {
@@ -379,18 +358,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // print I
-            printf("\nI: ");
-            for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
-            }
-
-            // printf ITilde
-            printf("\nITilde: ");
-            for (int i = 0; i < n1Tilde; i++) {
-                printf("%d ", ITilde[i]);
-            }
-
             // 12) Make I U ITilde and J U JTilde
             // make union of I and ITilde
             n1Union = n1 + n1Tilde;
@@ -402,22 +369,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 IUnion[n1 + i] = ITilde[i];
             }
 
-            // print IUnion
-            printf("\nIUnion: ");
-            for (int i = 0; i < n1Union; i++) {
-                printf("%d ", IUnion[i]);
-            }
-
-            // print Q
-            printf("\nQ before update: ");
-            for (int i = 0; i < n1; i++) {
-                for (int j = 0; j < n1; j++) {
-                    printf("%f ", Q[i * n1 + j]);
-                }
-                printf("\n");
-            }
-
-
             // 13) Update the QR factorization of A(IUnion, JUnion)
             int updateSuccess = updateQR(cHandle, A, &AHat, &Q, &R, &I, &J, &sortedJ, ITilde, JTilde, IUnion, JUnion, n1, n2, n1Tilde, n2Tilde, n1Union, n2Union, &mHat_k, residual, &residualNorm, k);
 
@@ -427,86 +378,39 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 return NULL;
             }
 
-            // print Q
-            printf("\nQ when we return from update: ");
-            for (int i = 0; i < n1Union; i++) {
-                for (int j = 0; j < n1Union; j++) {
-                    printf("%f ", Q[i * n1Union + j]);
-                }
-                printf("\n");
-            }
-
-
             n1 = n1Union;
             n2 = n2Union;
-            // print I
-            printf("\nI: ");
-            for (int i = 0; i < n1; i++) {
-                printf("%d ", I[i]);
-            }
             
             // free memory
             free(L);
-            printf("L freed\n");
             free(IUnion);
-            printf("IUnion freed\n");
             free(JUnion);
-            printf("JUnion freed\n");
             free(ITilde);
-            printf("ITilde freed\n");
             free(JTilde);
-            printf("JTilde freed\n");
             // free(smallestIndices);
             // printf("smallestIndices freed\n");
             free(smallestJTilde);
-            printf("smallestJTilde freed\n");
             free(rhoSq);
-            printf("rhoSq freed\n");
             free(keepArray);
-            printf("keepArray freed\n");
         }
 
         // 16) Set m_k(J) = mHat_k
         // update kth column of M
-        // print mHat_k
-        printf("\nmHat_k: ");
-        for (int i = 0; i < n2; i++) {
-            printf("%f ", mHat_k[i]);
-        }
-        // print J
-        printf("\nJ: ");
-        for (int i = 0; i < n2; i++) {
-            printf("%d ", J[i]);
-        }
-        // print n2
-        printf("\nn2: %d\n", n2);
         M = updateKthColumnCSC(M, mHat_k, k, sortedJ, n2);
-        printCSC(M);
-        printf("\nM after updateKthColumnCSC:\n");
 
         // free memory
         free(I);
-        printf("I freed\n");
         free(J);
-        printf("J freed\n");
         free(sortedJ);
-        printf("sortedJ freed\n");
         free(AHat);
-        printf("AHat freed\n");
         free(Q);
-        printf("Q freed\n");
         free(R);
-        printf("R freed\n");
         free(mHat_k);
-        printf("mHat_k freed\n");
         free(residual);
-        printf("all freed\n");
     }
     printCSC(M);
 
-    printf("vi er done\n");
     cublasDestroy(cHandle);
-    printf("cublas destroyed\n");
 
     return M;
 }
