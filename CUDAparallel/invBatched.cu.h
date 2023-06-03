@@ -88,7 +88,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
 
     // copy info back to host
     gpuAssert(
-        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_info, d_info, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
     
     // // check for singular matrices
     // for (int i = 0; i < BATCHSIZE; i++) {
