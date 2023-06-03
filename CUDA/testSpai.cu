@@ -153,20 +153,20 @@ int main(int argc, char** argv) {
             printf("hej\n");
             for (int j = 0; j < 3; j++) {
                 printf("hello\n");
-                if (sizeArray[i] != 10 && sparsityArray[j] != 0.1) {
-                    printf("hej IGEN\n");
-                    int n = sizeArray[i];
-                    int maxIterations = n - 1;
-                    int success;
+                // if (sizeArray[i] != 10 && sparsityArray[j] != 0.1) {
+                printf("hej IGEN\n");
+                int n = sizeArray[i];
+                int maxIterations = n - 1;
+                int success;
 
-                    printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
+                printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
 
-                    float* test = (float*) malloc(sizeof(float) * n * n);
-                    CSC* cscTest = createRandomCSC(n, n, sparsity);
+                float* test = (float*) malloc(sizeof(float) * n * n);
+                CSC* cscTest = createRandomCSC(n, n, sparsity);
 
-                    success = sequentialTest(cscTest, tolerance, maxIterations, s);
-                    printf("Done with test");  
-                }
+                success = sequentialTest(cscTest, tolerance, maxIterations, s);
+                printf("Done with test");  
+                // }
             }
         }
 
