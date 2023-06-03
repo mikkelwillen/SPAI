@@ -48,9 +48,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     CSC* M = createDiagonalCSC(A->m, A->n);
 
     // m_k = column in M
-    for (int k = 0; k < M->n; k++) {
-        printf("\n\n------NEW COLUMN: %d------", k);
-        
+    for (int k = 0; k < M->n; k++) {    
         // variables
         int n1 = 0;
         int n2 = 0;
@@ -76,12 +74,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         for (int i = M->offset[k]; i < M->offset[k + 1]; i++) {
             J[h] = M->flatRowIndex[i];
             h++;
-        }
-
-        // print J
-        printf("\nJ: ");
-        for (int i = 0; i < n2; i++) {
-            printf("%d ", J[i]);
         }
 
         // 2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
@@ -111,33 +103,16 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             n2 = 0;
         }
 
-        // print I
-        printf("\nI: ");
-        for (int i = 0; i < n1; i++) {
-            printf("%d ", I[i]);
-        }
-
         // 3) Create Â = A(I, J)
         // We initialize AHat to zeros. Then we iterate through all indeces of J, and iterate through all indeces of I. 
         // For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
         AHat = CSCToDense(A, I, J, n1, n2);
-
-        // print AHat
-        printf("\nAhat:\n");
-        for (int i = 0; i < n1; i++) {
-            for (int j = 0; j < n2; j++) {
-                printf("%f ", AHat[i * n2 + j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
 
         // 4) do QR decomposition of AHat
         Q = (float*) malloc(sizeof(float) * n1 * n1);
         R = (float*) malloc(sizeof(float) * n1 * n2);
 
         int qrSuccess = qrBatched(cHandle, &AHat, n1, n2, &Q, &R);
-        printf("after qrBatched\n");
 
         // overwrite AHat
         free(AHat);
@@ -174,8 +149,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 for (int h = 0; h < n2; h++) {
                     if (J[h] == j) {
                         residual[i] += ADense[i * A->n + j] * mHat_k[h];
-                        printf("residual[%d] += AHat[%d * %d + %d] * mHat_k[%d]\n", i, i, n2, j, h);
-                        printf("residual[%d] += %f * %f\n", i, ADense[i * A->n + j], mHat_k[h]);
                     }
                 }
             }
@@ -183,12 +156,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 residual[i] -= 1.0;
             }
         }
-        
-        printf("residual:\n");
-        for (int i = 0; i < A->m; i++) {
-            printf("%f ", residual[i]);
-        }
-        printf("\n");
 
         // compute the norm of the residual
         residualNorm = 0.0;
