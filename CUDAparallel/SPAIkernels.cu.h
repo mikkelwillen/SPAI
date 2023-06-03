@@ -168,14 +168,17 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
             AHat[i * maxn2 + j] = 1.0;
         }
         __syncthreads();
+        if (i == 10 && j == 0 && b == 1 && l == 0) {
+            printf("outside\n");
+        }
 
         if (i < n1 && j < n2) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
             if (tid == 0) {
-                printf("offsetDiff: %d\n", offsetDiff);
-                printf("n1: %d\n", n1);
-                printf("n2: %d\n", n2);
+                if (i == 10 && j == 0 && b == 1 && l == 0) {
+                    printf("inside\n");
+                }
             }
             if (l < offsetDiff) {
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
