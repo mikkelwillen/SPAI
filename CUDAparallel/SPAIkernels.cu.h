@@ -184,10 +184,6 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         if (i < n1 && j < n2) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
-            if (i == 9 && j == 0 && b == 1 && l == 9) {
-                printf("inside\n");
-                printf("d_A->flataData[l + offset]: %f\n", d_A->flatData[l + offset]);
-            }
             if (l < offsetDiff) {
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
                     AHat[i * maxn2 + j] += d_A->flatData[l + offset];
@@ -535,7 +531,6 @@ __global__ void computeABreve(float** d_PointerQ, float** d_PointerAIJTilde, flo
             d_ABreve[i * maxn2Tilde + j] = 0.0;
             for (int k = 0; k < n1; k++) {
                 d_ABreve[i * maxn2Tilde + j] += d_Q[k * maxn1 + i] * d_AIJTilde[k * maxn2Tilde + j];
-                printf("%f = %f * %f\n", d_ABreve[i * maxn2Tilde + j], d_Q[k * maxn1 + i], d_AIJTilde[k * maxn2Tilde + j]);
             }
         }
     }
@@ -669,7 +664,7 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
 
         float* d_SecondMatrix = d_PointerSecondMatrix[b];
         float* d_B2Q = d_PointerB2Q[b];
-        
+
         if (i < n1Union && j < n1Union) {
             if (i < n1Union - n2 && j < n1Union - n2) {
                 d_SecondMatrix[(i + n2) * maxn1Union + (j + n2)] = d_B2Q[i * maxn1Union + j];

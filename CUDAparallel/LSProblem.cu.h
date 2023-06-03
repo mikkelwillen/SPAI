@@ -95,9 +95,6 @@ __global__ void computeResidual(float* d_ADense, float** d_PointerResidual, floa
         for (int h = 0; h < n2; h++) {
             if (j == d_J[h]) {
                 d_residual[i] += d_ADense[i * n + j] * d_mHat_k[h];
-                if (b == 0) {
-                    printf("%f = %f * %f\n", d_residual[i], d_ADense[i * n + j], d_mHat_k[h]);
-                }
             }
         }
 
