@@ -28,6 +28,9 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
 
+    printf("maxn2 in invBatched: %d\n", maxn2);
+    printf("batchsize in invBatched: %d\n", batchsize);
+
     // malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
