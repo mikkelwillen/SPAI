@@ -70,17 +70,17 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_AIJTilde = (float*) malloc(batchsize * maxn1 * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AIJTilde, d_AIJTilde, batchsize * maxn1 * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("AIJTilde:\n");
-    for (int i = 0; i < batchsize; i++) {
-        printf("i = %d\n", i);
-        for (int j = 0; j < maxn1; j++) {
-            for (int k = 0; k < maxn2Tilde; k++) {
-                printf("%f ", h_AIJTilde[i * maxn1 * maxn2Tilde + j * maxn2Tilde + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("AIJTilde:\n");
+    // for (int i = 0; i < batchsize; i++) {
+    //     printf("i = %d\n", i);
+    //     for (int j = 0; j < maxn1; j++) {
+    //         for (int k = 0; k < maxn2Tilde; k++) {
+    //             printf("%f ", h_AIJTilde[i * maxn1 * maxn2Tilde + j * maxn2Tilde + k]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     // create AITildeJTilde
     float* d_AITildeJTilde;
