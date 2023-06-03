@@ -9,6 +9,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 #include "helperKernels.cu.h"
+#include "spaiKernels.cu.h"
 
 
 // Function to do inversion of batch matrices
