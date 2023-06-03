@@ -48,7 +48,7 @@ int sequentialTestCuSOLVER(float* A, int n) {
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            cuSOLVERInversion(A, n, n);
+            float* res = cuSOLVERInversion(A, n, n);
         }
         
         cudaDeviceSynchronize();
