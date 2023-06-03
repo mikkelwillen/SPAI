@@ -69,7 +69,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     }
 
     printf("print pointerR after LU\n");
-    printPointerArray(d_PointerR, maxn2, maxn2, batchsize);
+    printPointerArray<<<1, 1>>>(d_PointerR, maxn2, maxn2, batchsize);
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
