@@ -132,7 +132,6 @@ int runcuSOLVERTest(float* A, int n) {
 int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
-        float sparsity = 0.1;
         float tolerance = 0.01;
         int s = 1;
 
@@ -156,10 +155,11 @@ int main(int argc, char** argv) {
                 // if (sizeArray[i] != 10 && sparsityArray[j] != 0.1) {
                 printf("hej IGEN\n");
                 int n = sizeArray[i];
+                float sparsity = sparsityArray[j];
                 int maxIterations = n - 1;
                 int success;
 
-                printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
+                printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
 
                 float* test = (float*) malloc(sizeof(float) * n * n);
                 CSC* cscTest = createRandomCSC(n, n, sparsity);
