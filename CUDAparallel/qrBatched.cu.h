@@ -300,8 +300,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        // computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
-        matrixMultiplication <<<numBlocks, BLOCKSIZE>>> (d_PointerQv, d_PointerV, d_PointerQvvt, NULL, NULL, NULL, n1, 1, n1, batchsize);
+        computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
         float* h_Qvvt = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qvvt, d_Qvvt, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
