@@ -213,8 +213,8 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         return stat;
     }
-    // print d_PointerA
-    printPointerArray <<<1, 1>>>(d_PointerAHat, n1, n2, batchsize);
+    // // print d_PointerA
+    // printPointerArray <<<1, 1>>>(d_PointerAHat, n1, n2, batchsize);
     
     printf("n1: %d\n", n1);
     printf("n2: %d\n", n2);

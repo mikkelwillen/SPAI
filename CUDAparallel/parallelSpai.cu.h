@@ -149,17 +149,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
-        printf("--printing h_AHat--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < maxn1; j++) {
-                for (int k = 0; k < maxn2; k++) {
-                    printf("%f ", h_AHat[b * maxn1 * maxn2 + j * maxn2 + k]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
+        // printf("--printing h_AHat--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < maxn1; j++) {
+        //         for (int k = 0; k < maxn2; k++) {
+        //             printf("%f ", h_AHat[b * maxn1 * maxn2 + j * maxn2 + k]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     printf("\n");
+        // }
         printf("maxn1: %d\n", maxn1);
         printf("maxn2: %d\n", maxn2);
         // initialize d_Q and d_R
@@ -191,21 +191,21 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             return NULL;
         }
 
-        // print Q
-        float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
-        gpuAssert(
-            cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
-        printf("--printing h_Q--\n");
-        for (int b = 0; b < batchsize; b++) {
-            printf("b: %d\n", b);
-            for (int j = 0; j < maxn1; j++) {
-                for (int k = 0; k < maxn1; k++) {
-                    printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
+        // // print Q
+        // float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
+        // gpuAssert(
+        //     cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
+        // printf("--printing h_Q--\n");
+        // for (int b = 0; b < batchsize; b++) {
+        //     printf("b: %d\n", b);
+        //     for (int j = 0; j < maxn1; j++) {
+        //         for (int k = 0; k < maxn1; k++) {
+        //             printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
+        //         }
+        //         printf("\n");
+        //     }
+        //     printf("\n");
+        // }
 
         // overwrite AHat, since qr overwrote it previously
         numBlocks = (batchsize * maxn1 * maxn2 + BLOCKSIZE - 1) / BLOCKSIZE;
