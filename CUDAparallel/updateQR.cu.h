@@ -424,17 +424,17 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("R:\n");
-    for (int i = 0; i < batchsize; i++) {
-        printf("batch = %d\n", i);
-        for (int j = 0; j < maxn1; j++) {
-            for (int k = 0; k < maxn2; k++) {
-                printf("%f ", h_R[i * maxn1 * maxn2 + j * maxn2 + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("R:\n");
+    // for (int i = 0; i < batchsize; i++) {
+    //     printf("batch = %d\n", i);
+    //     for (int j = 0; j < maxn1; j++) {
+    //         for (int k = 0; k < maxn2; k++) {
+    //             printf("%f ", h_R[i * maxn1 * maxn2 + j * maxn2 + k]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
