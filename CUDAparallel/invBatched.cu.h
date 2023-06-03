@@ -21,8 +21,8 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
 
     // Set constants
     cublasStatus_t stat;
-    int lda = maxn2;
-    int ldc = maxn2;
+    int lda = MAX(1, maxn2);
+    int ldc = MAX(1, maxn2);
 
     // create device info array
     int* h_info = (int*) malloc(batchsize * sizeof(int));
