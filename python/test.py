@@ -83,7 +83,7 @@ def testofScipy(A):
     print("Norm of Scipy-implementation: ", np.linalg.norm(A * AInv - np.identity(AInv.shape[1])))
 
 # For n = 10, 100, 1000, 10000, 100000, 1000000, 100000:
-size = [10, 100, 1000, 10000, 100000]
+size = [10000, 100000]
 den = [0.1, 0.3, 0.5]
 for n in size:
     for d in den:
@@ -93,7 +93,7 @@ for n in size:
 
             testofScipy(A)
 
-            testErrorAndSpeed(SPAI.SPAI, A)
+            # testErrorAndSpeed(SPAI.SPAI, A)
 
         else:
             print("A is singular")
