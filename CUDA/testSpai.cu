@@ -217,12 +217,12 @@ int main(int argc, char** argv) {
     
         // struct CSC* cscA = createCSC(A, m, n);
         // struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(m, m, sparsity);
+        struct CSC* cscC = createRandomCSC(m, m, 0.5);
         // struct CSC* cscD = createCSC(C, n, n);
         // struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscC, m, m, 0.5, tolerance, maxIterations, s);
+        runIdentityTest(cscC, m, m, 0.5, tolerance, m - 1, s);
         // runcuSOLVERTest(m4, 4);
         // printf("after running cuSOLVER test\n");
     
