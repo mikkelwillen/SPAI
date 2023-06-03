@@ -228,9 +228,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     float* d_Qvvt;
     float** d_PointerQvvt;
 
-    float* d_tempStorage;
-    float** d_PointerTempStorage;
-
     printf("Malloc space for arrays and copy array start pointers to device\n");
 
     gpuAssert(
@@ -255,14 +252,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerQvvt, d_Qvvt, batchsize, n1 * n1);
     printf("d_Qvvt\n");
-
-    gpuAssert(
-        cudaMalloc((void**) &d_tempStorage, n1 * n1 * batchsize * sizeof(float)));
-    gpuAssert(
-        cudaMalloc((void**) &d_PointerTempStorage, batchsize * sizeof(float*)));
-    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel <<<numBlocks, BLOCKSIZE >>> (d_PointerTempStorage, d_tempStorage, batchsize, n1 * n1);
-    printf("d_tempStorage\n");
 
     // copy R from AHat
     numBlocks = (n1 * n2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -296,7 +285,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         // compute Q * v
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         matrixMultiplication <<<numBlocks, BLOCKSIZE>>> (d_PointerQ, d_PointerV, d_PointerQv, NULL, NULL, NULL, n1, n1, 1, batchsize);
-        // computeQtimesV <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerV, d_PointerQv, d_PointerTempStorage, n1, batchsize);
         float* h_Qv = (float*) malloc(n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qv, d_Qv, n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
@@ -308,20 +296,6 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
             printf("]\n");
         }
         free(h_Qv);
-        
-        float* h_tempStorage = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
-        gpuAssert(
-            cudaMemcpy(h_tempStorage, d_tempStorage, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-        for (int b = 0; b < batchsize; b++) {
-            printf("tempStorage[%d] = [", b);
-            for (int i = 0; i < n1; i++) {
-                for (int j = 0; j < n1; j++) {
-                    printf("%f, ", h_tempStorage[b * n1 * n1 + i * n1 + j]);
-                }
-                printf("]\n");
-            }
-        }
-        free(h_tempStorage);
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
