@@ -58,6 +58,9 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
 
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAIJTilde, d_AIJTilde, batchsize, maxn1 * maxn2Tilde);
+
+    numBlocks = (batchsize * maxn1 * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+    setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAIJTilde, maxn1, maxn2Tilde, batchsize);
     
     numBlocks = (batchsize * maxn1 * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAIJTilde, d_PointerI, d_PointerJTilde, d_n1, d_n2Tilde, maxn1, maxn2Tilde, A->m, batchsize);
@@ -105,6 +108,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         }
         printf("\n");
     }
+    numBlocks = (batchsize * maxn1Tilde * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
+    setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAITildeJTilde, maxn1Tilde, maxn2Tilde, batchsize);
 
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAITildeJTilde, d_PointerITilde, d_PointerJTilde, d_n1Tilde, d_n2Tilde, maxn1Tilde, maxn2Tilde, A->m, batchsize);

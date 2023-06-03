@@ -114,6 +114,24 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
     }
 }
 
+/* kernel for setting batch matrices to zero
+d_PointerA = device pointer to A
+m          = the number of rows in A
+n          = the number of columns in A
+batchsize  = the size of the batch */
+__global__ void setMatrixZero(float** d_PointerA, int m, int n, int batchsize) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < batchsize * m * n) {
+        int b = tid / (m * n);
+        int i = (tid / (m * n)) / n;
+        int j = (tid / (m * n)) % n;
+
+        d_A = d_PointerA[b];
+        d_A[i * n + j] = 0.0;
+        
+    }
+}
+
 // kernel for setting the dense matrices padded with zeros to make the uniform size
 // d_A          = device pointer to A
 // d_AHat       = device pointer pointer to AHat
@@ -161,21 +179,12 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
 
         int* I = d_PointerI[b];
         int* J = d_PointerJ[b];
-
         float* AHat = d_AHat[b];
-
-        if (l == 0) {
-            AHat[i * maxn2 + j] = 1.0;
-        }
-        __syncthreads();
-        if (i == 10 && j == 0 && b == 1 && l == 0) {
-            printf("outside\n");
-        }
 
         if (i < n1 && j < n2) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
-            if (i == 11 && j == 0 && b == 1 && l == 11) {
+            if (i == 9 && j == 0 && b == 1 && l == 9) {
                 printf("inside\n");
                 printf("d_A->flataData[l + offset]: %f\n", d_A->flatData[l + offset]);
             }

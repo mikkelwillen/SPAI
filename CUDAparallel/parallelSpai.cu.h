@@ -139,6 +139,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, d_AHat, batchsize, maxn1 * maxn2);
 
+        numBlocks = (batchsize * maxn1 * maxn2 + BLOCKSIZE - 1) / BLOCKSIZE;
+        setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, maxn1, maxn2, batchsize);
+
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
         
@@ -204,6 +207,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         }
 
         // overwrite AHat, since qr overwrote it previously
+        numBlocks = (batchsize * maxn1 * maxn2 + BLOCKSIZE - 1) / BLOCKSIZE;
+        setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, maxn1, maxn2, batchsize);
+        
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
 
