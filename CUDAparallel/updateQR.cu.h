@@ -134,16 +134,16 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_Pc = (float*) malloc(batchsize * maxn2Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_Pc, d_Pc, batchsize * maxn2Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("Pc:\n");
-    for (int b = 0; b < batchsize; b++) {
-        printf("b = %d\n", b);
-        for (int i = 0; i < maxn2Union; i++) {
-            for (int j = 0; j < maxn2Union; j++) {
-                printf("%f ", h_Pc[b * maxn2Union * maxn2Union + i * maxn2Union + j]);
-            }
-            printf("\n");
-        }
-    }
+    // printf("Pc:\n");
+    // for (int b = 0; b < batchsize; b++) {
+    //     printf("b = %d\n", b);
+    //     for (int i = 0; i < maxn2Union; i++) {
+    //         for (int j = 0; j < maxn2Union; j++) {
+    //             printf("%f ", h_Pc[b * maxn2Union * maxn2Union + i * maxn2Union + j]);
+    //         }
+    //         printf("\n");
+    //     }
+    // }
 
     // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* d_ABreve;
