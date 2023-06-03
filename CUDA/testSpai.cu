@@ -132,38 +132,66 @@ int runcuSOLVERTest(float* A, int n) {
 int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
-        int m = 4;
-        int n = 4;
-        float sparsity = 1.0;
+        float sparsity = 0.1;
         float tolerance = 0.01;
-        int maxIterations = 3;
         int s = 1;
-    
-        float* A = (float*) malloc(sizeof(float) * m * n);
-        float* B = (float*) malloc(sizeof(float) * m * n);
-        float* C = (float*) malloc(sizeof(float) * n * n);
-        float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
-        float* m5 = (float*) malloc(sizeof(float) * 5 * 5);
-    
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                A[i * n + j] = (float) i * n + j;
+
+        int* sizeArray = (int*) malloc(sizeof(int) * 5);
+        sizeArray[0] = 10;
+        sizeArray[1] = 100;
+        sizeArray[2] = 1000;
+        sizeArray[3] = 10000;
+        sizeArray[4] = 100000;
+
+        float* sparsityArray = (float*) malloc(sizeof(float) * 3);
+        sparsityArray[0] = 0.1;
+        sparsityArray[1] = 0.3;
+        sparsityArray[2] = 0.5;
+
+        for (int i = 0; i < 1; i++) {
+            if (i > 10) {
+                for (int j = 0; j < 3; j++) {
+                    int n = sizeArray[i];
+                    int maxIterations = n - 1;
+                    int success;;
+
+                    printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
+                    float* test = (float*) malloc(sizeof(float) * n * n);
+                    CSC* cscTest = createRandomCSC(n, n, sparsity);
+
+                    success = sequentialTest(cscTest, tolerance, maxIterations, s);
+                    printf("Done with test");  
+                }
             }
         }
-    
-        C[0] = 20.0; C[1] = 0.0;   C[2] = 0.0; 
-        C[3] = 0.0;  C[4] = 30.0;  C[5] = 11.0; 
-        C[6] = 25.0;  C[7] = 0.0;   C[8] = 10.0;
-    
-        B[0] = 20.0; B[1] = 0.0;   B[2] = 0.0; 
-        B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
-        B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
-        B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
 
-        m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
-        m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
-        m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
-        m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
+
+    
+        // float* A = (float*) malloc(sizeof(float) * m * n);
+        // float* B = (float*) malloc(sizeof(float) * m * n);
+        // float* C = (float*) malloc(sizeof(float) * n * n);
+        // float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
+        // float* m5 = (float*) malloc(sizeof(float) * 5 * 5);
+    
+        // for (int i = 0; i < m; i++) {
+        //     for (int j = 0; j < n; j++) {
+        //         A[i * n + j] = (float) i * n + j;
+        //     }
+        // }
+    
+        // C[0] = 20.0; C[1] = 0.0;   C[2] = 0.0; 
+        // C[3] = 0.0;  C[4] = 30.0;  C[5] = 11.0; 
+        // C[6] = 25.0;  C[7] = 0.0;   C[8] = 10.0;
+    
+        // B[0] = 20.0; B[1] = 0.0;   B[2] = 0.0; 
+        // B[3] = 0.0;  B[4] = 30.0;  B[5] = 10.0; 
+        // B[6] = 0.0;  B[7] = 0.0;   B[8] = 0.0; 
+        // B[9] = 0.0;  B[10] = 40.0; B[11] = 0.0;
+
+        // m4[0] = 10.0; m4[1] = 10.0; m4[2] = 1.2; m4[3] = 14.0;
+        // m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
+        // m4[8] = 13.0; m4[9] = 0.0; m4[10] = 5.3; m4[11] = 1.0;
+        // m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
 
         // m4[0] = 10.0; m4[1] = 10.0; m4[2] = 0.0; m4[3] = 14.0;
         // m4[4] = 0.0; m4[5] = 10.0; m4[6] = 2.0; m4[7] = 0.0;
@@ -171,26 +199,27 @@ int main(int argc, char** argv) {
         // m4[12] = 0.0; m4[13] = 5.0; m4[14] = 0.0; m4[15] = 0.0;
 
     
-        struct CSC* cscA = createCSC(A, m, n);
-        struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(n, n, sparsity);
-        struct CSC* cscD = createCSC(C, n, n);
-        struct CSC* cscM4 = createCSC(m4, 4, 4);
+        // struct CSC* cscA = createCSC(A, m, n);
+        // struct CSC* cscB = createCSC(B, m, n);
+        // struct CSC* cscC = createRandomCSC(n, n, sparsity);
+        // struct CSC* cscD = createCSC(C, n, n);
+        // struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s);
+        // runIdentityTest(cscM4, 4, 4, sparsity, tolerance, maxIterations, s);
         // runcuSOLVERTest(m4, 4);
         // printf("after running cuSOLVER test\n");
     
         // free memory
-        freeCSC(cscA);
-        freeCSC(cscB);
-        freeCSC(cscC);
-        freeCSC(cscD);
+        // freeCSC(cscA);
+        // freeCSC(cscB);
+        // freeCSC(cscC);
+        // freeCSC(cscD);
 
-        free(A);
-        free(B);
-        free(C);    
+        // free(A);
+        // free(B);
+        // free(C);   
+
     } else if (argc == 7) {
         // read args
         printf("hallo?\n");
