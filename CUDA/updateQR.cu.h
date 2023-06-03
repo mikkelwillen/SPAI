@@ -125,15 +125,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // print secondMatrix
-    printf("secondMatrix:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n1Union; j++) {
-            printf("%f ", secondMatrix[i * n1Union + j]);
-        }
-        printf("\n");
-    }
-
     // compute unsortedQ = firstMatrix * secondMatrix
     float* unsortedQ = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
@@ -143,15 +134,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
                 unsortedQ[i * n1Union + j] += firstMatrix[i * n1Union + k] * secondMatrix[k * n1Union + j];
             }
         }
-    }
-
-    // print unsortedQ
-    printf("unsortedQ:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n1Union; j++) {
-            printf("%f ", unsortedQ[i * n1Union + j]);
-        }
-        printf("\n");
     }
 
     // make unsortedR with R in the top left corner, B1 in the top right corner and B2R under B1 of size n1Union x n2Union
@@ -181,24 +163,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // print B1
-    printf("B1:\n");
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2Tilde; j++) {
-            printf("%f ", B1[i * n2Tilde + j]);
-        }
-        printf("\n");
-    }
-
-    // print unsortedR
-    printf("unsortedR:\n");
-    for (int i = 0; i < n1Union; i++) {
-        for (int j = 0; j < n2Union; j++) {
-            printf("%f ", unsortedR[i * n2Union + j]);
-        }
-        printf("\n");
-    }
-
     free(*m_kOut);
     (*m_kOut) = (float*) malloc(n2Union * sizeof(float));
 
@@ -223,13 +187,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             (*m_kOut)[i] += Pc[i * n2Union + j] * tempM_k[j];
         }
     }
-
-    // print m_kOut
-    printf("m_kOut:\n");
-    for (int i = 0; i < n2Union; i++) {
-        printf("%f ", (*m_kOut)[i]);
-    }
-    printf("\n");
 
     // 14) compute residual = A * mHat_k - e_k
     // malloc space for residual
@@ -281,13 +238,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
             residual[i] -= 1.0;
         }
     }
-    
-    printf("residual:\n");
-    for (int i = 0; i < A->m; i++) {
-        printf("%f ", residual[i]);
-    }
-    printf("\n");
-
+   
     // compute the norm of the residual
     *residualNorm = 0.0;
     for (int i = 0; i < A->m; i++) {
@@ -295,21 +246,16 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
     *residualNorm = sqrt(*residualNorm);
     
-    printf("residual norm: %f\n", *residualNorm);
-
     // set Q and R to unsortedQ and unsortedR
     free(*Q);
     (*Q) = (float*) malloc(n1Union * n1Union * sizeof(float));
-    printf("malloc q\n");
     free(*R);
     (*R) = (float*) malloc(n1Union * n2Union * sizeof(float));
-    printf("malloc r\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
             (*Q)[i * n1Union + j] = unsortedQ[i * n1Union + j];
         }
     }
-    printf("set Q\n");
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
             (*R)[i * n2Union + j] = unsortedR[i * n2Union + j];
@@ -319,38 +265,22 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
 
     // free memory
     free(AIJTilde);
-    printf("freed AIJTilde\n");
     free(AITildeJTilde);
-    printf("freed AITildeJTilde\n");
     free(ABreve);
-    printf("freed ABreve\n");
     // free(ATilde);
     // printf("freed ATilde\n");
     free(Pr);
-    printf("freed Pr\n");
     free(Pc);
-    printf("freed Pc\n");
     free(B1);
-    printf("freed B1\n");
     free(B2);
-    printf("freed B2\n");
     free(B2Q);
-    printf("freed B2Q\n");
     free(B2R);
-    printf("freed B2R\n");
     free(firstMatrix);
-    printf("freed firstMatrix\n");
     // free(secondMatrix);
     // printf("freed secondMatrix\n");
     free(unsortedQ);
-    printf("freed unsortedQ\n");
     free(unsortedR);
-    printf("freed unsortedR\n");
-
     free(tempM_k);
-    printf("freed tempM_k\n");
-
-    printf("done with updateQR\n");
 
     return 0;
 }
