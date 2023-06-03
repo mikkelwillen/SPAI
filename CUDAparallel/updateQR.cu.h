@@ -298,17 +298,17 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_B2R = (float*) malloc(batchsize * maxn1Union * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_B2R, d_B2R, batchsize * maxn1Union * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("B2R:\n");
-    for (int b = 0; b < batchsize; b++) {
-        printf("b = %d\n", b);
-        for (int i = 0; i < maxn1Union; i++) {
-            for (int j = 0; j < maxn2Tilde; j++) {
-                printf("%f ", h_B2R[b * maxn1Union * maxn2Tilde + i * maxn2Tilde + j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("B2R:\n");
+    // for (int b = 0; b < batchsize; b++) {
+    //     printf("b = %d\n", b);
+    //     for (int i = 0; i < maxn1Union; i++) {
+    //         for (int j = 0; j < maxn2Tilde; j++) {
+    //             printf("%f ", h_B2R[b * maxn1Union * maxn2Tilde + i * maxn2Tilde + j]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
@@ -329,17 +329,17 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     float* h_firstMatrix = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_firstMatrix, d_firstMatrix, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("firstMatrix:\n");
-    for (int b = 0; b < batchsize; b++) {
-        printf("b = %d\n", b);
-        for (int i = 0; i < maxn1Union; i++) {
-            for (int j = 0; j < maxn1Union; j++) {
-                printf("%f ", h_firstMatrix[b * maxn1Union * maxn1Union + i * maxn1Union + j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("firstMatrix:\n");
+    // for (int b = 0; b < batchsize; b++) {
+    //     printf("b = %d\n", b);
+    //     for (int i = 0; i < maxn1Union; i++) {
+    //         for (int j = 0; j < maxn1Union; j++) {
+    //             printf("%f ", h_firstMatrix[b * maxn1Union * maxn1Union + i * maxn1Union + j]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     // make second matrix with identity in the upper left corner and QB in the lower right corner of size n1Union x n1Union");
     float* d_secondMatrix;
