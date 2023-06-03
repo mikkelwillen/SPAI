@@ -81,6 +81,7 @@ __global__ void makeV(float** d_PointerAHat, float** d_PointerV, int n1, int k, 
     }
 }
 
+// (DEPRECATED) den er sgu lort
 // kernel for computing Q * v
 // d_PointerQ = an array of pointers to the start of each Q matrix in d_Q
 // d_PointerV = an array of pointers to the start of each V matrix in d_V
@@ -299,7 +300,8 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
 
         // compute Qv * v^T
         numBlocks = (n1 * n1 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
+        // computeQvTimesVtransposed <<<numBlocks, BLOCKSIZE >>>(d_PointerQv, d_PointerV, d_PointerQvvt, d_PointerTau, n1, k, batchsize);
+        matrixMultiplication <<<numBlock, BLOCKSIZE>>> (d_PointerQv, d_PointerV, d_PointerQvvt, NULL, NULL, NULL, n1, 1, n1, batchsize);
         float* h_Qvvt = (float*) malloc(n1 * n1 * batchsize * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_Qvvt, d_Qvvt, n1 * n1 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
