@@ -79,10 +79,10 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 20;
+        int n = 10;
         float sparsity = 1.0;
         float tolerance = 0.01;
-        int maxIterations = 19;
+        int maxIterations = 9;
         int s = 1;
         int batchsize = 5;
     
