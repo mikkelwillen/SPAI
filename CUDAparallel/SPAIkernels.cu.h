@@ -174,6 +174,8 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
             if (tid == 0) {
                 printf("offsetDiff: %d\n", offsetDiff);
+                printf("n1: %d\n", n1);
+                printf("n2: %d\n", n2);
             }
             if (l < offsetDiff) {
                 if (I[i] == d_A->flatRowIndex[l + offset]) {
