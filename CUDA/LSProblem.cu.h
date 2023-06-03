@@ -43,22 +43,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         }
     }
 
-    // print cHat
-    printf("cHat: ");
-    for (int i = 0; i < n2; i++) {
-        printf("%f ", cHat[i]);
-    }
-    printf("\n");
-
-    // print R
-    printf("R:\n");
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", R[i * n2 + j]);
-        }
-        printf("\n");
-    }
-
     // 5.2) make the inverse of R of size n2 x n2
     float* invR = (float*) malloc(n2 * n2 * sizeof(float));
 
@@ -69,14 +53,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
         return 1;
     }
 
-    printf("invR:\n");
-    for (int i = 0; i < n2; i++) {
-        for (int j = 0; j < n2; j++) {
-            printf("%f ", invR[i * n2 + j]);
-        }
-        printf("\n");
-    }
-
     // 5.3) compute mHat_k = R^-1 * cHat
     for (int i = 0; i < n2; i++) {
         (*mHat_k)[i] = 0.0;
@@ -84,11 +60,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* A, float* Q, float* R, float** mHat_k
             (*mHat_k)[i] += invR[i * n2 + j] * cHat[j];
         }
     }
-    printf("mHat_k:\n");
-    for (int i = 0; i < n2; i++) {
-        printf("%f ", (*mHat_k)[i]);
-    }
-
+    
     // free memory
     free(e_k);
     free(cHat);

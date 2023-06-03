@@ -45,8 +45,6 @@ __global__ void tauDeviceToDevicePointerKernel(float** d_Tau, float* h_Tau, int 
 // R is an array of pointers batch R matrices
 // returns 0 if succesful, 1 if not
 int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, float** R) {
-    printf("\nDo QR decomposition of AHat\n");
-
     // Set constants
     cublasStatus_t stat;
     int lda = n1;
@@ -64,7 +62,6 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     float** d_PointerAHat;
     float** d_PointerTau;
     int info;
-    printf("after creating input and output arrays\n");
 
     // malloc space and copy data for AHat
     gpuAssert(
@@ -74,7 +71,6 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     gpuAssert(
         cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
     AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
-    printf("after malloc space and copy data for AHat\n");
     
     // malloc space for tau
     gpuAssert(
@@ -173,47 +169,6 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         free(v);
         free(Qv);
         free(Qvvt);
-    }
-
-    // print various matrices
-    {
-        printf("R: \n");
-        for (int i = 0; i < n1; i++) {
-            for (int j = 0; j < n2; j++) {
-                printf("%f ", (*R)[i * n2 + j]);
-            }
-            printf("\n");
-        }
-        
-
-        printf("Q: \n");
-        for (int i = 0; i < n1; i++) {
-            for (int j = 0; j < n1; j++) {
-                printf("%f ", (*Q)[i * n1 + j]);
-            }
-            printf("\n");
-        }
-
-        // print tau
-        for (int i = 0; i < BATCHSIZE; i++) {
-            printf("tau %d:", i);
-            for (int k = 0; k < ltau; k++) {
-                printf("%f ", h_tau[i * ltau + k]);
-            }
-            printf("\n");
-        }
-        
-        // print AHat
-        for (int i = 0; i < BATCHSIZE; i++) {
-            printf("AHat %d:\n", i);
-            for (int j = 0; j < n1; j++) {
-                for (int k = 0; k < n2; k++) {
-                    printf("%f ", (*AHat)[i * n1 * n2 + j * n2 + k]);
-                }
-                printf("\n");
-            }
-            printf("\n");
-        }
     }
 
     // free arrays and destroy cHandle

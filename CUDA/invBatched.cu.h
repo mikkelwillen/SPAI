@@ -28,8 +28,6 @@ __global__ void deviceToDevicePointerKernel(float** d_PointerA, float* d_A, int 
 // AInv is an array of batch inverse matrices
 // returns 0 if succesful, 1 if not
 int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
-    printf("\nDo inversion of A\n");
-
     // Set constants
     cublasStatus_t stat;
     int lda = n;
@@ -44,39 +42,31 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     float** d_PointerA;
     float** d_PointerAInv;
     int* h_info = (int*) malloc(BATCHSIZE * sizeof(int));
-    printf("after h_info malloc\n");
     int* d_info;
 
     // malloc space and copy data for A
     gpuAssert(
         cudaMalloc((void**) &d_A, AMemSize));
-    printf("after cudaMalloc d_A\n");
     gpuAssert(
         cudaMemcpy(d_A, (*A), AMemSize, cudaMemcpyHostToDevice));
-    printf("after cudaMemcpy\n");
     gpuAssert(
         cudaMalloc((void**) &d_PointerA, APointerMemSize));
-    printf("after cudaMalloc d_PointerA\n");
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerA, d_A, BATCHSIZE, n);
 
     // malloc space for AInv
     gpuAssert(
         cudaMalloc((void**) &d_AInv, AMemSize));
-    printf("after cudaMalloc d_AInv\n");
     gpuAssert(
         cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
-    printf("after cudaMalloc d_PointerAInv\n");
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
 
     // malloc space for pivot array
     gpuAssert(
         cudaMalloc((void**) &d_PivotArray, n * BATCHSIZE * sizeof(float)));
-    printf("after cudaMalloc d_PivotArray\n");
 
     // malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, BATCHSIZE * sizeof(int)));
-    printf("after cudaMalloc d_info\n");
 
     // run batched LU factorization from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -129,7 +119,6 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
 
     gpuAssert(
         cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
-    printf("after cudaMemcpy h_info\n");
     
     for (int i = 0; i < BATCHSIZE; i++) {
         if (h_info[i] != 0) {
@@ -142,7 +131,6 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     // copy result back to host
     gpuAssert(
         cudaMemcpy((*AInv), d_AInv, AMemSize, cudaMemcpyDeviceToHost));
-    printf("after cudaMemcpy AInv\n");
 
     // free memory
     gpuAssert(
@@ -158,7 +146,6 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     gpuAssert(
         cudaFree(d_PivotArray));
     free(h_info);
-
 
     return 0;
 }
