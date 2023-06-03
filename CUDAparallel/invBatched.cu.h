@@ -57,7 +57,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     printf("before info to host\n");
     // copy info back to host
     gpuAssert(
-        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+        cudaMemcpy(h_info, d_info, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
     printf("copy info back to host\n");
     
     // for (int i = 0; i < BATCHSIZE; i++) {
