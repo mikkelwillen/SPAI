@@ -150,7 +150,9 @@ int main(int argc, char** argv) {
         printf("Starting tests\n");
 
         for (int i = 0; i < 1; i++) {
+            printf("hej\n");
             for (int j = 0; j < 3; j++) {
+                printf("hello\n");
                 if (sizeArray[i] == 10 && sparsityArray[j] == 0.1) {
                     int n = sizeArray[i];
                     int maxIterations = n - 1;
