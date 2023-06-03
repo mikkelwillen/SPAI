@@ -23,7 +23,6 @@
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printf("------SEQUENTIAL SPAI------\n");
     printf("running with parameters: tolerance = %f, maxIteration = %d, s = %d\n", tolerance, maxIteration, s);
-    printCSC(A);
 
     // check if matrix is singular
     int checkSingular = checkSingularity(A);
@@ -408,7 +407,6 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         free(mHat_k);
         free(residual);
     }
-    printCSC(M);
 
     cublasDestroy(cHandle);
 
