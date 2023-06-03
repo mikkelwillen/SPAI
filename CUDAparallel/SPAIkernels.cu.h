@@ -175,7 +175,7 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         if (i < n1 && j < n2) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
-            if (i == 10 && j == 0 && b == 1 && l == 10) {
+            if (i == 11 && j == 0 && b == 1 && l == 11) {
                 printf("inside\n");
                 printf("d_A->flataData[l + offset]: %f\n", d_A->flatData[l + offset]);
             }
