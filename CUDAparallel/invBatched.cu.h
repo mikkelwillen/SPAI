@@ -26,46 +26,46 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // create device info array
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
-    int* d_PivotArray;
+    // int* d_PivotArray;
 
     // malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
     printf("malloc info\n");
     // malloc space for pivot array
-    gpuAssert(
-        cudaMalloc((void**) &d_PivotArray, maxn2 * batchsize * sizeof(int)));
-    printf("malloc pivot array\n");
+    // gpuAssert(
+    //     cudaMalloc((void**) &d_PivotArray, maxn2 * batchsize * sizeof(int)));
+    // printf("malloc pivot array\n");
 
-    // run batched LU factorization from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas/
-    stat = cublasSgetrfBatched(cHandle,
-                               maxn2,
-                               d_PointerR,
-                               lda,
-                               d_PivotArray,
-                               d_info,
-                               batchsize);
+    // // run batched LU factorization from cublas
+    // // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    // stat = cublasSgetrfBatched(cHandle,
+    //                            maxn2,
+    //                            d_PointerR,
+    //                            lda,
+    //                            d_PivotArray,
+    //                            d_info,
+    //                            batchsize);
     
-    // error handling
-    if (stat != CUBLAS_STATUS_SUCCESS) {
-        printf("\ncublasSgetrfBatched failed");
-        printf("\ncublas error: %d\n", stat);
+    // // error handling
+    // if (stat != CUBLAS_STATUS_SUCCESS) {
+    //     printf("\ncublasSgetrfBatched failed");
+    //     printf("\ncublas error: %d\n", stat);
         
-        return stat;
-    }
+    //     return stat;
+    // }
 
-    printf("before info to host\n");
-    // copy info back to host
-    gpuAssert(
-        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
-    printf("copy info back to host\n");
+    // printf("before info to host\n");
+    // // copy info back to host
+    // gpuAssert(
+    //     cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    // printf("copy info back to host\n");
     
-    for (int i = 0; i < BATCHSIZE; i++) {
-        if (h_info[i] != 0) {
-            printf("\nError in LU: Matrix %d is singular\n", i);
-        }
-    }
+    // for (int i = 0; i < BATCHSIZE; i++) {
+    //     if (h_info[i] != 0) {
+    //         printf("\nError in LU: Matrix %d is singular\n", i);
+    //     }
+    // }
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -73,7 +73,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
                                maxn2,
                                d_PointerR,
                                lda,
-                               d_PivotArray,
+                               NULL,
                                d_PointerInvR,
                                ldc,
                                d_info,
