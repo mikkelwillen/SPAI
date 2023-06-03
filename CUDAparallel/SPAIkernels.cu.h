@@ -165,11 +165,11 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         float* AHat = d_AHat[b];
 
         if (l == 0) {
-            AHat[i * maxn2 + j] = 0.0;
+            AHat[i * maxn2 + j] = 1.0;
         }
         __syncthreads();
 
-        if (i < d_n1[b] && j < d_n2[b]) {
+        if (i < n1 && j < n2) {
             int offset = d_A->offset[J[j]];
             int offsetDiff = d_A->offset[J[j] + 1] - offset;
             if (tid == 0) {
