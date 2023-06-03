@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
                 }
 
                 float* denseTest = CSCToDense(cscTest, I, J, n, n);
-                success = runcuSOLVERTest(denseTest, n);
+                success = sequentialTestCuSOLVER(denseTest, n);
 
                 printf("Done with test for size: %d and sparsity: %f \n", n, sparsity);  
             }
