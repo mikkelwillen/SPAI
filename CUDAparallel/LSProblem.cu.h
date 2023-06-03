@@ -192,17 +192,17 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     float* h_invR = (float*) malloc(maxn2 * maxn2 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_invR, d_invR, maxn2 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
-    printf("--printing invR--\n");
-    for (int b = 0; b < batchsize; b++) {
-        printf("batch %d\n", b);
-        for (int i = 0; i < maxn2; i++) {
-            for (int j = 0; j < maxn2; j++) {
-                printf("%f ", h_invR[b * maxn2 * maxn2 + i * maxn2 + j]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
+    // printf("--printing invR--\n");
+    // for (int b = 0; b < batchsize; b++) {
+    //     printf("batch %d\n", b);
+    //     for (int i = 0; i < maxn2; i++) {
+    //         for (int j = 0; j < maxn2; j++) {
+    //             printf("%f ", h_invR[b * maxn2 * maxn2 + i * maxn2 + j]);
+    //         }
+    //         printf("\n");
+    //     }
+    //     printf("\n");
+    // }
 
     // compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
