@@ -67,16 +67,8 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
         }
     }
 
-    int* h_PivotArray = (int*) malloc(maxn2 * batchsize * sizeof(int));
-    gpuAssert(
-        cudaMemcpy(h_PivotArray, d_PivotArray, maxn2 * batchsize * sizeof(int), cudaMemcpyDeviceToHost));
-    for (int i = 0; i < BATCHSIZE; i++) {
-        printf("Pivot array for matrix %d:\n", i);
-        for (int j = 0; j < maxn2; j++) {
-            printf("%d ", h_PivotArray[i * maxn2 + j]);
-        }
-        printf("\n");
-    }
+    printf("print pointerR after LU\n");
+    printPointerArray(d_PointerR, maxn2, maxn2, batchsize);
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
