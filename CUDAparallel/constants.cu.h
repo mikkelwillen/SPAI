@@ -15,7 +15,7 @@
 #define RUNS_GPU            1
 #define RUNS_CPU            1
 #define NUM_BLOCKS          1
-#define BLOCKSIZE           256
+#define BLOCKSIZE           1024
 #define ELEMS_PER_THREAD    12
 
 #define MIN(a, b) a < b ? a : b
