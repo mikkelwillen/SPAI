@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
         sparsityArray[0] = 0.1;
         sparsityArray[1] = 0.3;
         sparsityArray[2] = 0.5;
+        printf("Starting tests\n");
 
         for (int i = 0; i < 1; i++) {
             for (int j = 0; j < 3; j++) {
@@ -156,7 +157,7 @@ int main(int argc, char** argv) {
                     int success;
 
                     printf("\n\nStarting test for size: %d and sparsity: %f \n", i, sparsity);
-                    
+
                     float* test = (float*) malloc(sizeof(float) * n * n);
                     CSC* cscTest = createRandomCSC(n, n, sparsity);
 
