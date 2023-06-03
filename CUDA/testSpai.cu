@@ -157,15 +157,24 @@ int main(int argc, char** argv) {
 
                 printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
 
-                float* test = (float*) malloc(sizeof(float) * n * n);
-                CSC* cscTest = createRandomCSC(n, n, sparsity);
-                success = sequentialTest(cscTest, tolerance, maxIterations, s);
-
-                // When we want to test cuSOLVER run this:
                 // float* test = (float*) malloc(sizeof(float) * n * n);
                 // CSC* cscTest = createRandomCSC(n, n, sparsity);
-                // float* denseTest = cscToDense(cscTest);
-                // success = runcuSOLVERTest(denseTest, n);
+                // success = sequentialTest(cscTest, tolerance, maxIterations, s);
+
+                // When we want to test cuSOLVER run this:
+                float* test = (float*) malloc(sizeof(float) * n * n);
+                CSC* cscTest = createRandomCSC(n, n, sparsity);
+
+                // Create I as all the row indices in cscTest
+                int* I = (int*) malloc(sizeof(int) * n);
+                int* J = (int*) malloc(sizeof(int) * n);
+                for (int i = 0; i < n; i++) {
+                    I[i] = i;
+                    J[i] = i;
+                }
+
+                float* denseTest = CSCToDense(cscTest, I, J, n, n);
+                success = runcuSOLVERTest(denseTest, n);
 
                 printf("Done with test for size: %d and sparsity: %f \n", n, sparsity);  
             }
