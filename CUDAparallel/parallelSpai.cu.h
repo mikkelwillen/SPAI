@@ -553,10 +553,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             gpuAssert(
                 cudaMemcpy(h_residualNorm, d_residualNorm, batchsize * sizeof(float), cudaMemcpyDeviceToHost));
             
-            printf("--printing h_residualNorm--\n");
-            for (int b = 0; b < batchsize; b++) {
-                printf("%f ", h_residualNorm[b]);
-            }
+            // printf("--printing h_residualNorm--\n");
+            // for (int b = 0; b < batchsize; b++) {
+            //     printf("%f ", h_residualNorm[b]);
+            // }
 
             toleranceNotMet = 0;
             for (int b = 0; b < batchsize; b++) {
