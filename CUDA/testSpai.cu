@@ -148,7 +148,7 @@ int main(int argc, char** argv) {
         sparsityArray[2] = 0.5;
         printf("Starting tests\n");
 
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 5; i++) {
             for (int j = 0; j < 3; j++) {
                 int n = sizeArray[i];
                 float sparsity = sparsityArray[j];
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
                 float* denseTest = CSCToDense(cscTest, I, J, n, n);
                 success = sequentialTestCuSOLVER(denseTest, n);
 
-                printf("Done with test for size: %d and sparsity: %f \n", n, sparsity);  
+                printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
             }
         }
 
