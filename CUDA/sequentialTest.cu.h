@@ -37,4 +37,32 @@ int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
 
 }
 
+int sequentialTestCuSOLVER(float* A, int n) {
+
+    double gigaBytesPerSec;
+    unsigned long int elapsed;
+    struct timeval t_start, t_end, t_diff;
+
+    { // timing the GPU implementations
+        gettimeofday(&t_start, NULL);
+
+        for(int i=0; i<RUNS_CPU; i++) {
+            cuSOLVERInversion(A, n, n);
+        }
+        
+        cudaDeviceSynchronize();
+
+        gettimeofday(&t_end, NULL);
+        timeval_subtract(&t_diff, &t_end, &t_start);
+        elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
+        gigaBytesPerSec = 2 * A->countNonZero * sizeof(int) * 1.0e-3f / elapsed;
+        printf("\n\nSequential SPAI runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+              , elapsed, gigaBytesPerSec);
+    }
+
+    // gpuAssert( cudaPeekAtLastError() );
+    return 0;
+
+}
+
 #endif
