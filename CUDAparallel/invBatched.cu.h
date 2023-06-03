@@ -44,7 +44,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
                                maxn2,
                                d_PointerR,
                                lda,
-                               d_PivotArray,
+                               NULL,
                                d_info,
                                batchsize);
     
@@ -58,15 +58,15 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
 
     printf("before info to host\n");
     // copy info back to host
-    // gpuAssert(
-    //     cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
-    // printf("copy info back to host\n");
+    gpuAssert(
+        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    printf("copy info back to host\n");
     
-    // for (int i = 0; i < BATCHSIZE; i++) {
-    //     if (h_info[i] != 0) {
-    //         printf("\nError in LU: Matrix %d is singular\n", i);
-    //     }
-    // }
+    for (int i = 0; i < BATCHSIZE; i++) {
+        if (h_info[i] != 0) {
+            printf("\nError in LU: Matrix %d is singular\n", i);
+        }
+    }
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -74,7 +74,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
                                maxn2,
                                d_PointerR,
                                lda,
-                               d_PivotArray,
+                               NULL,
                                d_PointerInvR,
                                ldc,
                                d_info,
@@ -88,16 +88,16 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
         return stat;
     }
 
-    // // copy info back to host
-    // gpuAssert(
-    //     cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    // copy info back to host
+    gpuAssert(
+        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
     
-    // // check for singular matrices
-    // for (int i = 0; i < BATCHSIZE; i++) {
-    //     if (h_info[i] != 0) {
-    //         printf("\nError in INV: Matrix %d is singular\n", i);
-    //     }
-    // }
+    // check for singular matrices
+    for (int i = 0; i < BATCHSIZE; i++) {
+        if (h_info[i] != 0) {
+            printf("\nError in INV: Matrix %d is singular\n", i);
+        }
+    }
 
     // free memory
     gpuAssert(
