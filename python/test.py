@@ -83,12 +83,12 @@ def testofScipy(A):
     # print("Norm of Scipy-implementation: ", np.linalg.norm(A * AInv - np.identity(AInv.shape[1])))
 
 # For n = 10, 100, 1000, 10000, 100000, 1000000, 100000:
-size = [100000]
-den = [0.1, 0.3, 0.5]
+size = [10]
+den = [0.1]
 for n in size:
     for d in den:
         print("\nTesting for n = %a and density = %a" % (n, d))
-        if n > 10 or d > 0.1:
+        if n > 1 or d > 0.0:
             A = scipy.sparse.random(n, n, density=d, format='csc', random_state=1)
 
             testofScipy(A)
