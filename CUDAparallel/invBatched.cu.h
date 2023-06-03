@@ -36,7 +36,7 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // malloc space for pivot array
     gpuAssert(
         cudaMalloc((void**) &d_PivotArray, maxn2 * batchsize * sizeof(int)));
-    // printf("malloc pivot array\n");
+    printf("malloc pivot array\n");
 
     // run batched LU factorization from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -67,9 +67,6 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
             printf("\nError in LU: Matrix %d is singular\n", i);
         }
     }
-
-    printf("print pointerR after LU\n");
-    printPointerArray<<<1, 1>>>(d_PointerR, maxn2, maxn2, batchsize);
 
     // run batched inversion from cublas
     // cublas docs: https://docs.nvidia.com/cuda/cublas/
@@ -105,6 +102,8 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     // free memory
     gpuAssert(
         cudaFree(d_info));
+    gpuAssert(
+        cudaFree(d_PivotArray));
     free(h_info);
 
     return 0;
