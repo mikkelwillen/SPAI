@@ -83,8 +83,8 @@ def testofScipy(A):
     print("Norm of Scipy-implementation: ", np.linalg.norm(A * AInv - np.identity(AInv.shape[1])))
 
 # For n = 10, 100, 1000, 10000, 100000, 1000000, 100000:
-size = [10000, 100000]
-den = [0.1, 0.3, 0.5]
+size = [10000]
+den = [0.5]
 for n in size:
     for d in den:
         print("\nTesting for n = %a and density = %a" % (n, d))
