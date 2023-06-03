@@ -88,16 +88,16 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
         return stat;
     }
 
-    // copy info back to host
-    gpuAssert(
-        cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
+    // // copy info back to host
+    // gpuAssert(
+    //     cudaMemcpy(h_info, d_info, BATCHSIZE * sizeof(int), cudaMemcpyDeviceToHost));
     
-    // check for singular matrices
-    for (int i = 0; i < BATCHSIZE; i++) {
-        if (h_info[i] != 0) {
-            printf("\nError in INV: Matrix %d is singular\n", i);
-        }
-    }
+    // // check for singular matrices
+    // for (int i = 0; i < BATCHSIZE; i++) {
+    //     if (h_info[i] != 0) {
+    //         printf("\nError in INV: Matrix %d is singular\n", i);
+    //     }
+    // }
 
     // free memory
     gpuAssert(
