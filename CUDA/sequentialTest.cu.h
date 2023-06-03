@@ -8,6 +8,7 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 #include "sequentialSpai.cu.h"
+#include "cuSOLVERInversion.cu.h"
 
 int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
 
