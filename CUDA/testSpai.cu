@@ -222,7 +222,7 @@ int main(int argc, char** argv) {
         // struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s);
+        runIdentityTest(cscC, m, m, 0.5, tolerance, maxIterations, s);
         // runcuSOLVERTest(m4, 4);
         // printf("after running cuSOLVER test\n");
     
