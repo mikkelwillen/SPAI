@@ -57,7 +57,7 @@ int sequentialTestCuSOLVER(float* A, int n) {
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
         gigaBytesPerSec = 2 * sizeof(int) * 1.0e-3f / elapsed;
-        printf("\n\nSequential SPAI runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+        printf("\n\ncuSOLVER runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
 
