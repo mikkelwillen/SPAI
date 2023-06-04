@@ -69,16 +69,16 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
     cudaMalloc((void**)&d_PointerC, batchsize * sizeof(float*));
 
     int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1, dim2);
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2, dim3);
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerC, d_C, batchsize, dim1, dim3);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim2);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim3);
+    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerC, d_C, batchsize, dim1 * dim3);
 
         { // timing the GPU implementations
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim3 + BLOCKSIZE - 1) / BLOCKSIZE;
-            matrixMultiplication<<<numBlocks, BLOCK_SIZE>>>(d_PointerA, d_PointerB, d_PointerC, dim1, dim2, dim3, batchsize);
+            matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_PointerC, NULL, NULL, NULL, dim1, dim2, dim3, batchsize);
         }
         
         cudaDeviceSynchronize();
