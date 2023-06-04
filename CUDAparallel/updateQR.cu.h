@@ -432,21 +432,21 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
     printf("hallo10\n");
     // print R
-    float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
-    gpuAssert(
-        cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("R:\n");
-    // for (int i = 0; i < batchsize; i++) {
-    //     printf("batch = %d\n", i);
-    //     for (int j = 0; j < maxn1; j++) {
-    //         for (int k = 0; k < maxn2; k++) {
-    //             printf("%f ", h_R[i * maxn1 * maxn2 + j * maxn2 + k]);
-    //         }
-    //         printf("\n");
-    //     }
-    //     printf("\n");
-    // }
-    free(h_R);
+    // float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+    // gpuAssert(
+    //     cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+    // // printf("R:\n");
+    // // for (int i = 0; i < batchsize; i++) {
+    // //     printf("batch = %d\n", i);
+    // //     for (int j = 0; j < maxn1; j++) {
+    // //         for (int k = 0; k < maxn2; k++) {
+    // //             printf("%f ", h_R[i * maxn1 * maxn2 + j * maxn2 + k]);
+    // //         }
+    // //         printf("\n");
+    // //     }
+    // //     printf("\n");
+    // // }
+    // free(h_R);
     printf("hallo11\n");
     // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
