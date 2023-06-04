@@ -1,5 +1,5 @@
-# PILAA
-Parallel Implementation of Linear Algebra Algorithms
+# SPAI preconditioner on GPU
+This project contains the code for the Bachelor Project "Parallel Implementation of the SPAI algorithm" by Caroline Amalie Kierkegaard and Mikkel Willén.
 
 Bachelor Project by Caroline Amalie Kierkegaard and Mikkel Willén
 
