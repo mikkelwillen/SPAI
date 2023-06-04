@@ -795,7 +795,7 @@ __global__ void permuteJ(int** d_PointerSortedJ, int** d_PointerJ, float** d_Poi
         float* d_Pc = d_PointerPc[b];
 
         if (i < n2) {
-            d_SortedJ[i] = 0.0;
+            d_SortedJ[i] = 0;
             for (int j = 0; j < n2; j++) {
                 d_SortedJ[i] += (int) (d_Pc[i * n2 + j] + 0.05) * d_J[j];
             }
