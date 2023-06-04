@@ -246,6 +246,22 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
 
+        // print R
+        float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+        printf("--printing h_R--\n");
+        for (int b = 0; b < batchsize; b++) {
+            printf("b: %d\n", b);
+            for (int j = 0; j < maxn1; j++) {
+                for (int k = 0; k < maxn2; k++) {
+                    printf("%f ", h_R[b * maxn1 * maxn2 + j * maxn2 + k]);
+                }
+                printf("\n");
+            }
+            printf("\n");
+        }
+
         LSProblem(cHandle, d_A, A, d_ADense, d_PointerQ, d_R, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
 
         // print residual
