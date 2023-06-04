@@ -398,6 +398,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, d_n1Union, d_n1Union, maxn1Union, maxn1Union, maxn1Union, batchsize);
+    cudaError_t test = cudaDeviceSynchronize();
+    printf("test = %d\n", test);
     printf("hallo8\n");
     // print unsortedQ
     float* h_unsortedQ = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
@@ -433,8 +435,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     
     cudaDeviceSynchronize();
     printPointerArray<<<1, 1>>>(d_PointerUnsortedR, maxn1Union, maxn2Union, batchsize);
-    cudaError_t test = cudaDeviceSynchronize();
-    printf("test = %d\n", test);
+    
     printf("hallo10\n");
     // print R
     // float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
