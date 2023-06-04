@@ -59,8 +59,8 @@ int sequentialTestCuSOLVER(float* A, int n) {
         
         cudaDeviceSynchronize();
 
-        printf("ending test\n");
         gettimeofday(&t_end, NULL);
+        printf("ending test\n");
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
         gigaBytesPerSec = 2 * n * n * n * 1.0e-3f / elapsed;
