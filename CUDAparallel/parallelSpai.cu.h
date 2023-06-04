@@ -249,7 +249,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         LSProblem(cHandle, d_A, A, d_ADense, d_PointerQ, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
 
         // print residual
-        // float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
+        float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         // gpuAssert(
         //     cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
         // printf("--printing h_residual--\n");
@@ -260,6 +260,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     }
         //     printf("\n");
         // }
+        free(h_residual);
         
         // check if the tolerance is met
         int toleranceNotMet = 0;
@@ -620,8 +621,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     }
         //     printf("\n");
         // }
-        
-        free(h_residual);
+
         h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
