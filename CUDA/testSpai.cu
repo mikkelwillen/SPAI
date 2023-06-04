@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
         int s = 1;
 
         // RUNNING OUR SPAI ONCE
-        int n = 10000;
+        int n = 10;
         int maxIterations = n - 1;
         float sparsity = 0.1;
 
@@ -91,8 +91,6 @@ int main(int argc, char** argv) {
         //         printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
         //     }
 
-        
-        }
 
 
     
