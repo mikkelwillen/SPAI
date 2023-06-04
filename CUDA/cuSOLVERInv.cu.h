@@ -176,14 +176,14 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
     // Compute buffersize of L
     stat = cusolverDnXtrtri_bufferSize(handle,
-                                      CUBLAS_FILL_MODE_LOWER,
-                                      CUBLAS_DIAG_NON_UNIT,
-                                        n,
-                                        CUDA_R_32F,
-                                        d_L,
-                                        lda,
-                                        &workspaceInBytesOnDevice,
-                                        &workspaceInBytesOnHost);
+                                       CUBLAS_FILL_MODE_LOWER,
+                                       CUBLAS_DIAG_NON_UNIT,
+                                       n,
+                                       CUDA_R_32F,
+                                       d_L,
+                                       lda,
+                                       &workspaceInBytesOnDevice,
+                                       &workspaceInBytesOnHost);
 
     void* bufferOnDevice;
     gpuAssert(
@@ -224,14 +224,14 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
     // Compute buffersize of U
     stat = cusolverDnXtrtri_bufferSize(handle,
-                                      CUBLAS_FILL_MODE_UPPER,
-                                      CUBLAS_DIAG_NON_UNIT,
-                                        n,
-                                        CUDA_R_32F,
-                                        d_U,
-                                        lda,
-                                        &workspaceInBytesOnDevice,
-                                        &workspaceInBytesOnHost);
+                                       CUBLAS_FILL_MODE_UPPER,
+                                       CUBLAS_DIAG_NON_UNIT,
+                                       n,
+                                       CUDA_R_32F,
+                                       d_U,
+                                       lda,
+                                       &workspaceInBytesOnDevice,
+                                       &workspaceInBytesOnHost);
     
     gpuAssert(
         cudaFree(bufferOnDevice));
