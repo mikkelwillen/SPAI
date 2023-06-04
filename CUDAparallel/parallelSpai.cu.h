@@ -128,8 +128,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         }
 
         // free space
-        free(h_n1);
-        free(h_n2);
+        // free(h_n1);
+        // free(h_n2);
 
         // create d_AHat
         float* d_AHat;
