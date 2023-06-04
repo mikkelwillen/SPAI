@@ -13,7 +13,7 @@
 //#define MAX_WORKGROUP_SIZE  1024
 
 #define RUNS_GPU            1
-#define RUNS_CPU            0
+#define RUNS_CPU            2
 #define NUM_BLOCKS          1
 #define BLOCK_SIZE          256
 #define ELEMS_PER_THREAD    12
