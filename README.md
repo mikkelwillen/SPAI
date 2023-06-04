@@ -1,7 +1,5 @@
 # SPAI preconditioner on GPU
-This project contains the code for the Bachelor Project "Parallel Implementation of the SPAI algorithm" by Caroline Amalie Kierkegaard and Mikkel Willén.
-
-Bachelor Project by Caroline Amalie Kierkegaard and Mikkel Willén
+This project contains the code for the Bachelor Project "Parallel Implementation of the SPAI algorithm" by Caroline Amalie Kierkegaard and Mikkel Willén. The project was supervised by Cosmin Oancea and was submitted in June 2023.
 
 ## Project description
 This thesis explores the Sparse Approximate Inverse (SPAI) preconditioner, which calculates
