@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
                 int n = sizeArray[i];
                 float sparsity = sparsityArray[j];
                 int maxIterations = n - 1;
-                // int success1;
+                int success1;
                 // int success2;
 
                 // printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
                 float* test = (float*) malloc(sizeof(float) * n * n);
                 CSC* cscTest = createRandomCSC(n, n, sparsity);
                 // success1 = sequentialTest(cscTest, tolerance, maxIterations, s);
-                runIdentityTest(cscTest, n, n, sparsity, tolerance, maxIterations, s);
+                success1 = runIdentityTest(cscTest, n, n, sparsity, tolerance, maxIterations, s);
 
                 // printf("Running cuSOLVER test\n");
                 // // When we want to test cuSOLVER run this:
@@ -91,8 +91,7 @@ int main(int argc, char** argv) {
 
                 // printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
             }
-
-
+        }
 
     
         // float* A = (float*) malloc(sizeof(float) * m * n);
