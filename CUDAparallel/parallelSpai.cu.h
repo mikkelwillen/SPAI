@@ -548,6 +548,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             //     }
             //     printf("\n");
             // }
+            free(h_mHat_k);
 
             float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
             gpuAssert(
@@ -561,6 +562,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             //     }
             //     printf("\n");
             // }
+            free(h_residual);
 
             float* h_residualNorm = (float*) malloc(batchsize * sizeof(float));
             gpuAssert(
@@ -570,6 +572,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // for (int b = 0; b < batchsize; b++) {
             //     printf("%f ", h_residualNorm[b]);
             // }
+            free(h_residualNorm);
 
             toleranceNotMet = 0;
             for (int b = 0; b < batchsize; b++) {
@@ -579,18 +582,18 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // free memory
-            gpuAssert(
-                cudaFree(d_l));
-            gpuAssert(
-                cudaFree(d_PointerL));
-            gpuAssert(
-                cudaFree(d_KeepArray));
-            gpuAssert(
-                cudaFree(d_PointerKeepArray));
-            gpuAssert(
-                cudaFree(d_n2Tilde));
-            gpuAssert(
-                cudaFree(d_PointerJTilde));
+            // gpuAssert(
+            //     cudaFree(d_l));
+            // gpuAssert(
+            //     cudaFree(d_PointerL));
+            // gpuAssert(
+            //     cudaFree(d_KeepArray));
+            // gpuAssert(
+            //     cudaFree(d_PointerKeepArray));
+            // gpuAssert(
+            //     cudaFree(d_n2Tilde));
+            // gpuAssert(
+            //     cudaFree(d_PointerJTilde));
             
         }
 
