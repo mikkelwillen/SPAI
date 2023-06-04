@@ -606,6 +606,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaFree(d_rhoSquared));
             gpuAssert(
                 cudaFree(d_PointerRhoSquared));
+            gpuAssert(
+                cudaFree(d_newN2Tilde));
             
             
         }
