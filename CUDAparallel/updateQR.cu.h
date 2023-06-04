@@ -496,8 +496,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     int* sortedJ;
     gpuAssert(
         cudaMalloc((void**) &sortedJ, batchsize * maxn2Union * sizeof(int)));
-    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, batchsize);
+    // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, batchsize);
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, sortedJ, batchsize, maxn2Union);

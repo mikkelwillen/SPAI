@@ -742,8 +742,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_residual));
         gpuAssert(
             cudaFree(d_residualNorm));
-        
-        
     }
 
     // copy M back to host

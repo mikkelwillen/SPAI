@@ -207,7 +207,6 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     //     }
     //     printf("\n");
     // }
-    free(h_invR);
 
     // compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -265,7 +264,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
         cudaFree(d_invR));
     gpuAssert(
         cudaFree(d_PointerInvR));
-    
+
     return 0;
 }
 
