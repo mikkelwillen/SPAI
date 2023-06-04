@@ -398,8 +398,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, d_n1Union, d_n1Union, maxn1Union, maxn1Union, maxn1Union, batchsize);
-    cudaError_t test = cudaDeviceSynchronize();
-    printf("test = %d\n", test);
     printf("hallo8\n");
     // print unsortedQ
     float* h_unsortedQ = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
@@ -429,9 +427,12 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     printf("hallo9\n");
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_unsortedR, batchsize, maxn1Union * maxn2Union);
-
+    cudaError_t test = cudaDeviceSynchronize();
+    printf("test1 = %d\n", test);
     numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
+    cudaError_t test = cudaDeviceSynchronize();
+    printf("test2 = %d\n", test);
     
     cudaDeviceSynchronize();
     printPointerArray<<<1, 1>>>(d_PointerUnsortedR, maxn1Union, maxn2Union, batchsize);
