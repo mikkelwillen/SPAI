@@ -641,6 +641,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     }
         //     printf("\n");
         // }
+        free(h_mHat_k);
 
         h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         gpuAssert(
@@ -654,6 +655,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     }
         //     printf("\n");
         // }
+        free(h_residual);
 
         // printf("--SortedJ--\n");
         // intPrintPointerArray<<<1, 1>>>(d_PointerSortedJ, 1, maxn2, batchsize);
@@ -668,9 +670,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         // free memory
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerI, batchsize);
-        freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJ, batchsize);
-        freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, batchsize);
+        // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerI, batchsize);
+        // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJ, batchsize);
+        // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, batchsize);
         gpuAssert(
             cudaFree(d_n1));
         gpuAssert(
