@@ -28,7 +28,23 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
 
+    float* h_R = (float*) malloc(20 * maxn2 * batchsize * sizeof(float));
+
+    // copy R to host
+    gpuAssert(
+        cudaMemcpy(h_R, d_R, 20 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
     
+    // print R
+    printf("\nR:\n");
+    for (int i = 0; i < batchsize; i++) {
+        printf("\nMatrix %d:\n", i);
+        for (int j = 0; j < 20; j++) {
+            for (int k = 0; k < maxn2; k++) {
+                printf("%f ", h_R[i * 20 * maxn2 + j * 20 + k]);
+            }
+            printf("\n");
+        }
+    }
 
     printf("maxn2 in invBatched: %d\n", maxn2);
     printf("batchsize in invBatched: %d\n", batchsize);
