@@ -306,8 +306,14 @@ float* cuSOLVERInversion(float* A, int m, int n) {
         cudaFree(bufferOnDevice));
     gpuAssert(
         cudaFree(bufferOnHost));
-    
+    gpuAssert(
+        cudaFree(d_info));
+    gpuAssert(
+        cudaFree(devIpiv));
+    gpuAssert(
+        cudaFree(workspace));
 
+    
     // return AInv
     return h_AInv;
 
