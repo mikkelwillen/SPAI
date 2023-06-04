@@ -279,7 +279,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
-        free(h_residualNorm);
+        // free(h_residualNorm);
         printf("toleranceNotMet: %d\n", toleranceNotMet);
 
         // while the tolerance is not met, continue the loop
