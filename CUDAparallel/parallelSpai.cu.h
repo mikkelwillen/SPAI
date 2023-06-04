@@ -527,11 +527,15 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             gpuAssert(
                 cudaMalloc((void**) &d_n2, batchsize * sizeof(int)));
 
-            gpuAssert(
-                cudaMemcpy(d_n1, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
-            gpuAssert(
-                cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
-            printf("cudaMemcpy success\n");
+            // gpuAssert(
+            //     cudaMemcpy(d_n1, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
+            // gpuAssert(
+            //     cudaMemcpy(d_n2, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToDevice));
+            // printf("cudaMemcpy success\n");
+
+            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            copyIntArray<<<numBlocks, BLOCKSIZE>>>(d_n1, d_n1Union, batchsize);
+            copyIntArray<<<numBlocks, BLOCKSIZE>>>(d_n2, d_n2Union, batchsize);
             
             // set maxn1 and maxn2 to maxn1Union and maxn2Union
             maxn1 = maxn1Union;

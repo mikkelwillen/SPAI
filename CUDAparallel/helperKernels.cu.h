@@ -35,4 +35,11 @@ __global__ void copyFloatArray(float* d_dest, float* d_src, int size) {
     }
 }
 
+__global__ void copyIntArray(int* d_dest, int* d_src, int size) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < size) {
+        d_dest[tid] = d_src[tid];
+    }
+}
+
 #endif
