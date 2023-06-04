@@ -28,6 +28,8 @@ int invBatched(cublasHandle_t cHandle, float** d_PointerR, float** d_PointerInvR
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
 
+    printPointerArray<<<1, 1>>>(d_PointerR, maxn2, maxn2, batchsize);
+
     printf("maxn2 in invBatched: %d\n", maxn2);
     printf("batchsize in invBatched: %d\n", batchsize);
 
