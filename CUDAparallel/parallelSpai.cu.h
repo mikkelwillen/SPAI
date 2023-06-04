@@ -127,6 +127,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
+        // free space
+        free(h_n1);
+        free(h_n2);
+
         // create d_AHat
         float* d_AHat;
         float** d_PointerAHat;
@@ -638,15 +642,17 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         // free memory
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-        freeIJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, batchsize);
+        freeIJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerSortedJ, batchsize);
+        gpuAssert(
+            cudaFree(d_n1));
+        gpuAssert(
+            cudaFree(d_n2));
         gpuAssert(
             cudaFree(d_PointerI));
         gpuAssert(
             cudaFree(d_PointerJ));
         gpuAssert(
-            cudaFree(d_n1));
-        gpuAssert(
-            cudaFree(d_n2));
+            cudaFree(d_PointerSortedJ));
         gpuAssert(
             cudaFree(d_AHat));
         gpuAssert(
