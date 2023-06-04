@@ -260,7 +260,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         //     }
         //     printf("\n");
         // }
-        free(h_residual);
+        // free(h_residual);
         
         // check if the tolerance is met
         int toleranceNotMet = 0;
