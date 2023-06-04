@@ -425,7 +425,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             printf("hallo5\n");
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeITilde<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerI, d_PointerJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, batchsize);
-
+            printf("hallo6\n");
             // find maxn1Tilde, maxn1Union and maxn2Union
             int maxn1Tilde = 0;
             int maxn1Union = 0;
@@ -434,14 +434,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
             int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
             int* h_n2Union = (int*) malloc(batchsize * sizeof(int));
-
+            printf("hallo7\n");
             gpuAssert(
                 cudaMemcpy(h_n1Tilde, d_n1Tilde, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
             gpuAssert(
                 cudaMemcpy(h_n1Union, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
             gpuAssert(
                 cudaMemcpy(h_n2Union, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
-            
+            printf("hallo8\n");
             for (int b = 0; b < batchsize; b++) {
                 if (h_n1Tilde[b] > maxn1Tilde) {
                     maxn1Tilde = h_n1Tilde[b];
