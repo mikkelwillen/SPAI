@@ -523,7 +523,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
     printf("Q and R set\n");
 
-    h_R = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
+    float* h_R = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
     // printf("R after memcpy:\n");
