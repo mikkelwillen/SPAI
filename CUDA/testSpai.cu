@@ -18,7 +18,7 @@ int main(int argc, char** argv) {
         int s = 1;
 
         // RUNNING OUR SPAI ONCE
-        int n = 10;
+        int n = 500;
         int maxIterations = n - 1;
         float sparsity = 0.1;
 
