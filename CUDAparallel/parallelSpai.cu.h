@@ -595,6 +595,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerIUnion, batchsize);
             freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJUnion, batchsize);
 
+            cudaDeviceSynchronize();
+
             gpuAssert(
                 cudaFree(d_l));
             gpuAssert(
@@ -629,10 +631,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaFree(d_n2Union));
             gpuAssert(
                 cudaFree(d_PointerITilde));
-            // gpuAssert(
-            //     cudaFree(d_PointerIUnion));
-            // gpuAssert(
-            //     cudaFree(d_PointerJUnion));
+            gpuAssert(
+                cudaFree(d_PointerIUnion));
+            gpuAssert(
+                cudaFree(d_PointerJUnion));
             
         }
 
