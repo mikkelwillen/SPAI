@@ -298,7 +298,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, d_PointerL, A->m, d_n1, i, batchsize);
-            printf("hallo1\n");
 
             // check what indeces to keep
             int* d_KeepArray;
@@ -322,7 +321,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeN2Tilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_n2Tilde, A->n, batchsize);
 
-            printf("hallo2\n");
             // find the max value of n2Tilde
             int maxn2Tilde = 0;
             int* h_n2Tilde = (int*) malloc(batchsize * sizeof(int));
@@ -352,7 +350,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_rhoSquared, batchsize * maxn2Tilde * sizeof(float)));
             gpuAssert(
                 cudaMalloc((void**) &d_PointerRhoSquared, batchsize * sizeof(float*)));
-            printf("hallo3\n");
+
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_rhoSquared, batchsize, maxn2Tilde);
             
@@ -381,7 +379,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_smallestJTilde, batchsize * s * sizeof(int)));
             gpuAssert(
                 cudaMalloc((void**) &d_PointerSmallestJTilde, batchsize * sizeof(int*)));
-            printf("hallo4\n");
+
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSmallestJTilde, d_smallestJTilde, batchsize, s);
         
@@ -423,10 +421,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaMalloc((void**) &d_PointerIUnion, batchsize * sizeof(int*)));
             gpuAssert(
                 cudaMalloc((void**) &d_PointerJUnion, batchsize * sizeof(int*)));
-            printf("hallo5\n");
+
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeITilde<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerI, d_PointerJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, batchsize);
-            printf("hallo6\n");
+
             // find maxn1Tilde, maxn1Union and maxn2Union
             int maxn1Tilde = 0;
             int maxn1Union = 0;
@@ -435,14 +433,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
             int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
             int* h_n2Union = (int*) malloc(batchsize * sizeof(int));
-            printf("hallo7\n");
+
             gpuAssert(
                 cudaMemcpy(h_n1Tilde, d_n1Tilde, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
             gpuAssert(
                 cudaMemcpy(h_n1Union, d_n1Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
             gpuAssert(
                 cudaMemcpy(h_n2Union, d_n2Union, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
-            printf("hallo8\n");
+          
             for (int b = 0; b < batchsize; b++) {
                 if (h_n1Tilde[b] > maxn1Tilde) {
                     maxn1Tilde = h_n1Tilde[b];
@@ -456,7 +454,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                     maxn2Union = h_n2Union[b];
                 }
             }
-            printf("hallo6\n");
+
+            free(h_n1Tilde);
+            free(h_n1Union);
+            free(h_n2Union);
+            
             // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
             int updateSuccess = updateQR(cHandle, A, d_A, d_ADense, d_Q, d_R, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
 
