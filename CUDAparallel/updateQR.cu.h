@@ -432,6 +432,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
     
     cudaDeviceSynchronize();
+    printPointerArray<<<1, 1>>>(d_PointerUnsortedR, maxn1Union, maxn2Union, batchsize);
+    cudaDeviceSynchronize();
 
     printf("hallo10\n");
     // print R
