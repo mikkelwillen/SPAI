@@ -681,8 +681,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_PointerI));
         gpuAssert(
             cudaFree(d_PointerJ));
-        gpuAssert(
-            cudaFree(d_PointerSortedJ));
+        // gpuAssert(
+        //     cudaFree(d_PointerSortedJ));
         gpuAssert(
             cudaFree(d_AHat));
         gpuAssert(
@@ -716,8 +716,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     gpuAssert(
         cudaFree(d_ADense));
     
-
-
     cublasDestroy(cHandle);
 
     return M;
