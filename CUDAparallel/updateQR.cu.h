@@ -432,7 +432,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
     
     cudaDeviceSynchronize();
-    
+
     printf("hallo10\n");
     // print R
     // float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
@@ -453,6 +453,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     printf("hallo11\n");
     // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
+    
     gpuAssert(
         cudaMemcpy(h_unsortedR, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
     // printf("unsortedR:\n");
