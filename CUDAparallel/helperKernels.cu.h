@@ -28,4 +28,11 @@ __global__ void intDeviceToDevicePointerKernel(int** d_Pointer, int* d_data, int
     }
 }
 
+__global__ void copyFloatArray(float* d_dest, float* d_src, int size) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < size) {
+        d_dest[tid] = d_src[tid];
+    }
+}
+
 #endif
