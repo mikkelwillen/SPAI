@@ -70,7 +70,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     
     free(I);
     free(J);
-    free(h_ADense);
+    // free(h_ADense);
 
     // copy A to device
     CSC* d_A = copyCSCFromHostToDevice(A);
