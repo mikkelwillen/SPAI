@@ -91,8 +91,6 @@ int main(int argc, char** argv) {
         //         printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
         //     }
 
-        
-        }
 
 
     
