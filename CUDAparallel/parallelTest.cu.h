@@ -37,4 +37,69 @@ int parallelTest(CSC* A, float tolerance, int maxIteration, int s, int batchsize
 
 }
 
+int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s, int batchsize) {
+    float* identity = (float*) malloc (sizeof(float) * n * n);
+
+    struct CSC* res = parallelSpai(cscA, tolerance, maxIterations, s, batchsize);
+    printf("After parallelSpai\n");
+    int* I = (int*) malloc(sizeof(int) * m);
+    int* J = (int*) malloc(sizeof(int) * n);
+    for (int i = 0; i < m; i++) {
+        I[i] = i;
+    }
+    for (int i = 0; i < n; i++) {
+        J[i] = i;
+    }
+
+    float* A = CSCToDense(cscA, I, J, m, n);
+    float* inv = CSCToDense(res, I, J, m, n);
+    
+    // identity = A * inv
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            identity[i * n + j] = 0.0;
+            for (int k = 0; k < n; k++) {
+                identity[i * n + j] += A[i * n + k] * inv[k * n + j];
+            }
+        }
+    }
+
+    // print A
+    printf("A:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", A[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print inv
+    printf("inv:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", inv[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // print identity
+    printf("identity:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", identity[i * n + j]);
+        }
+        printf("\n");
+    }
+
+    // calculate error
+    float error = 0.0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            error += (identity[i * n + j] - (i == j ? 1.0 : 0.0)) * (identity[i * n + j] - (i == j ? 1.0 : 0.0));
+        }
+    }
+
+    printf("Error: %f%\n", error);
+}
+
 #endif
