@@ -134,52 +134,67 @@ int main(int argc, char** argv) {
         initHwd();
         float tolerance = 0.01;
         int s = 1;
-        int m = 100;
+        int n = 100;
+        float sparsity = 0.1;
 
-        int* sizeArray = (int*) malloc(sizeof(int) * 5);
-        sizeArray[0] = 10;
-        sizeArray[1] = 100;
-        sizeArray[2] = 1000;
-        sizeArray[3] = 10000;
-        sizeArray[4] = 100000;
+        float* test = (float*) malloc(sizeof(float) * n * n);
+        CSC* cscTest = createRandomCSC(n, n, sparsity);
 
-        float* sparsityArray = (float*) malloc(sizeof(float) * 3);
-        sparsityArray[0] = 0.1;
-        sparsityArray[1] = 0.3;
-        sparsityArray[2] = 0.5;
-        printf("Starting tests\n");
-
-        for (int i = 1; i < 5; i++) {
-            for (int j = 0; j < 3; j++) {
-                int n = sizeArray[i];
-                float sparsity = sparsityArray[j];
-                int maxIterations = n - 1;
-                int success;
-
-                printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
-
-                float* test = (float*) malloc(sizeof(float) * n * n);
-                CSC* cscTest = createRandomCSC(n, n, sparsity);
-                success = sequentialTest(cscTest, tolerance, maxIterations, s);
-
-                // // When we want to test cuSOLVER run this:
-                // float* test = (float*) malloc(sizeof(float) * n * n);
-                // CSC* cscTest = createRandomCSC(n, n, sparsity);
-
-                // // Create I as all the row indices in cscTest
-                // int* I = (int*) malloc(sizeof(int) * n);
-                // int* J = (int*) malloc(sizeof(int) * n);
-                // for (int i = 0; i < n; i++) {
-                //     I[i] = i;
-                //     J[i] = i;
-                // }
-
-                // float* denseTest = CSCToDense(cscTest, I, J, n, n);
-                // success = sequentialTestCuSOLVER(denseTest, n);
-
-                printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
-            }
+        // Create I as all the row indices in cscTest
+        int* I = (int*) malloc(sizeof(int) * n);
+        int* J = (int*) malloc(sizeof(int) * n);
+        for (int i = 0; i < n; i++) {
+            I[i] = i;
+            J[i] = i;
         }
+
+        float* denseTest = CSCToDense(cscTest, I, J, n, n);
+        runcuSOLVERTest(denseTest, n);
+
+        // int* sizeArray = (int*) malloc(sizeof(int) * 5);
+        // sizeArray[0] = 10;
+        // sizeArray[1] = 100;
+        // sizeArray[2] = 1000;
+        // sizeArray[3] = 10000;
+        // sizeArray[4] = 100000;
+
+        // float* sparsityArray = (float*) malloc(sizeof(float) * 3);
+        // sparsityArray[0] = 0.1;
+        // sparsityArray[1] = 0.3;
+        // sparsityArray[2] = 0.5;
+        // printf("Starting tests\n");
+
+        // for (int i = 1; i < 5; i++) {
+        //     for (int j = 0; j < 3; j++) {
+        //         int n = sizeArray[i];
+        //         float sparsity = sparsityArray[j];
+        //         int maxIterations = n - 1;
+        //         int success;
+
+        //         printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
+
+        //         float* test = (float*) malloc(sizeof(float) * n * n);
+        //         CSC* cscTest = createRandomCSC(n, n, sparsity);
+        //         success = sequentialTest(cscTest, tolerance, maxIterations, s);
+
+        //         // // When we want to test cuSOLVER run this:
+        //         // float* test = (float*) malloc(sizeof(float) * n * n);
+        //         // CSC* cscTest = createRandomCSC(n, n, sparsity);
+
+        //         // // Create I as all the row indices in cscTest
+        //         // int* I = (int*) malloc(sizeof(int) * n);
+        //         // int* J = (int*) malloc(sizeof(int) * n);
+        //         // for (int i = 0; i < n; i++) {
+        //         //     I[i] = i;
+        //         //     J[i] = i;
+        //         // }
+
+        //         // float* denseTest = CSCToDense(cscTest, I, J, n, n);
+        //         // success = sequentialTestCuSOLVER(denseTest, n);
+
+        //         printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
+        //     }
+        // }
 
 
     

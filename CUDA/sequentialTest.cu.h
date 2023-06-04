@@ -17,6 +17,7 @@ int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
     struct timeval t_start, t_end, t_diff;
 
     { // timing the GPU implementations
+        sequentialSpai(A, tolerance, maxIteration, s);
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
