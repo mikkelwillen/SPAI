@@ -15,8 +15,8 @@ int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
         int m = 4;
-        int n = 20;
-        float sparsity = 1.0;
+        int n = 10;
+        float sparsity = 0.3;
         float tolerance = 0.01;
         int maxIterations = n - 1;
         int s = 1;
@@ -55,9 +55,11 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
 
-        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
+        // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
 
         // runMatrixMultiplicationTest();
+
+        parallelTest(cscC, tolerance, maxIterations, s, batchsize);
 
     } else if (argc == 8) {
         // read args

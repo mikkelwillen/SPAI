@@ -18,7 +18,7 @@ int parallelTest(CSC* A, float tolerance, int maxIteration, int s, int batchsize
     { // timing the GPU implementations
         gettimeofday(&t_start, NULL);
 
-        for(int i=0; i<RUNS_CPU; i++) {
+        for(int i=0; i<RUNS_GPU; i++) {
             parallelSpai(A, tolerance, maxIteration, s, batchsize);
         }
         
