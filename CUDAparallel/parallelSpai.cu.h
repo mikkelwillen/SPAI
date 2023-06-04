@@ -149,9 +149,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize * maxn1 * maxn2 * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
         
-        float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
-        gpuAssert(
-            cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+
+        // print AHat
+        // float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        // gpuAssert(
+        //     cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
         // printf("--printing h_AHat--\n");
         // for (int b = 0; b < batchsize; b++) {
@@ -245,9 +247,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
 
         LSProblem(cHandle, d_A, A, d_ADense, d_PointerQ, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
-        float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
-        gpuAssert(
-            cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
+
+        // print residual
+        // float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
+        // gpuAssert(
+        //     cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
         // printf("--printing h_residual--\n");
         // for (int b = 0; b < batchsize; b++) {
         //     printf("b: %d\n", b);
@@ -273,6 +277,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 toleranceNotMet = 1;
             }
         }
+
+        free(h_residualNorm);
         printf("toleranceNotMet: %d\n", toleranceNotMet);
 
         // while the tolerance is not met, continue the loop
@@ -665,6 +671,15 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_R));
         gpuAssert(
             cudaFree(d_PointerR));
+        gpuAssert(
+            cudaFree(d_mHat_k));
+        gpuAssert(
+            cudaFree(d_PointerMHat_k));
+        gpuAssert(
+            cudaFree(d_residual));
+        gpuAssert(
+            cudaFree(d_residualNorm));
+        
         
     }
 
