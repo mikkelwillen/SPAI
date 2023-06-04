@@ -197,7 +197,7 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
 // d_PointerI = device pointer pointer to I
 // d_PointerJ = device pointer pointer to J
 // batchsize  = the size of the batch
-__global__ void freeIJ(int** d_PointerI, int** d_PointerJ, d_PointerSortedJ, int batchsize) {
+__global__ void freeIJ(int** d_PointerI, int** d_PointerJ,int** d_PointerSortedJ, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
         if (d_PointerI[tid] != NULL) {
