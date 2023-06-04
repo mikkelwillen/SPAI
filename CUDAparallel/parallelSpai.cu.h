@@ -668,6 +668,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     // free memory
     freeDeviceCSC(d_A);
     freeDeviceCSC(d_M);
+    gpuAssert(
+        cudaFree(d_ADense));
+    
 
 
     cublasDestroy(cHandle);
