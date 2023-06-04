@@ -335,8 +335,6 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 }
             }
 
-            // free(h_n2Tilde);
-
             // fill JTilde
             int** d_PointerJTilde;
 
@@ -399,6 +397,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                     maxn2Tilde = h_n2Tilde[b];
                 }
             }
+
+            free(h_n2Tilde);
+            
 
             // find ITilde and make IUnion and JUnion
             int* d_n1Tilde;
