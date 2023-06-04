@@ -436,7 +436,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     
     cudaDeviceSynchronize();
     printPointerArray<<<1, 1>>>(d_PointerUnsortedR, maxn1Union, maxn2Union, batchsize);
-    
+    test = cudaDeviceSynchronize();
+    printf("test3 = %d\n", test);
     printf("hallo10\n");
     // print R
     // float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
@@ -460,10 +461,14 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     if (h_unsortedR == NULL) {
         printf("h_unsortedR is NULL\n");
     }
+    test = cudaDeviceSynchronize();
+    printf("test4 = %d\n", test);
     printf("maxn1Union: %d\n", maxn1Union);
     printf("maxn2Union: %d\n", maxn2Union);
     gpuAssert(
         cudaMemcpy(h_unsortedR, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
+    test = cudaDeviceSynchronize();
+    printf("test5 = %d\n", test);
     // printf("unsortedR:\n");
     // for (int i = 0; i < batchsize; i++) {
     //     printf("batch = %d\n", i);
@@ -476,7 +481,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_unsortedR);
-    printf("hallo12\n");
+    test = cudaDeviceSynchronize();
+    printf("test6 = %d\n", test);
     // free and malloc space for new mHat_k
     gpuAssert(
         cudaFree(d_mHat_k));
