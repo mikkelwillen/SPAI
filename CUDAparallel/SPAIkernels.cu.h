@@ -193,15 +193,14 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
     }
 }
 
-// kernel for freeing I and J
-// d_PointerI = device pointer pointer to I
-// d_PointerJ = device pointer pointer to J
+// kernel for freeing the arrays in the pointer array
+// d_PointerArray = device array of pointers to arrays
 // batchsize  = the size of the batch
-__global__ void freeArraysInPointerArray(int** d_PointerIArray, int batchsize) {
+__global__ void freeArraysInPointerArray(int** d_PointerArray, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
-        if (d_PointerIArray[tid] != NULL) {
-            free(d_PointerIArray[tid]);
+        if (d_PointerArray[tid] != NULL) {
+            free(d_PointerArray[tid]);
         }
     }
 }
