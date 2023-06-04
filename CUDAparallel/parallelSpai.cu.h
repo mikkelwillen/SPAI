@@ -684,8 +684,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_PointerI));
         gpuAssert(
             cudaFree(d_PointerJ));
-        // gpuAssert(
-        //     cudaFree(d_PointerSortedJ));
+        gpuAssert(
+            cudaFree(d_PointerSortedJ));
         gpuAssert(
             cudaFree(d_AHat));
         gpuAssert(
@@ -698,14 +698,14 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_R));
         gpuAssert(
             cudaFree(d_PointerR));
-        // gpuAssert(
-        //     cudaFree(d_mHat_k));
-        // gpuAssert(
-        //     cudaFree(d_PointerMHat_k));
-        // gpuAssert(
-        //     cudaFree(d_residual));
-        // gpuAssert(
-        //     cudaFree(d_residualNorm));
+        gpuAssert(
+            cudaFree(d_mHat_k));
+        gpuAssert(
+            cudaFree(d_PointerMHat_k));
+        gpuAssert(
+            cudaFree(d_residual));
+        gpuAssert(
+            cudaFree(d_residualNorm));
         
         
     }
