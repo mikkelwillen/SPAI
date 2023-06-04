@@ -134,7 +134,7 @@ int main(int argc, char** argv) {
         initHwd();
         float tolerance = 0.01;
         int s = 1;
-        int n = 10;
+        int n = 100;
         float sparsity = 0.1;
 
         float* test = (float*) malloc(sizeof(float) * n * n);
