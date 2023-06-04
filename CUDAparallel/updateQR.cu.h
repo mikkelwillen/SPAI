@@ -535,15 +535,15 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     gpuAssert(
         cudaMalloc((void**) &d_R, batchsize * maxn1Union * maxn2Union * sizeof(float)));
     
-    // gpuAssert(
-    //     cudaMemcpy(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToDevice));
-    // gpuAssert(
-    //     cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
-    numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    copyFloatArray<<<numBlocks, BLOCKSIZE>>>(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union);
+    gpuAssert(
+        cudaMemcpy(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToDevice));
+    gpuAssert(
+        cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
+    // numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    // copyFloatArray<<<numBlocks, BLOCKSIZE>>>(d_Q, d_unsortedQ, batchsize * maxn1Union * maxn1Union);
 
-    numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
-    copyFloatArray<<<numBlocks, BLOCKSIZE>>>(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union);
+    // numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
+    // copyFloatArray<<<numBlocks, BLOCKSIZE>>>(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union);
     printf("Q and R set\n");
 
     float* h_R = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
