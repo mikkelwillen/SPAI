@@ -589,11 +589,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // free memory
-            numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-            freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerITilde, batchsize);
-            freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerJTilde, batchsize);
-            freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerIUnion, batchsize);
-            freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJUnion, batchsize);
+            // numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+            // freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerITilde, batchsize);
+            // freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerJTilde, batchsize);
+            // freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerIUnion, batchsize);
+            // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJUnion, batchsize);
 
             gpuAssert(
                 cudaFree(d_l));
