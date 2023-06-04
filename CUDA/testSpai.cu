@@ -17,33 +17,33 @@ int main(int argc, char** argv) {
         float tolerance = 0.01;
         int s = 1;
 
-        // RUNNING OUR SPAI ONCE
-        int n = 500;
-        int maxIterations = n - 1;
-        float sparsity = 0.1;
-
-        float* test = (float*) malloc(sizeof(float) * n * n);
-        CSC* cscTest = createRandomCSC(n, n, sparsity);
-
-        runIdentityTest(cscTest, n, n, sparsity, tolerance, maxIterations, s);
-
-        // // RUNNING CUSOLVER ONCE
-        // int n = 10000;
+        // // RUNNING OUR SPAI ONCE
+        // int n = 500;
+        // int maxIterations = n - 1;
         // float sparsity = 0.1;
 
         // float* test = (float*) malloc(sizeof(float) * n * n);
         // CSC* cscTest = createRandomCSC(n, n, sparsity);
 
-        // // Create I as all the row indices in cscTest
-        // int* I = (int*) malloc(sizeof(int) * n);
-        // int* J = (int*) malloc(sizeof(int) * n);
-        // for (int i = 0; i < n; i++) {
-        //     I[i] = i;
-        //     J[i] = i;
-        // }
+        // runIdentityTest(cscTest, n, n, sparsity, tolerance, maxIterations, s);
 
-        // float* denseTest = CSCToDense(cscTest, I, J, n, n);
-        // sequentialTestCuSOLVER(denseTest, n);
+        // RUNNING CUSOLVER ONCE
+        int n = 1000;
+        float sparsity = 0.1;
+
+        float* test = (float*) malloc(sizeof(float) * n * n);
+        CSC* cscTest = createRandomCSC(n, n, sparsity);
+
+        // Create I as all the row indices in cscTest
+        int* I = (int*) malloc(sizeof(int) * n);
+        int* J = (int*) malloc(sizeof(int) * n);
+        for (int i = 0; i < n; i++) {
+            I[i] = i;
+            J[i] = i;
+        }
+
+        float* denseTest = CSCToDense(cscTest, I, J, n, n);
+        sequentialTestCuSOLVER(denseTest, n);
 
         // int* sizeArray = (int*) malloc(sizeof(int) * 5);
         // sizeArray[0] = 10;
