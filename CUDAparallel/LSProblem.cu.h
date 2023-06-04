@@ -139,7 +139,7 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
 // k                 = the index of the column to be added
 // residualNorm      = the norm of the residual
 // batchsize         = the batchsize for the cublas handle
-int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float** d_PointerQ, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
+int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float** d_PointerQ, float* d_R, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
     // define the number of blocks
     int numBlocks;
 

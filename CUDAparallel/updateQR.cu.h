@@ -480,7 +480,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2Union);
 
     // 13.7) compute the new solution m_k with the least squares problem
-    int lsSuccess = LSProblem(cHandle, d_A, A, d_ADense, d_PointerUnsortedQ, d_PointerUnsortedR, d_PointerMHat_k, d_PointerPc, d_PointerResidual, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, i, d_residualNorm, batchsize);
+    int lsSuccess = LSProblem(cHandle, d_A, A, d_ADense, d_PointerUnsortedQ, d_unsortedR, d_PointerUnsortedR, d_PointerMHat_k, d_PointerPc, d_PointerResidual, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, i, d_residualNorm, batchsize);
 
     if (lsSuccess != 0) {
         printf("LSProblem failed\n");
