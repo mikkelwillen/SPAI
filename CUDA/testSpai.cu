@@ -149,43 +149,43 @@ int main(int argc, char** argv) {
         sparsityArray[2] = 0.5;
         printf("Starting tests\n");
 
-        // for (int i = 0; i < 5; i++) {
-        //     for (int j = 0; j < 3; j++) {
-        //         int n = sizeArray[i];
-        //         float sparsity = sparsityArray[j];
-        //         int maxIterations = n - 1;
-        //         int success;
+        for (int i = 0; i < 5; i++) {
+            for (int j = 0; j < 3; j++) {
+                int n = sizeArray[i];
+                float sparsity = sparsityArray[j];
+                int maxIterations = n - 1;
+                int success;
 
-        //         printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
+                printf("\n\nStarting test for size: %d and sparsity: %f \n", n, sparsity);
 
-        //         // float* test = (float*) malloc(sizeof(float) * n * n);
-        //         // CSC* cscTest = createRandomCSC(n, n, sparsity);
-        //         // success = sequentialTest(cscTest, tolerance, maxIterations, s);
+                float* test = (float*) malloc(sizeof(float) * n * n);
+                CSC* cscTest = createRandomCSC(n, n, sparsity);
+                success = sequentialTest(cscTest, tolerance, maxIterations, s);
 
-        //         // When we want to test cuSOLVER run this:
-        //         float* test = (float*) malloc(sizeof(float) * n * n);
-        //         CSC* cscTest = createRandomCSC(n, n, sparsity);
+                // // When we want to test cuSOLVER run this:
+                // float* test = (float*) malloc(sizeof(float) * n * n);
+                // CSC* cscTest = createRandomCSC(n, n, sparsity);
 
-        //         // Create I as all the row indices in cscTest
-        //         int* I = (int*) malloc(sizeof(int) * n);
-        //         int* J = (int*) malloc(sizeof(int) * n);
-        //         for (int i = 0; i < n; i++) {
-        //             I[i] = i;
-        //             J[i] = i;
-        //         }
+                // // Create I as all the row indices in cscTest
+                // int* I = (int*) malloc(sizeof(int) * n);
+                // int* J = (int*) malloc(sizeof(int) * n);
+                // for (int i = 0; i < n; i++) {
+                //     I[i] = i;
+                //     J[i] = i;
+                // }
 
-        //         float* denseTest = CSCToDense(cscTest, I, J, n, n);
-        //         success = sequentialTestCuSOLVER(denseTest, n);
+                // float* denseTest = CSCToDense(cscTest, I, J, n, n);
+                // success = sequentialTestCuSOLVER(denseTest, n);
 
-        //         printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
-        //     }
-        // }
+                printf("Done with test for size: %d and sparsity: %f \n\n", n, sparsity);  
+            }
+        }
 
 
     
         // float* A = (float*) malloc(sizeof(float) * m * n);
         // float* B = (float*) malloc(sizeof(float) * m * n);
-        float* C = (float*) malloc(sizeof(float) * m * m);
+        // float* C = (float*) malloc(sizeof(float) * m * m);
         // float* m4 = (float*) malloc(sizeof(float) * 4 * 4);
         // float* m5 = (float*) malloc(sizeof(float) * 5 * 5);
     
@@ -217,12 +217,12 @@ int main(int argc, char** argv) {
     
         // struct CSC* cscA = createCSC(A, m, n);
         // struct CSC* cscB = createCSC(B, m, n);
-        struct CSC* cscC = createRandomCSC(m, m, 0.5);
+        // struct CSC* cscC = createRandomCSC(m, m, 0.5);
         // struct CSC* cscD = createCSC(C, n, n);
         // struct CSC* cscM4 = createCSC(m4, 4, 4);
     
         // run test
-        runIdentityTest(cscC, m, m, 0.5, tolerance, m - 1, s);
+        // runIdentityTest(cscC, m, m, 0.5, tolerance, m - 1, s);
         // runcuSOLVERTest(m4, 4);
         // printf("after running cuSOLVER test\n");
     

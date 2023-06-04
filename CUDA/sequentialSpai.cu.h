@@ -24,13 +24,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printf("------SEQUENTIAL SPAI------\n");
     printf("running with parameters: tolerance = %f, maxIteration = %d, s = %d\n", tolerance, maxIteration, s);
 
-    // check if matrix is singular
-    int checkSingular = checkSingularity(A);
-    if (checkSingular == 1) {
-        printf("Matrix is singular\n");
+    // // check if matrix is singular
+    // int checkSingular = checkSingularity(A);
+    // if (checkSingular == 1) {
+    //     printf("Matrix is singular\n");
 
-        return NULL;
-    }
+    //     return NULL;
+    // }
 
     // initialize cuBLAS
     cublasHandle_t cHandle;
