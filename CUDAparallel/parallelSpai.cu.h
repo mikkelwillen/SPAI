@@ -616,6 +616,18 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaFree(d_smallestJTilde));
             gpuAssert(
                 cudaFree(d_PointerSmallestJTilde));
+            gpuAssert(
+                cudaFree(d_n1Tilde));
+            gpuAssert(
+                cudaFree(d_n1Union));
+            gpuAssert(
+                cudaFree(d_n2Union));
+            gpuAssert(
+                cudaFree(d_PointerITilde));
+            gpuAssert(
+                cudaFree(d_PointerIUnion));
+            gpuAssert(
+                cudaFree(d_PointerJUnion));
             
         }
 
