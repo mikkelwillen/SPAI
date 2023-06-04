@@ -581,6 +581,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 cudaFree(d_l));
             gpuAssert(
                 cudaFree(d_PointerL));
+            gpuAssert(
+                cudaFree(d_KeepArray));
+            gpuAssert(
+                cudaFree(d_PointerKeepArray));
         }
 
         // free(h_Q);
