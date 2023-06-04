@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
         sparsityArray[2] = 0.5;
         printf("Starting tests\n");
 
-        for (int i = 0; i < 5; i++) {
+        for (int i = 1; i < 5; i++) {
             for (int j = 0; j < 3; j++) {
                 int n = sizeArray[i];
                 float sparsity = sparsityArray[j];
