@@ -100,32 +100,32 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
         }
     }
 
-    // print A
-    printf("A:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n;j++) {
-            printf("%f ", A[i * n + j]);
-        }
-        printf("\n");
-    }
+    // // print A
+    // printf("A:\n");
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n;j++) {
+    //         printf("%f ", A[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
 
-    // print inv
-    printf("inv:\n");
-    for (int i = 0; i < m; i++) {
-        for (int j = 0; j < n;j++) {
-            printf("%f ", inv[i * n + j]);
-        }
-        printf("\n");
-    }
+    // // print inv
+    // printf("inv:\n");
+    // for (int i = 0; i < m; i++) {
+    //     for (int j = 0; j < n;j++) {
+    //         printf("%f ", inv[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
 
-    // print identity
-    printf("identity:\n");
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n;j++) {
-            printf("%f ", identity[i * n + j]);
-        }
-        printf("\n");
-    }
+    // // print identity
+    // printf("identity:\n");
+    // for (int i = 0; i < n; i++) {
+    //     for (int j = 0; j < n;j++) {
+    //         printf("%f ", identity[i * n + j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // calculate error
     float error = 0.0;
@@ -135,7 +135,7 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
         }
     }
 
-    printf("Error: %.10f%\n", error);
+    printf("Error: %.15f%\n", error);
 }
 
 int runcuSOLVERTest(float* A, int n) {
