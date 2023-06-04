@@ -189,7 +189,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     printf("batchsize before invBatched: %d\n", batchsize);
     
     // compute the invR matrices
-    invBatched(cHandle, d_PointerR, d_PointerInvR, maxn2, batchsize);
+    invBatched(cHandle, d_R, d_PointerR, d_PointerInvR, maxn2, batchsize);
 
 
     // print the invR matrices
