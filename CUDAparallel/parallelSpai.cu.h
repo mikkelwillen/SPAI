@@ -595,44 +595,44 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // freeArraysInPointerArray<<<numBlocks,BLOCKSIZE>>>(d_PointerIUnion, batchsize);
             // freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerJUnion, batchsize);
 
-            gpuAssert(
-                cudaFree(d_l));
-            gpuAssert(
-                cudaFree(d_PointerL));
-            gpuAssert(
-                cudaFree(d_KeepArray));
-            gpuAssert(
-                cudaFree(d_PointerKeepArray));
-            gpuAssert(
-                cudaFree(d_n2Tilde));
-            gpuAssert(
-                cudaFree(d_PointerJTilde));
-            gpuAssert(
-                cudaFree(d_rhoSquared));
-            gpuAssert(
-                cudaFree(d_PointerRhoSquared));
-            gpuAssert(
-                cudaFree(d_newN2Tilde));
-            gpuAssert(
-                cudaFree(d_smallestIndices));
-            gpuAssert(
-                cudaFree(d_PointerSmallestIndices));
-            gpuAssert(
-                cudaFree(d_smallestJTilde));
-            gpuAssert(
-                cudaFree(d_PointerSmallestJTilde));
-            gpuAssert(
-                cudaFree(d_n1Tilde));
-            gpuAssert(
-                cudaFree(d_n1Union));
-            gpuAssert(
-                cudaFree(d_n2Union));
-            gpuAssert(
-                cudaFree(d_PointerITilde));
-            gpuAssert(
-                cudaFree(d_PointerIUnion));
-            gpuAssert(
-                cudaFree(d_PointerJUnion));
+            // gpuAssert(
+            //     cudaFree(d_l));
+            // gpuAssert(
+            //     cudaFree(d_PointerL));
+            // gpuAssert(
+            //     cudaFree(d_KeepArray));
+            // gpuAssert(
+            //     cudaFree(d_PointerKeepArray));
+            // gpuAssert(
+            //     cudaFree(d_n2Tilde));
+            // gpuAssert(
+            //     cudaFree(d_PointerJTilde));
+            // gpuAssert(
+            //     cudaFree(d_rhoSquared));
+            // gpuAssert(
+            //     cudaFree(d_PointerRhoSquared));
+            // gpuAssert(
+            //     cudaFree(d_newN2Tilde));
+            // gpuAssert(
+            //     cudaFree(d_smallestIndices));
+            // gpuAssert(
+            //     cudaFree(d_PointerSmallestIndices));
+            // gpuAssert(
+            //     cudaFree(d_smallestJTilde));
+            // gpuAssert(
+            //     cudaFree(d_PointerSmallestJTilde));
+            // gpuAssert(
+            //     cudaFree(d_n1Tilde));
+            // gpuAssert(
+            //     cudaFree(d_n1Union));
+            // gpuAssert(
+            //     cudaFree(d_n2Union));
+            // gpuAssert(
+            //     cudaFree(d_PointerITilde));
+            // gpuAssert(
+            //     cudaFree(d_PointerIUnion));
+            // gpuAssert(
+            //     cudaFree(d_PointerJUnion));
             
         }
 
