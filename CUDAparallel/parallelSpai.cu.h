@@ -585,6 +585,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
 
             // free memory
+            freeArraysInPointerArray<<<1, 1>>>(d_PointerIUnion, d_n1Union, maxn1Union, batchsize);
             gpuAssert(
                 cudaFree(d_l));
             gpuAssert(
