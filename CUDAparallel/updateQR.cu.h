@@ -456,7 +456,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     if (h_unsortedR == NULL) {
         printf("h_unsortedR is NULL\n");
     }
-    
+    printf("maxn1Union: %d\n", maxn1Union);
+    printf("maxn2Union: %d\n", maxn2Union);
     gpuAssert(
         cudaMemcpy(h_unsortedR, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
     // printf("unsortedR:\n");
