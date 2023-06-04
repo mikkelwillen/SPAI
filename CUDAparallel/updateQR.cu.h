@@ -81,6 +81,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_AIJTilde);
 
     // create AITildeJTilde
     float* d_AITildeJTilde;
@@ -109,6 +110,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_AITildeJTilde);
 
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
     setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAITildeJTilde, maxn1Tilde, maxn2Tilde, batchsize);
@@ -144,6 +146,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //         printf("\n");
     //     }
     // }
+    free(h_Pc);
 
     // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* d_ABreve;
@@ -174,6 +177,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //         printf("\n");
     //     }
     // }
+    free(h_ABreve);
 
     printf("maxn1: %d\n", maxn1);
     printf("maxn2: %d\n", maxn2);
@@ -212,6 +216,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //         printf("\n");
     //     }
     // }
+    free(h_B1);
 
     // 13.4) Set B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
     float* d_B2;
@@ -242,6 +247,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_B2);
 
     // 13.5) Do QR factorization of B2
     float* d_B2Q;
@@ -294,6 +300,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_B2Q);
 
     float* h_B2R = (float*) malloc(batchsize * maxn1Union * maxn2Tilde * sizeof(float));
     gpuAssert(
@@ -309,6 +316,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_B2R);
 
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
@@ -340,6 +348,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_firstMatrix);
 
     // make second matrix with identity in the upper left corner and QB in the lower right corner of size n1Union x n1Union");
     float* d_secondMatrix;
@@ -373,6 +382,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_secondMatrix);
 
     // compute unsortedQ = firstMatrix * secondMatrix
     float* d_unsortedQ;
@@ -404,6 +414,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_unsortedQ);
 
     // set unsorted R
     float* d_unsortedR;
@@ -435,6 +446,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_R);
 
     // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
@@ -451,6 +463,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_unsortedR);
 
     // free and malloc space for new mHat_k
     gpuAssert(
@@ -483,6 +496,8 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     int* sortedJ;
     gpuAssert(
         cudaMalloc((void**) &sortedJ, batchsize * maxn2Union * sizeof(int)));
+    numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
+    freeArraysInPointerArray<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, batchsize);
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     intDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSortedJ, sortedJ, batchsize, maxn2Union);
@@ -508,7 +523,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         cudaMemcpy(d_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToDevice));
     printf("Q and R set\n");
 
-    free(h_R);
     h_R = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_R, d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float), cudaMemcpyDeviceToHost));
@@ -523,6 +537,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     }
     //     printf("\n");
     // }
+    free(h_R);
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_Q, batchsize, maxn1Union * maxn1Union);
@@ -540,6 +555,10 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         cudaFree(d_AITildeJTilde));
     gpuAssert(
         cudaFree(d_PointerAITildeJTilde));
+    gpuAssert(
+        cudaFree(d_Pc));
+    gpuAssert(
+        cudaFree(d_PointerPc));
     gpuAssert(
         cudaFree(d_ABreve));
     gpuAssert(
@@ -563,11 +582,20 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     gpuAssert(
         cudaFree(d_firstMatrix));
     gpuAssert(
+        cudaFree(d_PointerFirstMatrix));
+    gpuAssert(
         cudaFree(d_secondMatrix));
+    gpuAssert(
+        cudaFree(d_PointerSecondMatrix));
     gpuAssert(
         cudaFree(d_unsortedQ));
     gpuAssert(
+        cudaFree(d_PointerUnsortedQ));
+    gpuAssert(
         cudaFree(d_unsortedR));
+    gpuAssert(
+        cudaFree(d_PointerUnsortedR));
+    
     
     return 0;
 }
