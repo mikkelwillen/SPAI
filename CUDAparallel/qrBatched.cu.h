@@ -21,8 +21,8 @@ __global__ void copyRFromAHat(float** d_PointerAHat, float** d_PointerR, int n1,
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < n1 * n2 * batchsize) {
         int b = tid / (n1 * n2);
-        int i = (tid % (n1 * n2)) / n1;
-        int j = (tid % (n1 * n2)) % n1;
+        int i = (tid % (n1 * n2)) / n2;
+        int j = (tid % (n1 * n2)) % n2;
 
         float* d_AHat = d_PointerAHat[b];
         float* d_R = d_PointerR[b];
