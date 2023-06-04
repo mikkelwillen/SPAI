@@ -48,6 +48,7 @@ int sequentialTestCuSOLVER(float* A, int n) {
     { // timing the GPU implementations
         float* res = cuSOLVERInversion(A, n, n);
         free(res);
+        printf("starting test\n");
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
@@ -58,6 +59,7 @@ int sequentialTestCuSOLVER(float* A, int n) {
         
         cudaDeviceSynchronize();
 
+        printf("ending test\n");
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
