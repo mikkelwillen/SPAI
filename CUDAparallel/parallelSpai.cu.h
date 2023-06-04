@@ -151,9 +151,9 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         
 
         // print AHat
-        // float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
-        // gpuAssert(
-        //     cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
+        float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
+        gpuAssert(
+            cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
         // printf("--printing h_AHat--\n");
         // for (int b = 0; b < batchsize; b++) {
@@ -335,7 +335,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 }
             }
 
-            free(h_n2Tilde);
+            // free(h_n2Tilde);
 
             // fill JTilde
             int** d_PointerJTilde;
