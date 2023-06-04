@@ -21,6 +21,7 @@ $ ssh -l <ku_id> futharkhpa01fl.unicph.domain
 $ ssh -l <ku_id> futharkhpa02fl.unicph.domain
 $ ssh -l <ku_id> futharkhpa03fl.unicph.domain
 ```
+More info: https://github.com/diku-dk/howto/blob/main/servers.md
 
 ### Running the code
 ```bash
