@@ -285,7 +285,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         
         return 1;
     }
-    
+    printf("hallo1\n");
     float* h_B2Q = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_B2Q, d_B2Q, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToHost));
@@ -301,7 +301,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_B2Q);
-
+    printf("hallo2\n");
     float* h_B2R = (float*) malloc(batchsize * maxn1Union * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_B2R, d_B2R, batchsize * maxn1Union * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
@@ -317,7 +317,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_B2R);
-
+    printf("hallo3\n");
     // 13.6) compute QB and RB from algorithm 17
     // make frist matrix with Q in the upper left corner and identity in the lower right corner of size n1Union x n1Union
     float* d_firstMatrix;
@@ -330,7 +330,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_firstMatrix, batchsize, maxn1Union * maxn1Union);
-
+    printf("hallo4\n");
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setFirstMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerQ, d_n1, d_n1Union, maxn1, maxn1Union, batchsize);
 
@@ -349,7 +349,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_firstMatrix);
-
+    printf("hallo5\n");
     // make second matrix with identity in the upper left corner and QB in the lower right corner of size n1Union x n1Union");
     float* d_secondMatrix;
     float** d_PointerSecondMatrix;
@@ -361,13 +361,13 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_secondMatrix, batchsize, maxn1Union * maxn1Union);
-
+    printf("hallo6\n");
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, maxn1Union, maxn1Union, batchsize);
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerSecondMatrix, d_PointerB2Q, d_n1Tilde, d_n1Union, d_n2, maxn1Union, batchsize);
-
+    printf("hallo7\n");
     float* h_secondMatrix = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_secondMatrix, d_secondMatrix, batchsize * maxn1Union * maxn1Union * sizeof(float), cudaMemcpyDeviceToHost));
@@ -398,7 +398,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
 
     numBlocks = (batchsize * maxn1Union * maxn1Union + BLOCKSIZE - 1) / BLOCKSIZE;
     matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerFirstMatrix, d_PointerSecondMatrix, d_PointerUnsortedQ, d_n1Union, d_n1Union, d_n1Union, maxn1Union, maxn1Union, maxn1Union, batchsize);
-
+    printf("hallo8\n");
     // print unsortedQ
     float* h_unsortedQ = (float*) malloc(batchsize * maxn1Union * maxn1Union * sizeof(float));
     gpuAssert(
@@ -424,13 +424,13 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
         cudaMalloc((void**) &d_unsortedR, batchsize * maxn1Union * maxn2Union * sizeof(float)));
     gpuAssert(
         cudaMalloc((void**) &d_PointerUnsortedR, batchsize * sizeof(float*)));
-    
+    printf("hallo9\n");
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_unsortedR, batchsize, maxn1Union * maxn2Union);
 
     numBlocks = (batchsize * maxn1Union * maxn2Union + BLOCKSIZE - 1) / BLOCKSIZE;
     setUnsortedR<<<numBlocks, BLOCKSIZE>>>(d_PointerUnsortedR, d_PointerR, d_PointerB1, d_PointerB2R, d_n1, d_n1Union, d_n2, d_n2Union, d_n2Tilde, maxn1Union, maxn2, maxn2Tilde, maxn2Union, batchsize);
-
+    printf("hallo10\n");
     // print R
     float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
     gpuAssert(
@@ -447,7 +447,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_R);
-
+    printf("hallo11\n");
     // print unsortedR
     float* h_unsortedR = (float*) malloc(batchsize * maxn1Union * maxn2Union * sizeof(float));
     gpuAssert(
@@ -464,7 +464,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     //     printf("\n");
     // }
     free(h_unsortedR);
-
+    printf("hallo12\n");
     // free and malloc space for new mHat_k
     gpuAssert(
         cudaFree(d_mHat_k));
@@ -478,7 +478,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_mHat_k, batchsize, maxn2Union);
-
+    printf("hallo13\n");
     // 13.7) compute the new solution m_k with the least squares problem
     int lsSuccess = LSProblem(cHandle, d_A, A, d_ADense, d_PointerUnsortedQ, d_unsortedR, d_PointerUnsortedR, d_PointerMHat_k, d_PointerPc, d_PointerResidual, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, maxn1Union, maxn2Union, i, d_residualNorm, batchsize);
 
