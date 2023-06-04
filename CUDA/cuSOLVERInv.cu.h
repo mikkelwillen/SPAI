@@ -70,6 +70,7 @@ float* cuSOLVERInversion(float* A, int m, int n) {
 
     gpuAssert(
         cudaMalloc((void**) &d_A, m * n * sizeof(float)));
+
     gpuAssert(
         cudaMemcpy(d_A, A, m * n * sizeof(float), cudaMemcpyHostToDevice));
 
@@ -291,6 +292,21 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     float* h_AInv = (float*) malloc(m * n * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AInv, AInv, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    
+    // free memory
+    gpuAssert(
+        cudaFree(d_A));
+    gpuAssert(
+        cudaFree(d_L));
+    gpuAssert(
+        cudaFree(d_U));
+    gpuAssert(
+        cudaFree(AInv));
+    gpuAssert(
+        cudaFree(bufferOnDevice));
+    gpuAssert(
+        cudaFree(bufferOnHost));
+    
 
     // return AInv
     return h_AInv;
