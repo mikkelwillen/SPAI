@@ -140,32 +140,32 @@ float* cuSOLVERInversion(float* A, int m, int n) {
     int numBlocks = (m * n + BLOCK_SIZE - 1) / BLOCK_SIZE;
     getLAndU<<<numBlocks, BLOCK_SIZE>>>(d_A, d_L, d_U, m, n);
 
-    float* h_L = (float*) malloc(m * n * sizeof(float));
-    float* h_U = (float*) malloc(m * n * sizeof(float));
-    gpuAssert(
-        cudaMemcpy(h_L, d_L, m * n * sizeof(float), cudaMemcpyDeviceToHost));
-    gpuAssert(
-        cudaMemcpy(h_U, d_U, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    // float* h_L = (float*) malloc(m * n * sizeof(float));
+    // float* h_U = (float*) malloc(m * n * sizeof(float));
+    // gpuAssert(
+    //     cudaMemcpy(h_L, d_L, m * n * sizeof(float), cudaMemcpyDeviceToHost));
+    // gpuAssert(
+    //     cudaMemcpy(h_U, d_U, m * n * sizeof(float), cudaMemcpyDeviceToHost));
 
-    // print h_L
-    printf("L:\n");
-    for (int i = 0; i < m; i++) {
-        printf("[");
-        for (int j = 0; j < n; j++) {
-            printf("%f ", h_L[i * n + j]);
-        }
-        printf("]\n");
-    }
+    // // print h_L
+    // printf("L:\n");
+    // for (int i = 0; i < m; i++) {
+    //     printf("[");
+    //     for (int j = 0; j < n; j++) {
+    //         printf("%f ", h_L[i * n + j]);
+    //     }
+    //     printf("]\n");
+    // }
 
-    // print h_U
-    printf("U:\n");
-    for (int i = 0; i < m; i++) {
-        printf("[");
-        for (int j = 0; j < n; j++) {
-            printf("%f ", h_U[i * n + j]);
-        }
-        printf("]\n");
-    }
+    // // print h_U
+    // printf("U:\n");
+    // for (int i = 0; i < m; i++) {
+    //     printf("[");
+    //     for (int j = 0; j < n; j++) {
+    //         printf("%f ", h_U[i * n + j]);
+    //     }
+    //     printf("]\n");
+    // }
 
 
     // Variables
