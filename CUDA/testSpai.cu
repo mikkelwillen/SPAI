@@ -149,7 +149,7 @@ int main(int argc, char** argv) {
         }
 
         float* denseTest = CSCToDense(cscTest, I, J, n, n);
-        runcuSOLVERTest(denseTest, n);
+        sequentialTestCuSOLVER(denseTest, n);
 
         // int* sizeArray = (int*) malloc(sizeof(int) * 5);
         // sizeArray[0] = 10;
