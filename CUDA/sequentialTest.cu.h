@@ -46,11 +46,15 @@ int sequentialTestCuSOLVER(float* A, int n) {
     struct timeval t_start, t_end, t_diff;
 
     { // timing the GPU implementations
+        float* res = cuSOLVERInversion(A, n, n);
+        free(res);
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            cuSOLVERInversion(A, n, n);
+            res = cuSOLVERInversion(A, n, n);
+            free(res);
         }
+
         
         cudaDeviceSynchronize();
 
