@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
 
         // RUNNING CUSOLVER ONCE
         int n = 1000;
-        float sparsity = 0.1;
+        float sparsity = 0.3;
 
         float* test = (float*) malloc(sizeof(float) * n * n);
         CSC* cscTest = createRandomCSC(n, n, sparsity);
