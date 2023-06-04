@@ -28,13 +28,13 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     printf("running with parameters: tolerance: %f, maxIterations: %d, s: %d, batchsize: %d\n", tolerance, maxIterations, s, batchsize);
     printCSC(A);
 
-    // check if matrix is singular
-    int checkSingular = checkSingularity(A);
-    if (checkSingular == 1) {
-        printf("Matrix is singular\n");
+    // // check if matrix is singular
+    // int checkSingular = checkSingularity(A);
+    // if (checkSingular == 1) {
+    //     printf("Matrix is singular\n");
 
-        return NULL;
-    }
+    //     return NULL;
+    // }
 
     // initialize cublas
     cublasHandle_t cHandle;

@@ -321,7 +321,7 @@ int qrBatched(cublasHandle_t cHandle, float** d_PointerAHat, float** d_PointerQ,
         computeQminusQvvt <<<numBlocks, BLOCKSIZE>>>(d_PointerQ, d_PointerQvvt, n1, batchsize);
     }
 
-    // free arrays and destroy cHandle
+    // free memory
     gpuAssert(
         cudaFree(d_tau));
     gpuAssert(
