@@ -55,11 +55,11 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
 
-        // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
+        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
 
         // runMatrixMultiplicationTest();
 
-        parallelTest(cscC, tolerance, maxIterations, s, batchsize);
+        // parallelTest(cscC, tolerance, maxIterations, s, batchsize);
 
     } else if (argc == 8) {
         // read args
