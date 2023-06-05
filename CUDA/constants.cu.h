@@ -4,9 +4,12 @@
 #include <sys/time.h>
 #include <time.h> 
 
+#define DEBUG_INFO  true
+
 #define RUNS_GPU            1
 #define RUNS_CPU            1
 #define BLOCK_SIZE          256
+#define BATCHSIZE           1
 
 #define MIN(a, b) a < b ? a : b
 #define MAX(a, b) a > b ? a : b
@@ -55,4 +58,4 @@ int gpuAssert(cudaError_t code) {
   return 0;
 }
 
-#endif 
+#endif //HWD_SOFT_CONSTANTS
