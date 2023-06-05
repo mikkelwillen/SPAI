@@ -176,7 +176,7 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
     cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
     cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
 
-    int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
+    int numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim1);
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim2);
 
