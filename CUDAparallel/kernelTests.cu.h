@@ -97,9 +97,9 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
 
 int runMatrixMultiplicationTest() {
 
-    int dim1 = 10;
-    int dim2 = 10;
-    int dim3 = 10;
+    int dim1 = 100;
+    int dim2 = 100;
+    int dim3 = 100;
     float sparsity = 1.0;
 
     CSC* cscA = createRandomCSC(dim1, dim2, sparsity);
