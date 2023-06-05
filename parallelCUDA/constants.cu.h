@@ -6,17 +6,10 @@
 
 #define DEBUG_INFO  true
 
-#define lgWARP      5
-#define WARP        (1<<lgWARP)
-
-//#define WORKGROUP_SIZE      128
-//#define MAX_WORKGROUP_SIZE  1024
-
 #define RUNS_GPU            10
 #define RUNS_CPU            2
 #define NUM_BLOCKS          1
 #define BLOCKSIZE           1024
-#define ELEMS_PER_THREAD    12
 
 #define MIN(a, b) a < b ? a : b
 #define MAX(a, b) a > b ? a : b
@@ -65,4 +58,4 @@ int gpuAssert(cudaError_t code) {
   return 0;
 }
 
-#endif //HWD_SOFT_CONSTANTS
+#endif

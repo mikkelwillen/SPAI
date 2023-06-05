@@ -47,7 +47,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     printf("\n------UPDATE QR------\n");
     int numBlocks;
 
-    // create AIJTilde
+    // Create AIJTilde
     float* d_AIJTilde;
     float** d_PointerAIJTilde;
 
@@ -66,7 +66,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     numBlocks = (batchsize * maxn1 * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAIJTilde, d_PointerI, d_PointerJTilde, d_n1, d_n2Tilde, maxn1, maxn2Tilde, A->m, batchsize);
 
-    // print AIJTilde
+    // Print AIJTilde
     float* h_AIJTilde = (float*) malloc(batchsize * maxn1 * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AIJTilde, d_AIJTilde, batchsize * maxn1 * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
@@ -83,7 +83,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     // }
     free(h_AIJTilde);
 
-    // create AITildeJTilde
+    // Create AITildeJTilde
     float* d_AITildeJTilde;
     float** d_PointerAITildeJTilde;
 
@@ -95,7 +95,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerAITildeJTilde, d_AITildeJTilde, batchsize, maxn1Tilde * maxn2Tilde);
 
-    // print AITildeJTilde
+    // Print AITildeJTilde
     float* h_AITildeJTilde = (float*) malloc(batchsize * maxn1Tilde * maxn2Tilde * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_AITildeJTilde, d_AITildeJTilde, batchsize * maxn1Tilde * maxn2Tilde * sizeof(float), cudaMemcpyDeviceToHost));
@@ -118,7 +118,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     numBlocks = (batchsize * maxn1Tilde * maxn2Tilde * A->m + BLOCKSIZE - 1) / BLOCKSIZE;
     CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAITildeJTilde, d_PointerITilde, d_PointerJTilde, d_n1Tilde, d_n2Tilde, maxn1Tilde, maxn2Tilde, A->m, batchsize);
 
-    // create permutation matrices Pc (we dont need Pr, since we never permute the rows)
+    // Create permutation matrices Pc (we dont need Pr, since we never permute the rows)
     float* d_Pc;
     float** d_PointerPc;
 
@@ -148,7 +148,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, CSC* d_A, float* d_ADense, float* d
     // }
     free(h_Pc);
 
-    // 13.2) ABreve of size n1 x n2Tilde = Q^T * AIJTilde
+    // 13.2) Compute ABreve of size n1 x n2Tilde = Q^T * AIJTilde
     float* d_ABreve;
     float** d_PointerABreve;
 

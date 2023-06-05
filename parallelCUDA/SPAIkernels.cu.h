@@ -6,7 +6,7 @@
 #include <math.h>
 #include "csc.cu.h"
 
-/* kernel for printing pointerArrays
+/* Kernel for printing pointerArrays
 d_PointerArray = device pointer to the pointer array
 m              = the number of elements in the pointer array
 n             = the number of elements in each array
@@ -28,7 +28,7 @@ __global__ void printPointerArray(float** d_PointerArray, int m, int n, int batc
     }
 }
 
-/* kernel for printing int pointerArrays
+/* Kernel for printing int pointerArrays
 d_PointerArray = device pointer to the pointer array
 m              = the number of elements in the pointer array
 n             = the number of elements in each array
@@ -50,7 +50,7 @@ __global__ void intPrintPointerArray(int** d_PointerArray, int m, int n, int bat
     }
 }
 
-// kernel for computing I, J n1 and n2
+// Kernel for computing I, J n1 and n2
 // d_A          = device pointer to A
 // d_M          = device pointer to M
 // d_PointerI   = device pointer pointer to I
@@ -67,7 +67,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
             int n2 = d_M->offset[index + 1] - d_M->offset[index];
             int* d_J = (int*) malloc(n2 * sizeof(int));
 
-            // iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
+            // Iterate through the row indeces from offset[k] to offset[k+1] and take all elements from the flatRowIndex
             int h = 0;
             for (int i = d_M->offset[index]; i < d_M->offset[index + 1]; i++) {
                 d_J[h] = d_M->flatRowIndex[i];
@@ -97,8 +97,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
                 }
             }
 
-            // set device values
-            // giver det mening at parallelisere dette?
+            // Set device values
             d_PointerI[tid] = d_I;
             d_PointerJ[tid] = d_J;
             d_PointerSortedJ[tid] = d_J;
@@ -114,7 +113,7 @@ __global__ void computeIandJ(CSC* d_A, CSC* d_M, int** d_PointerI, int** d_Point
     }
 }
 
-/* kernel for setting batch matrices to zero
+/* Kernel for setting batch matrices to zero
 d_PointerA = device pointer to A
 m          = the number of rows in A
 n          = the number of columns in A
@@ -132,18 +131,18 @@ __global__ void setMatrixZero(float** d_PointerA, int m, int n, int batchsize) {
     }
 }
 
-// kernel for setting the dense matrices padded with zeros to make the uniform size
-// d_A          = device pointer to A
-// d_AHat       = device pointer pointer to AHat
-// d_PointerI   = device pointer pointer to I
-// d_PointerJ   = device pointer pointer to J
-// d_n1         = device pointer to n1
-// d_n2         = device pointer to n2
-// maxn1        = the maximum value of n1
-// maxn2        = the maximum value of n2
-// maxOffset    = the maximum value of offset
-// currentBatch = the current batch
-// batchsize    = the size of the batch
+/* Kernel for setting the dense matrices padded with zeros to make the uniform size
+d_A          = device pointer to A
+d_AHat       = device pointer pointer to AHat
+d_PointerI   = device pointer pointer to I
+d_PointerJ   = device pointer pointer to J
+d_n1         = device pointer to n1
+d_n2         = device pointer to n2
+maxn1        = the maximum value of n1
+maxn2        = the maximum value of n2
+maxOffset    = the maximum value of offset
+currentBatch = the current batch
+batchsize    = the size of the batch */
 __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2, int maxOffset, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1 * maxn2 * maxOffset) {
@@ -193,9 +192,9 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
     }
 }
 
-// kernel for freeing the arrays in the pointer array
-// d_PointerArray = device array of pointers to arrays
-// batchsize  = the size of the batch
+/* Kernel for freeing the arrays in the pointer array
+d_PointerArray = device array of pointers to arrays
+batchsize  = the size of the batch */
 __global__ void freeArraysInPointerArray(int** d_PointerArray, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -205,14 +204,14 @@ __global__ void freeArraysInPointerArray(int** d_PointerArray, int batchsize) {
     }
 }
 
-// kernel for finding the length of L
-// d_l               = device pointer to l
-// d_PointerResidual = device pointer pointer to residual
-// d_PointerI        = device pointer pointer to I
-// m                 = the number of rows in A
-// n1                = the number of rows in AHat
-// currentBatch      = the current batch
-// batchsize         = the size of the batch
+/* Kernel for finding the length of L
+d_l               = device pointer to l
+d_PointerResidual = device pointer pointer to residual
+d_PointerI        = device pointer pointer to I
+m                 = the number of rows in A
+n1                = the number of rows in AHat
+currentBatch      = the current batch
+batchsize         = the size of the batch */
 __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_PointerI, int** d_PointerL, int m, int* d_n1, int currentBatch, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -263,6 +262,14 @@ __global__ void computeLengthOfL(int* d_l, float** d_PointerResidual, int** d_Po
     }
 }
 
+/* Kernel for computing the keep array
+d_A               = device pointer to A
+d_PointerKeepArray = device pointer pointer to keep array
+d_PointerL        = device pointer pointer to L
+d_PointerJ        = device pointer pointer to J
+d_n2              = device pointer to n2
+d_l               = device pointer to l
+batchsize         = the size of the batch */
 __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_PointerL, int** d_PointerJ, int* d_n2, int* d_l, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     int n = d_A->n;
@@ -292,10 +299,10 @@ __global__ void computeKeepArray(CSC* d_A, int** d_PointerKeepArray, int** d_Poi
     }
 }
 
-// kernel for finding the length of n2Tilde
-// d_PointerKeepArray = device pointer pointer to keepArray
-// d_n2Tilde          = device pointer to n2Tilde
-// batchsize          = the size of the batch
+/* Kernel for finding the length of n2Tilde
+d_PointerKeepArray = device pointer pointer to keepArray
+d_n2Tilde          = device pointer to n2Tilde
+batchsize          = the size of the batch */
 __global__ void computeN2Tilde(int** d_PointerKeepArray, int* d_n2Tilde, int n, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -312,11 +319,11 @@ __global__ void computeN2Tilde(int** d_PointerKeepArray, int* d_n2Tilde, int n, 
     }
 }
 
-// kernel for setting JTilde
-// d_PointerKeepArray = device pointer pointer to keepArray
-// d_PointerJTilde    = device pointer pointer to JTilde
-// n                  = the number of columns in A
-// batchsize          = the size of the batch
+/* Kernel for setting JTilde
+d_PointerKeepArray = device pointer pointer to keepArray
+d_PointerJTilde    = device pointer pointer to JTilde
+n                  = the number of columns in A
+batchsize          = the size of the batch */
 __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, int* d_N2Tilde, int n, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -337,14 +344,14 @@ __global__ void computeJTilde(int** d_PointerKeepArray, int** d_PointerJTilde, i
     }
 }
 
-// kernel for computing rho squared
-// d_A                 = device pointer to A
-// d_PointerRhoSquared = device pointer pointer to rhoSquared
-// d_PointerResidual   = device pointer pointer to residual
-// d_PointerJTilde     = device pointer pointer to JTilde
-// d_n2Tilde           = device pointer to n2Tilde
-// maxn2Tilde          = the maximum length of n2Tilde
-// batchsize           = the size of the batch
+/* Kernel for computing rho squared
+d_A                 = device pointer to A
+d_PointerRhoSquared = device pointer pointer to rhoSquared
+d_PointerResidual   = device pointer pointer to residual
+d_PointerJTilde     = device pointer pointer to JTilde
+d_n2Tilde           = device pointer to n2Tilde
+maxn2Tilde          = the maximum length of n2Tilde
+batchsize           = the size of the batch */
 __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float** d_PointerResidual, int** d_PointerJTilde, float* d_residualNorm, int* d_n2Tilde, int maxn2Tilde, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn2Tilde) {
@@ -374,7 +381,7 @@ __global__ void computeRhoSquared(CSC* d_A, float** d_PointerRhoSquared, float**
     }
 }
 
-/* kernel for finding the index of the maximum rho squared
+/* Kernel for finding the index of the maximum rho squared
 d_PointerRhoSquared      = device pointer pointer to rhoSquared
 d_PointerSmallestIndices = device pointer pointer to smallestIndices
 d_PointerSmallestJTilde  = device pointer pointer to smallestJTilde
@@ -417,7 +424,7 @@ __global__ void computeSmallestIndices(float** d_PointerRhoSquared, int** d_Poin
     }
 }
 
-/* kernel for finding ITilde and setting IUnion and JUnion
+/* Kernel for finding ITilde and setting IUnion and JUnion
 d_A                 = device pointer to A
 d_PointerI          = device pointer pointer to I
 d_PointerJ          = device pointer pointer to J
@@ -499,8 +506,7 @@ __global__ void computeITilde(CSC* d_A, int** d_PointerI, int** d_PointerJ, int*
     }
 }
 
-// kører parallelt i batchsize * maxn1 * maxn2Tilde tråde
-/* kernel for computing ABreve = Q^T * A(I, JTilde)
+/* Kernel for computing ABreve = Q^T * A(I, JTilde)
 d_PointerQ        = device pointer pointer to Q
 d_PointerAIJTilde = device pointer pointer to AIJTilde
 d_PointerABreve   = device pointer pointer to ABreve
@@ -532,8 +538,7 @@ __global__ void computeABreve(float** d_PointerQ, float** d_PointerAIJTilde, flo
     }
 }
 
-// kører parallelt i batchsize * maxn2 * maxn2Tilde tråde
-/* kernel for setting B1 = ABreve[0:n2, 0:n2Tilde]
+/* Kernel for setting B1 = ABreve[0:n2, 0:n2Tilde]
 d_PointerABreve = device pointer pointer to ABreve
 d_PointerB1     = device pointer pointer to B1
 d_n2            = device pointer to n2
@@ -560,8 +565,7 @@ __global__ void setB1(float** d_PointerABreve, float** d_PointerB1, int* d_n2, i
     }
 }
 
-// kører parallelt i batchsize * maxn1Union * maxn2Tilde tråde
-/* kernel for setting B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
+/* Kernel for setting B2 = ABreve[n2 + 1:n1, 0:n2Tilde] + A(ITilde, JTilde)
 d_PointerABreve        = device pointer pointer to ABreve
 d_PointerAITildeJTilde = device pointer pointer to AITildeJTilde
 d_PointerB2            = device pointer pointer to B2
@@ -600,8 +604,7 @@ __global__ void setB2(float** d_PointerABreve, float** d_PointerAITildeJTilde, f
     }
 }
 
-// parallelt i batchsize * maxn1Union * maxn1Union tråde
-/* kernel for setting the firstMatrix with Q in the upper left corner and identity in the lower right corner
+/* Kernel for setting the firstMatrix with Q in the upper left corner and identity in the lower right corner
 d_PointerFirstMatrix = device pointer pointer to firstMatrix
 d_PointerQ           = device pointer pointer to Q
 d_n1                 = device pointer to n1
@@ -639,8 +642,7 @@ __global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ,
     }
 }
 
-// parallelt i batchsize * maxn1Union * maxn1Union tråde
-/* kernel for setting the secondMatrix with identity in the upper left corner and QB in the lower right corner
+/* Kernel for setting the secondMatrix with identity in the upper left corner and QB in the lower right corner
 d_PointerSecondMatrix = device pointer pointer to secondMatrix
 d_PointerQB           = device pointer pointer to QB
 d_n1Tilde             = device pointer to n1
@@ -671,8 +673,7 @@ __global__ void setSecondMatrix(float** d_PointerSecondMatrix, float** d_Pointer
     }
 }
 
-// parallelt i batchsize * maxn1Union * maxn1Union tråde
-/* kernel for computing matrix multiplication
+/* Kernel for computing matrix multiplication
 d_PointerA = device pointer pointer to matrix A
 d_PointerB = device pointer pointer to matrix B
 d_PointerC = device pointer pointer to the result matrix C
@@ -728,8 +729,7 @@ __global__ void matrixMultiplication (float** d_PointerA, float** d_PointerB, fl
     }
 }
 
-// parallelt i batchsize * maxn1Union * maxn2Union tråde
-/* kernel for setting unsorted R with R in the upper left corner, B1 in the upper right corner, B2R below B1 and zeros the rest
+/* Kernel for setting unsorted R with R in the upper left corner, B1 in the upper right corner, B2R below B1 and zeros the rest
 d_PointerUnsortedR = device pointer pointer to unsorted R
 d_PointerR         = device pointer pointer to R
 d_PointerB1        = device pointer pointer to B1
@@ -774,8 +774,7 @@ __global__ void setUnsortedR(float** d_PointerUnsortedR, float** d_PointerR, flo
     }
 }
 
-// parallelt i batchsize * maxn2Union
-/* kernel for permuting J
+/* Kernel for permuting J
 d_PointerSortedJ = device pointer pointer to sorted J
 d_PointerJ       = device pointer pointer to J
 d_PointerPc      = device pointer pointer to the permutation matrix
@@ -803,8 +802,7 @@ __global__ void permuteJ(int** d_PointerSortedJ, int** d_PointerJ, float** d_Poi
     }
 }
 
-// parallelt i batchsize 
-/* kernel for copying IUnion to I and JUnion to J
+/* Kernel for copying IUnion to I and JUnion to J
 d_PointerI      = device pointer pointer to I
 d_PointerJ      = device pointer pointer to J
 d_PointerIUnion = device pointer pointer to IUnion
