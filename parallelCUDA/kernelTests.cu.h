@@ -372,6 +372,12 @@ int runSetSecondMatrixTest() {
     float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
     cudaMemcpy(h_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
     printf("B:\n");
+    for (int i = 0; i < dim2; i++) {
+        for (int j = 0; j < dim2; j++) {
+            printf("%f ", h_B[i * dim2 + j]);
+        }
+        printf("\n");
+    }
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
