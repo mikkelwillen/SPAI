@@ -341,7 +341,7 @@ int runSetSecondMatrixTest() {
     createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, dim1, dim1, sparsity);
     
     numBlocks = (dim2 * dim2 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim1, dim1, sparsity);
+    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim2, sparsity);
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
