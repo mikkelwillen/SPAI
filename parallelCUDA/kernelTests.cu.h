@@ -366,6 +366,12 @@ int runSetSecondMatrixTest() {
     createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim2, sparsity);
 
     cudaDeviceSynchronize();
+    float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
+    cudaMemcpy(h_A, A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost);
+
+    float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
+    cudaMemcpy(h_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
+    printf("B:\n");
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
