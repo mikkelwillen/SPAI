@@ -189,6 +189,9 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
         h_n1Union[i] = dim1;
         h_n2[i] = dim2;
     }
+    printf("h_n1Tilde[0]: %d\n", h_n1Tilde[0]);
+    printf("h_n1Union[0]: %d\n", h_n1Union[0]);
+    printf("h_n2[0]: %d\n", h_n2[0]);
 
     int* d_n1Tilde;
     int* d_n1Union;
