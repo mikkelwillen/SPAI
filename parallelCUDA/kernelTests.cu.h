@@ -142,75 +142,85 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
 
     // gpuAssert(
     //     cudaMemcpy(h_A, d_A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost));
-    // gpuAssert(
-    //     cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("memcpy done\n");
+    gpuAssert(
+        cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("memcpy done\n");
 
-    // { // timing the CPU implementations
-    //     gettimeofday(&t_start, NULL);
-
-    //     for(int i=0; i<RUNS_CPU; i++) {
-    //         seqSetSecondMatrix(h_A, h_B, dim1, dim2, batchsize);
-    //     }
-        
-    //     cudaDeviceSynchronize();
-
-    //     gettimeofday(&t_end, NULL);
-    //     timeval_subtract(&t_diff, &t_end, &t_start);
-    //     elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-    //     printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
-    //           , elapsed, gigaBytesPerSec);
-    // }
-
-    float** d_PointerA;
-    float** d_PointerB;
-
-    cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
-    cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
-
-    int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim1);
-    floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim2);
-
-    int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
-    int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
-    int* h_n2 = (int*) malloc(batchsize * sizeof(int));
-
-    for (int i = 0; i < batchsize; i++) {
-        h_n1Tilde[i] = 0;
-        h_n1Union[i] = dim1;
-        h_n2[i] = dim2;
-    }
-
-    int* d_n1Tilde;
-    int* d_n1Union;
-    int* d_n2;
-
-    cudaMalloc((void**)&d_n1Tilde, batchsize * sizeof(int));
-    cudaMalloc((void**)&d_n1Union, batchsize * sizeof(int));
-    cudaMalloc((void**)&d_n2, batchsize * sizeof(int));
-
-    cudaMemcpy(d_n1Tilde, h_n1Tilde, batchsize * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_n1Union, h_n1Union, batchsize * sizeof(int), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_n2,h_n2, batchsize* sizeof(int), cudaMemcpyHostToDevice);
-
-    { // timing the GPU implementations
+    { // timing the CPU implementations
         gettimeofday(&t_start, NULL);
 
-        for(int i=0; i<RUNS_GPU; i++) {
-            int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
-            setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
+        for(int i=0; i<RUNS_CPU; i++) {
+            seqSetSecondMatrix(h_A, h_B, dim1, dim2, batchsize);
         }
         
-        cudaError_t test = cudaDeviceSynchronize();
-        printf("error: %d\n", test);
+        cudaDeviceSynchronize();
+
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
-        elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
-        gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
-        printf("\n\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+        elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
+        printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
+    printf("printing h_A\n");
+    for (int i = 0; i < batchsize; i++) {
+        for (int j = 0; j < dim1; j++) {
+            for (int k = 0; k < dim1; k++) {
+                printf("%f ", h_A[i * dim1 * dim1 + j * dim1 + k]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+
+    // float** d_PointerA;
+    // float** d_PointerB;
+
+    // cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
+    // cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
+
+    // int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
+    // floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim1);
+    // floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim2);
+
+    // int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
+    // int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
+    // int* h_n2 = (int*) malloc(batchsize * sizeof(int));
+
+    // for (int i = 0; i < batchsize; i++) {
+    //     h_n1Tilde[i] = 0;
+    //     h_n1Union[i] = dim1;
+    //     h_n2[i] = dim2;
+    // }
+
+    // int* d_n1Tilde;
+    // int* d_n1Union;
+    // int* d_n2;
+
+    // cudaMalloc((void**)&d_n1Tilde, batchsize * sizeof(int));
+    // cudaMalloc((void**)&d_n1Union, batchsize * sizeof(int));
+    // cudaMalloc((void**)&d_n2, batchsize * sizeof(int));
+
+    // cudaMemcpy(d_n1Tilde, h_n1Tilde, batchsize * sizeof(int), cudaMemcpyHostToDevice);
+    // cudaMemcpy(d_n1Union, h_n1Union, batchsize * sizeof(int), cudaMemcpyHostToDevice);
+    // cudaMemcpy(d_n2,h_n2, batchsize* sizeof(int), cudaMemcpyHostToDevice);
+
+    // { // timing the GPU implementations
+    //     gettimeofday(&t_start, NULL);
+
+    //     for(int i=0; i<RUNS_GPU; i++) {
+    //         int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
+    //         setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
+    //     }
+        
+    //     cudaError_t test = cudaDeviceSynchronize();
+    //     printf("error: %d\n", test);
+    //     gettimeofday(&t_end, NULL);
+    //     timeval_subtract(&t_diff, &t_end, &t_start);
+    //     elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
+    //     gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
+    //     printf("\n\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+    //           , elapsed, gigaBytesPerSec);
+    // }
 
     // gpuAssert( cudaPeekAtLastError() );
     return 0;
