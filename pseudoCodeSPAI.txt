@@ -19,8 +19,8 @@ For every column m_k of M
 
 while residual > tolerance:
 	7) Set L set of indices, where r(l) =/= 0 (can be restricted to some number of largest elements in r)
-	  8) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
-	  9) For each j in JTilde solve the minimisation problem by computing:
+	8) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
+	9) For each j in JTilde solve the minimisation problem by computing:
 		rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
 	10) Find the indices JTilde corresponding to the smallest s elements of rho^2
 	11) Determine the new indices I-rond_tilde

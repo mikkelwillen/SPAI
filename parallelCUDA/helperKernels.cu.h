@@ -4,11 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// kernel to copy d_data to d_Pointer
-// d_Pointer = an array of pointers to the start of each matrix in d_data
-// d_data = an array of batch matrices
-// pointerArraySize = the size of d_Pointer
-// dataSize = the size of each matrix in d_data
+/* Kernel to copy d_data to d_Pointer
+d_Pointer = an array of pointers to the start of each matrix in d_data
+d_data = an array of batch matrices
+pointerArraySize = the size of d_Pointer
+dataSize = the size of each matrix in d_data */
 __global__ void floatDeviceToDevicePointerKernel(float** d_Pointer, float* d_data, int pointerArraySize, int dataSize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < pointerArraySize) {
@@ -16,11 +16,11 @@ __global__ void floatDeviceToDevicePointerKernel(float** d_Pointer, float* d_dat
     }
 }
 
-// kernel to copy int d_data to d_Pointer
+/* Kernel to copy int d_data to d_Pointer
 // d_Pointer = an array of pointers to the start of each matrix in d_data
 // d_data = an array of batch matrices
 // pointerArraySize = the size of d_Pointer
-// dataSize = the size of each matrix in d_data
+// dataSize = the size of each matrix in d_data */
 __global__ void intDeviceToDevicePointerKernel(int** d_Pointer, int* d_data, int pointerArraySize, int dataSize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < pointerArraySize) {

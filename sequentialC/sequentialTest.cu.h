@@ -15,7 +15,7 @@ Function for testing and timing the sequential SPAI implementation
 A = the matrix to be inverted
 tolerance = the tolerance
 maxIteration = the maximum number of iterations
-S = smallest indices to be used
+s = smallest indices to be used
 */
 int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
 
@@ -93,7 +93,7 @@ n = the number of columns in the matrix
 sparsity = the sparsity of the matrix
 tolerance = the tolerance
 maxIteration = the maximum number of iterations
-S = smallest indices to be used
+s = smallest indices to be used
 */
 int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
     float* identity = (float*) malloc (sizeof(float) * n * n);

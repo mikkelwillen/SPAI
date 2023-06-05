@@ -12,10 +12,10 @@
 #include "SPAIkernels.cu.h"
 
 
-// Function to do inversion of batch matrices
-// A is an array of batch matrices
-// n is the max number of rows and columns of the matrices
-// AInv is an array of batch inverse matrices
+/* Function to do inversion of batch matrices
+A is an array of batch matrices
+n is the max number of rows and columns of the matrices
+AInv is an array of batch inverse matrices */
 int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d_PointerInvR, int maxn2, int batchsize) {
     printf("\nDo inversion of R\n");
 
@@ -24,17 +24,17 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
     int lda = MAX(1, maxn2);
     int ldc = MAX(1, maxn2);
 
-    // create device info array
+    // Create device info array
     int* h_info = (int*) malloc(batchsize * sizeof(int));
     int* d_info;
 
     float* h_R = (float*) malloc(20 * maxn2 * batchsize * sizeof(float));
 
-    // copy R to host
+    // Copy R to host
     gpuAssert(
         cudaMemcpy(h_R, d_R, 20 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
     
-    // print R
+    // Print R
     printf("\nR:\n");
     for (int i = 0; i < batchsize; i++) {
         printf("\nMatrix %d:\n", i);
@@ -49,13 +49,13 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
     printf("maxn2 in invBatched: %d\n", maxn2);
     printf("batchsize in invBatched: %d\n", batchsize);
 
-    // malloc space for info
+    // Malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, batchsize * sizeof(int)));
     printf("malloc info\n");
 
-    // run batched LU factorization from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    // Run batched LU factorization from cublas
+    // Cublas docs: https://docs.nvidia.com/cuda/cublas/
     stat = cublasSgetrfBatched(cHandle,
                                maxn2,
                                d_PointerR,
@@ -64,7 +64,7 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
                                d_info,
                                batchsize);
     
-    // error handling
+    // Error handling
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgetrfBatched failed");
         printf("\ncublas error: %d\n", stat);
@@ -73,7 +73,7 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
     }
 
     printf("before info to host\n");
-    // copy info back to host
+    // Copy info back to host
     gpuAssert(
         cudaMemcpy(h_info, d_info, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
     printf("copy info back to host\n");
@@ -84,8 +84,8 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
     //     }
     // }
 
-    // run batched inversion from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    // Run batched inversion from cublas
+    // Cublas docs: https://docs.nvidia.com/cuda/cublas/
     stat = cublasSgetriBatched(cHandle,
                                maxn2,
                                d_PointerR,
@@ -96,7 +96,7 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
                                d_info,
                                batchsize);
     
-    // error handling
+    // Error handling
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgetriBatched failed");
         printf("\ncublas error: %d\n", stat);
@@ -104,7 +104,7 @@ int invBatched(cublasHandle_t cHandle, float* d_R, float** d_PointerR, float** d
         return stat;
     }
 
-    // copy info back to host
+    // Copy info back to host
     gpuAssert(
         cudaMemcpy(h_info, d_info, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
     

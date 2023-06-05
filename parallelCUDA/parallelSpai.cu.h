@@ -17,12 +17,14 @@
 #include "singular.cu.h"
 
 
-// A            = matrix we want to compute SPAI on
-// m, n         = size of array
-// tolerance    = tolerance
-// maxIteration = constraint for the maximal number of iterations
-// s            = number of rho_j - the most profitable indices
-// batchsize    = number of matrices to be processed in parallel
+/*
+A            = matrix we want to compute SPAI on
+m, n         = size of array
+tolerance    = tolerance
+maxIteration = constraint for the maximal number of iterations
+s            = number of rho_j - the most profitable indices
+batchsize    = number of matrices to be processed in parallel
+*/
 CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int batchsize) {
     printf("---------PARALLEL SPAI---------\n");
     printf("running with parameters: tolerance: %f, maxIterations: %d, s: %d, batchsize: %d\n", tolerance, maxIterations, s, batchsize);
@@ -48,11 +50,11 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     }
 
     int numBlocks;
-    // initialize M and set to diagonal
+    // Initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
     printf("after m\n");
 
-    // make A dense and copy to device
+    //  Make A dense and copy to device
     int* I = (int*) malloc(A->m * sizeof(int));
     int* J = (int*) malloc(A->n * sizeof(int));
     for (int i = 0; i < A->m; i++) {
@@ -70,21 +72,22 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
     
     free(I);
     free(J);
-    // free(h_ADense);
 
-    // copy A to device
+    // Copy A to device
     CSC* d_A = copyCSCFromHostToDevice(A);
     printf("after d_A\n");
     CSC* d_M = copyCSCFromHostToDevice(M);
     printf("after d_M\n");
     
-    // compute the number of batches
+    // Compute the number of batches
     int numberOfBatches = (A->n + batchsize - 1) / batchsize;
 
     for (int i = 0; i < numberOfBatches; i++) {
         printf("---------BATCH: %d---------\n", i);
         int iteration = 0;
-        
+
+        // 1) Find initial sparsity J of m_k
+        // 2) Compute the row indices I of the corresponding nonzero entries of A(i, J)
         int* d_n1;
         int* d_n2;
         
@@ -92,7 +95,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         int** d_PointerJ;
         int** d_PointerSortedJ;
 
-        // malloc space
+        // Malloc space
         gpuAssert(
             cudaMalloc((void**) &d_PointerI, batchsize * sizeof(int*)));
         gpuAssert(
@@ -107,7 +110,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
         computeIandJ<<<numBlocks, BLOCKSIZE>>>(d_A, d_M, d_PointerI, d_PointerJ, d_PointerSortedJ, d_n1, d_n2, i, batchsize, A->n);
 
-        // find the max value of n1 and n2
+        // Find the max value of n1 and n2
         int* h_n1 = (int*) malloc(batchsize * sizeof(float));
         int* h_n2 = (int*) malloc(batchsize * sizeof(float));
 
@@ -127,11 +130,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
-        // free space
-        // free(h_n1);
-        // free(h_n2);
-
-        // create d_AHat
+        // 3) Create AHat = A(I, J)
+        // Create d_AHat
         float* d_AHat;
         float** d_PointerAHat;
 
@@ -150,25 +150,16 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
         
 
-        // print AHat
+        // Print AHat
         float* h_AHat = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_AHat, d_AHat, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
 
-        // printf("--printing h_AHat--\n");
-        // for (int b = 0; b < batchsize; b++) {
-        //     printf("b: %d\n", b);
-        //     for (int j = 0; j < maxn1; j++) {
-        //         for (int k = 0; k < maxn2; k++) {
-        //             printf("%f ", h_AHat[b * maxn1 * maxn2 + j * maxn2 + k]);
-        //         }
-        //         printf("\n");
-        //     }
-        //     printf("\n");
-        // }
         printf("maxn1: %d\n", maxn1);
         printf("maxn2: %d\n", maxn2);
-        // initialize d_Q and d_R
+
+        // 4) Do QR decomposition of AHat
+        // Initialize d_Q and d_R
         float* d_Q;
         float* d_R;
         float** d_PointerQ;
@@ -197,23 +188,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             return NULL;
         }
 
-        // // print Q
-        // float* h_Q = (float*) malloc(batchsize * maxn1 * maxn1 * sizeof(float));
-        // gpuAssert(
-        //     cudaMemcpy(h_Q, d_Q, batchsize * maxn1 * maxn1 * sizeof(float), cudaMemcpyDeviceToHost));
-        // printf("--printing h_Q--\n");
-        // for (int b = 0; b < batchsize; b++) {
-        //     printf("b: %d\n", b);
-        //     for (int j = 0; j < maxn1; j++) {
-        //         for (int k = 0; k < maxn1; k++) {
-        //             printf("%f ", h_Q[b * maxn1 * maxn1 + j * maxn1 + k]);
-        //         }
-        //         printf("\n");
-        //     }
-        //     printf("\n");
-        // }
-
-        // overwrite AHat, since qr overwrote it previously
+        // Overwrite AHat, since qr overwrote it previously
         numBlocks = (batchsize * maxn1 * maxn2 + BLOCKSIZE - 1) / BLOCKSIZE;
         setMatrixZero<<<numBlocks, BLOCKSIZE>>>(d_PointerAHat, maxn1, maxn2, batchsize);
 
@@ -221,7 +196,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerAHat, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, A->m, batchsize);
 
 
-        // initialize mHat_k, residual, residualNorm
+        // 5) Compute the solution m_k for the least sqaures problem
+        // Initialize mHat_k, residual, residualNorm
         float* d_mHat_k;
         float** d_PointerMHat_k;
 
@@ -246,7 +222,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         gpuAssert(
             cudaMalloc((void**) &d_residualNorm, batchsize * sizeof(float)));
 
-        // print R
+        // Print R
         float* h_R = (float*) malloc(batchsize * maxn1 * maxn2 * sizeof(float));
         gpuAssert(
             cudaMemcpy(h_R, d_R, batchsize * maxn1 * maxn2 * sizeof(float), cudaMemcpyDeviceToHost));
@@ -264,7 +240,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
         LSProblem(cHandle, d_A, A, d_ADense, d_PointerQ, d_R, d_PointerR, d_PointerMHat_k, NULL, d_PointerResidual, d_PointerI, d_PointerJ, d_n1, d_n2, maxn1, maxn2, i, d_residualNorm, batchsize);
 
-        // print residual
+        //Print residual
         float* h_residual = (float*) malloc(batchsize * A->m * sizeof(float));
         // gpuAssert(
         //     cudaMemcpy(h_residual, d_residual, batchsize * A->m * sizeof(float), cudaMemcpyDeviceToHost));
@@ -295,15 +271,16 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             }
         }
 
-        // free(h_residualNorm);
+        // Free(h_residualNorm);
         printf("toleranceNotMet: %d\n", toleranceNotMet);
 
-        // while the tolerance is not met, continue the loop
+        // While the tolerance is not met, continue the loop
         while (toleranceNotMet && maxIterations > iteration) {
             printf("\n-------Iteration: %d-------\n", iteration);
             iteration++;
         
-            // compute the length of L and set L
+            // 7) Set L set of indices, where r(l) =/= 0
+            // Compute the length of L and set L
             int* d_l;
             int** d_PointerL;
 
@@ -315,7 +292,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeLengthOfL<<< numBlocks, BLOCKSIZE >>>(d_l, d_PointerResidual, d_PointerI, d_PointerL, A->m, d_n1, i, batchsize);
 
-            // check what indeces to keep
+            // Check what indeces to keep
             int* d_KeepArray;
             int** d_PointerKeepArray;
 
@@ -330,6 +307,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize * A->n + BLOCKSIZE - 1) / BLOCKSIZE;
             computeKeepArray<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerKeepArray, d_PointerL, d_PointerJ, d_n2, d_l, batchsize);
 
+            // 8) Set JTilde to all new column indices of A that appear in all L rows, but is not in J yet
             int* d_n2Tilde;
             gpuAssert(
                 cudaMalloc((void**) &d_n2Tilde, batchsize * sizeof(int)));
@@ -337,7 +315,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeN2Tilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_n2Tilde, A->n, batchsize);
 
-            // find the max value of n2Tilde
+            // Find the max value of n2Tilde
             int maxn2Tilde = 0;
             int* h_n2Tilde = (int*) malloc(batchsize * sizeof(int));
             gpuAssert(
@@ -349,7 +327,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
                 }
             }
 
-            // fill JTilde
+            // Fill JTilde
             int** d_PointerJTilde;
 
             gpuAssert(
@@ -358,7 +336,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeJTilde<<<numBlocks, BLOCKSIZE>>>(d_PointerKeepArray, d_PointerJTilde, d_n2Tilde, A->n, batchsize);
 
-            // compute rhoSquared
+            // 	9) For each j in JTilde solve the minimisation problem by computing:
+		    // rho^2_j = ||r_new||^2 - (r^T A e_j)^2 / ||A e_j||^2
+
+            // Compute rhoSquared
             float* d_rhoSquared;
             float** d_PointerRhoSquared;
 
@@ -373,7 +354,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize * maxn2Tilde + BLOCKSIZE - 1) / BLOCKSIZE;
             computeRhoSquared<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerRhoSquared, d_PointerResidual, d_PointerJTilde, d_residualNorm, d_n2Tilde, maxn2Tilde, batchsize);
 
-            // find the smallest s values of rhoSquared
+            // 10) Find the indices JTilde corresponding to the smallest s elements of rho^2
             int* d_newN2Tilde;
             int* d_smallestIndices;
             int** d_PointerSmallestIndices;
@@ -402,7 +383,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeSmallestIndices<<<numBlocks, BLOCKSIZE>>>(d_PointerRhoSquared, d_PointerSmallestIndices, d_PointerSmallestJTilde, d_PointerJTilde, d_newN2Tilde, d_n2Tilde, s, batchsize);
 
-            // find maxn2Tilde after finding the smallest s values
+            // Find maxn2Tilde after finding the smallest s values
             maxn2Tilde = 0;
             gpuAssert(
                 cudaMemcpy(h_n2Tilde, d_newN2Tilde, batchsize * sizeof(int), cudaMemcpyDeviceToHost));
@@ -414,8 +395,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
 
             free(h_n2Tilde);
             
-
-            // find ITilde and make IUnion and JUnion
+            // 11) Determine the new indices I-rond_tilde
+            // 12) Make I U ITilde and J U JTilde
             int* d_n1Tilde;
             int* d_n1Union;
             int* d_n2Union;
@@ -441,7 +422,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             computeITilde<<<numBlocks, BLOCKSIZE>>>(d_A, d_PointerI, d_PointerJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, batchsize);
 
-            // find maxn1Tilde, maxn1Union and maxn2Union
+            // Find maxn1Tilde, maxn1Union and maxn2Union
             int maxn1Tilde = 0;
             int maxn1Union = 0;
             int maxn2Union = 0;
@@ -475,7 +456,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             free(h_n1Union);
             free(h_n2Union);
 
-            // 13) Update the QR factorization of A(IUnion, JUnion) and compute the residual norm
+            // 13) Update the QR factorization of A(IUnion, JUnion)
             int updateSuccess = updateQR(cHandle, A, d_A, d_ADense, d_Q, d_R, d_PointerQ, d_PointerR, d_PointerI, d_PointerJ, d_PointerSortedJ, d_PointerITilde, d_PointerSmallestJTilde, d_PointerIUnion, d_PointerJUnion, d_n1, d_n2, d_n1Tilde, d_newN2Tilde, d_n1Union, d_n2Union, d_mHat_k, d_PointerMHat_k, d_PointerResidual, d_residualNorm, maxn1, maxn2, maxn1Tilde, maxn2Tilde, maxn1Union, maxn2Union, i, batchsize);
 
             if (updateSuccess != 0) {
@@ -501,7 +482,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // }
             free(h_Q);
 
-            // set I and J to IUnion and JUnion
+            // Set I and J to IUnion and JUnion
             numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
             copyIandJ<<<numBlocks, BLOCKSIZE>>>(d_PointerI, d_PointerJ, d_PointerIUnion, d_PointerJUnion, d_n1Union, d_n2Union, batchsize);
             printf("copyIandJ success\n");
@@ -537,7 +518,7 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             // copyIntArray<<<numBlocks, BLOCKSIZE>>>(d_n1, d_n1Union, batchsize);
             // copyIntArray<<<numBlocks, BLOCKSIZE>>>(d_n2, d_n2Union, batchsize);
             
-            // set maxn1 and maxn2 to maxn1Union and maxn2Union
+            // Set maxn1 and maxn2 to maxn1Union and maxn2Union
             maxn1 = maxn1Union;
             maxn2 = maxn2Union;
 
@@ -724,6 +705,8 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
         // printf("--printing mHat_k--\n");
         // printPointerArray<<<1, 1>>>(d_PointerMHat_k, 1, maxn2, batchsize);
         
+
+        // 16) Set m_k(J) = mHat_k
         updateBatchColumnsCSC <<<1, 1>>> (d_M, d_PointerMHat_k, d_PointerSortedJ, d_n2, maxn2, i, batchsize);
 
 
@@ -767,10 +750,10 @@ CSC* parallelSpai(CSC* A, float tolerance, int maxIterations, int s, const int b
             cudaFree(d_residualNorm));
     }
 
-    // copy M back to host
+    // Copy M back to host
     M = copyCSCFromDeviceToHost(d_M);
 
-    // free memory
+    // Free memory
     freeDeviceCSC(d_A);
     freeDeviceCSC(d_M);
     gpuAssert(

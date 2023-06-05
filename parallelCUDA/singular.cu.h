@@ -10,11 +10,11 @@
 #include "cusolverDn.h"
 #include "constants.cu.h"
 
-// Function to check if a matrix is singular
-// A = the matrix to check for singularity
-// m = the number of rows in A
-// n = the number of columns in A
-// returns 1 if A is singular, 0 otherwise
+/* Function to check if a matrix is singular
+A = the matrix to check for singularity
+m = the number of rows in A
+n = the number of columns in A
+returns 1 if A is singular, 0 otherwise */
 int checkSingularity(CSC* cscA) {
     // initialize cusolver
     cusolverDnHandle_t cHandle;

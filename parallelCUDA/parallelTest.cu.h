@@ -9,6 +9,14 @@
 #include "constants.cu.h"
 #include "parallelSpai.cu.h"
 
+/*
+Function for testing and timing the parallel SPAI implementation
+A = the matrix to be inverted
+tolerance = the tolerance
+maxIteration = the maximum number of iterations
+s = smallest indices to be used
+batchsize = the batchsize
+*/
 int parallelTest(CSC* A, float tolerance, int maxIteration, int s, int batchsize) {
 
     double gigaBytesPerSec;
@@ -37,6 +45,17 @@ int parallelTest(CSC* A, float tolerance, int maxIteration, int s, int batchsize
 
 }
 
+/* 
+Function for testing the accuracy of the parallel SPAI implementation
+A = the matrix to be inverted
+m = the number of rows in the matrix
+n = the number of columns in the matrix
+sparsity = the sparsity of the matrix
+tolerance = the tolerance
+maxIteration = the maximum number of iterations
+s = smallest indices to be used
+batchsize = the batchsize
+*/
 int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s, int batchsize) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
 

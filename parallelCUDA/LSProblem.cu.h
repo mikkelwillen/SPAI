@@ -13,14 +13,14 @@
 #include "SPAIkernels.cu.h"
 
 
-// Function for setting the cHat vector, which is the k'th vector of the Q matrix
-// d_PointerCHat = the pointer to the cHat vector
-// d_PointerQ    = the pointer to the Q matrix
-// d_PointerI    = the pointer to the I vector
-// d_n1          = the number of rows in A
-// currentBatch  = the current batch
-// batchsize     = the batchsize for the cublas handle
-// maxn1         = the maximum number of rows in A
+/* Function for setting the cHat vector, which is the k'th vector of the Q matrix
+d_PointerCHat = the pointer to the cHat vector
+d_PointerQ    = the pointer to the Q matrix
+d_PointerI    = the pointer to the I vector
+d_n1          = the number of rows in A
+currentBatch  = the current batch
+batchsize     = the batchsize for the cublas handle
+maxn1         = the maximum number of rows in A */
 __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int* d_n2, int maxn1, int maxn2, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < maxn1 * maxn2 * batchsize) {
@@ -46,12 +46,12 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
     }
 }
 
-// function for computing mHat_k
-// d_PointerMHat_k = the pointer to the mHat_k vector
-// d_PointerInvR   = the pointer to the invR matrix
-// d_PointerCHat   = the pointer to the cHat vector
-// maxn2           = the maximum number of columns in A
-// batchsize       = the batchsize for the cublas handle
+/* Function for computing mHat_k
+d_PointerMHat_k = the pointer to the mHat_k vector
+d_PointerInvR   = the pointer to the invR matrix
+d_PointerCHat   = the pointer to the cHat vector
+maxn2           = the maximum number of columns in A
+batchsize       = the batchsize for the cublas handle */
 __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, float** d_PointerCHat, int maxn2, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < maxn2 * batchsize) {
@@ -69,13 +69,13 @@ __global__ void computeMHat_k(float** d_PointerMHat_k, float** d_PointerInvR, fl
     }
 }
 
-// function for computing the residual
-// d_A               = the sparse matrix
-// d_PointerResidual = the pointer to the residual vector
-// d_PointerMHat_k   = the pointer to the mHat_k vector
-// maxn2             = the maximum number of columns in A
-// currentBatch      = the current batch
-// batchsize         = the batchsize
+/* Function for computing the residual
+d_A               = the sparse matrix
+d_PointerResidual = the pointer to the residual vector
+d_PointerMHat_k   = the pointer to the mHat_k vector
+maxn2             = the maximum number of columns in A
+currentBatch      = the current batch
+batchsize         = the batchsize */
 __global__ void computeResidual(float* d_ADense, float** d_PointerResidual, float** d_PointerMHat_k, int** d_PointerJ, int* d_n2, int m, int n, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < m * n * batchsize) {
@@ -104,11 +104,11 @@ __global__ void computeResidual(float* d_ADense, float** d_PointerResidual, floa
     }
 }
 
-// function for computing the norm of the residual
-// d_PointerResidual = the pointer to the residual vector
-// d_residualNorm    = the pointer to the residual norm value
-// batchsize         = the batchsize
-// m                 = the number of rows in A
+/* Function for computing the norm of the residual
+d_PointerResidual = the pointer to the residual vector
+d_residualNorm    = the pointer to the residual norm value
+batchsize         = the batchsize
+m                 = the number of rows in A */
 __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, int batchsize, int m) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize) {
@@ -124,30 +124,30 @@ __global__ void computeNorm(float** d_PointerResidual, float* d_residualNorm, in
     }
 }
 
-// Function for computing the least squares problem
-// cHandle           = the cublas handle
-// A                 = the sparse matrix
-// d_PointerQ        = the pointer to the Q matrix
-// d_PointerR        = the pointer to the R matrix
-// d_mHat_k          = the pointer to the mHat_k vector
-// d_PointerPc       = the pointer to the column permutation matrix (null if not used)
-// d_PointerResidual = the pointer to the residual vector
-// d_PointerI        = the pointer to the I vector
-// d_PointerJ        = the pointer to the J vector
-// d_n1              = the number of rows in A
-// d_n2              = the number of columns in A
-// k                 = the index of the column to be added
-// residualNorm      = the norm of the residual
-// batchsize         = the batchsize for the cublas handle
+/* Function for computing the least squares problem
+cHandle           = the cublas handle
+A                 = the sparse matrix
+d_PointerQ        = the pointer to the Q matrix
+d_PointerR        = the pointer to the R matrix
+d_mHat_k          = the pointer to the mHat_k vector
+d_PointerPc       = the pointer to the column permutation matrix (null if not used)
+d_PointerResidual = the pointer to the residual vector
+d_PointerI        = the pointer to the I vector
+d_PointerJ        = the pointer to the J vector
+d_n1              = the number of rows in A
+d_n2              = the number of columns in A
+k                 = the index of the column to be added
+residualNorm      = the norm of the residual
+batchsize         = the batchsize for the cublas handle */
 int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float** d_PointerQ, float* d_R, float** d_PointerR, float** d_PointerMHat_k, float** d_PointerPc, float** d_PointerResidual, int** d_PointerI, int** d_PointerJ, int* d_n1, int* d_n2, int maxn1, int maxn2,int currentBatch, float* d_residualNorm, int batchsize) {
-    // define the number of blocks
+    // Define the number of blocks
     int numBlocks;
 
-    // create the cHat vector
+    // Create the cHat vector
     float* d_cHat;
     float** d_PointerCHat;
 
-    // allocate device memory for the cHat vector
+    // Allocate device memory for the cHat vector
     gpuAssert(
         cudaMalloc((void**) &d_cHat, maxn2 * batchsize * sizeof(float)));
     gpuAssert(
@@ -155,7 +155,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_cHat, batchsize, maxn2);
     
-    // set the cHat vector
+    // Set the cHat vector
     numBlocks = (maxn1 * maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, d_n2, maxn1, maxn2, currentBatch, batchsize);
 
@@ -172,11 +172,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     //     printf("\n");
     // }
 
-    // create the invR matrices
+    // Create the invR matrices
     float* d_invR;
     float** d_PointerInvR;
 
-    // allocate device memory for the invR matrices
+    // Allocate device memory for the invR matrices
     gpuAssert(
         cudaMalloc((void**) &d_invR, maxn2 * maxn2 * batchsize * sizeof(float)));
     gpuAssert(
@@ -188,11 +188,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     printf("maxn2 before invBatched: %d\n", maxn2);
     printf("batchsize before invBatched: %d\n", batchsize);
     
-    // compute the invR matrices
+    // Compute the invR matrices
     invBatched(cHandle, d_R, d_PointerR, d_PointerInvR, maxn2, batchsize);
 
 
-    // print the invR matrices
+    // Print the invR matrices
     float* h_invR = (float*) malloc(maxn2 * maxn2 * batchsize * sizeof(float));
     gpuAssert(
         cudaMemcpy(h_invR, d_invR, maxn2 * maxn2 * batchsize * sizeof(float), cudaMemcpyDeviceToHost));
@@ -208,19 +208,19 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     //     printf("\n");
     // }
 
-    // compute the mHat_k vectors
+    // Compute the mHat_k vectors
     numBlocks = (maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeMHat_k<<<numBlocks, BLOCKSIZE>>>(d_PointerMHat_k, d_PointerInvR, d_PointerCHat, maxn2, batchsize);
     printf("after mHat_k\n");
 
-    // compute residual vectors
+    // Compute residual vectors
     numBlocks = (A->m * A->n * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeResidual<<<numBlocks, BLOCKSIZE>>>(d_ADense, d_PointerResidual, d_PointerMHat_k, d_PointerJ, d_n2, A->m, A->n, currentBatch, batchsize);
     printf("after residual\n");
     
-    // permute the mHat_k vectors, if necessary
+    // Permute the mHat_k vectors, if necessary
     if (d_PointerPc != NULL) {
-        // permute the vector and save it in a temporary vector
+        // Permute the vector and save it in a temporary vector
         float* d_tempMHat_k;
         float** d_PointerTempMHat_k;
         gpuAssert(
@@ -251,11 +251,11 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
             cudaMemcpy(d_PointerMHat_k, d_PointerTempMHat_k, batchsize * sizeof(float*), cudaMemcpyDeviceToDevice));
     }
 
-    // compute the norm of the residual
+    // Compute the norm of the residual
     numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     computeNorm<<<numBlocks, BLOCKSIZE>>>(d_PointerResidual, d_residualNorm, batchsize, A->m);
 
-    // free memory
+    // Free memory
     gpuAssert(
         cudaFree(d_cHat));
     gpuAssert(
