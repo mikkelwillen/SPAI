@@ -341,9 +341,6 @@ int runSetSecondMatrixTest() {
 
     cudaMalloc((void**)&A, batchsize * dim1 * dim1 * sizeof(float));
     cudaMalloc((void**)&B, batchsize * dim2 * dim2 * sizeof(float));
-
-    int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, dim1, dim1, sparsity);
     
     numBlocks = (batchsize * dim2 * dim2 + BLOCKSIZE - 1) / BLOCKSIZE;
     createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim2, sparsity);
