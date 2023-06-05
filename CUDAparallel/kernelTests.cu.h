@@ -234,8 +234,8 @@ int runMatrixMultiplicationTest() {
 
 int runSetSecondMatrixTest() {
 
-    int dim1 = 10;
-    int dim2 = 5;
+    int dim1 = 100;
+    int dim2 = 50;
     float sparsity = 1.0;
 
     CSC* cscA = createRandomCSC(dim1, dim1, sparsity);
