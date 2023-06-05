@@ -159,16 +159,6 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
         printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
-    printf("printing h_A\n");
-    for (int i = 0; i < batchsize; i++) {
-        for (int j = 0; j < dim1; j++) {
-            for (int k = 0; k < dim1; k++) {
-                printf("%f ", h_A[i * dim1 * dim1 + j * dim1 + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
-    }
 
     float** d_PointerA;
     float** d_PointerB;
@@ -333,8 +323,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    int dim1 = 10;
-    int dim2 = 5;
+    int dim1 = 100;
+    int dim2 = 50;
     float sparsity = 1.0;
     int batchsize = 1;
 
