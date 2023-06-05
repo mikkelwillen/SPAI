@@ -15,11 +15,12 @@
 #include "singular.cu.h"
 
 
-// A = matrix we want to compute SPAI on
-// m, n = size of array
-// tolerance = tolerance
-// maxIteration = constraint for the maximal number of iterations
-// s = number of rho_j - the most profitable indices
+/* A = matrix we want to compute SPAI on
+m = number of rows
+n = number of columns
+tolerance = tolerance
+maxIteration = constraint for the maximal number of iterations
+s = number of rho_j - the most profitable indices */
 CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     printf("------SEQUENTIAL SPAI------\n");
     printf("running with parameters: tolerance = %f, maxIteration = %d, s = %d\n", tolerance, maxIteration, s);
@@ -32,7 +33,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     //     return NULL;
     // }
 
-    // initialize cuBLAS
+    // Initialize cuBLAS
     cublasHandle_t cHandle;
     cublasStatus_t stat;
     stat = cublasCreate(&cHandle);
@@ -43,7 +44,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         return NULL;
     } 
 
-    // initialize M and set to diagonal
+    // Initialize M and set to diagonal
     CSC* M = createDiagonalCSC(A->m, A->n);
 
     // m_k = column in M
@@ -64,11 +65,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         float* residual;
 
         // 1) Find the initial sparsity J of m_k
-        // malloc space for the indeces from offset[k] to offset[k + 1]
+        // Malloc space for the indeces from offset[k] to offset[k + 1]
         n2 = M->offset[k + 1] - M->offset[k];
         J = (int*) malloc(sizeof(int) * n2);
 
-        // iterate through row indeces from offset[k] to offset[k + 1] and take all elements from the flatRowIndex
+        // Iterate through row indeces from offset[k] to offset[k + 1] and take all elements from the flatRowIndex
         int h = 0;
         for (int i = M->offset[k]; i < M->offset[k + 1]; i++) {
             J[h] = M->flatRowIndex[i];
@@ -107,13 +108,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         // For each of the indices of I and the indices in the flatRowIndex, we check if they match. If they do, we add that element to AHat.
         AHat = CSCToDense(A, I, J, n1, n2);
 
-        // 4) do QR decomposition of AHat
+        // 4) Do QR decomposition of AHat
         Q = (float*) malloc(sizeof(float) * n1 * n1);
         R = (float*) malloc(sizeof(float) * n1 * n2);
 
         int qrSuccess = qrBatched(cHandle, &AHat, n1, n2, &Q, &R);
 
-        // overwrite AHat
+        // Overwrite AHat
         free(AHat);
         AHat = CSCToDense(A, I, J, n1, n2);
 
@@ -128,9 +129,9 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             return NULL;
         }
 
-        // 6) compute residual = A * mHat_k - e_k
-        // malloc space for residual
-        // do matrix multiplication
+        // 6) Compute residual = A * mHat_k - e_k
+        // Malloc space for residual
+        // Do matrix multiplication
         int* IDense = (int*) malloc(A->m * sizeof(int));
         int* JDense = (int*) malloc(A->n * sizeof(int));
         for (int i = 0; i < A->m; i++) {
@@ -141,7 +142,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
         }
 
         float* ADense = CSCToDense(A, IDense, JDense, A->m, A->n);
-        // compute residual
+        
+        // Compute residual
         for (int i = 0; i < A->m; i++) {
             residual[i] = 0.0;
             for (int j = 0; j < A->n; j++) {
@@ -156,7 +158,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
         }
 
-        // compute the norm of the residual
+        // Compute the norm of the residual
         residualNorm = 0.0;
         for (int i = 0; i < A->m; i++) {
             residualNorm += residual[i] * residual[i];
@@ -165,11 +167,11 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
     
         int somethingToBeDone = 1;
 
-        // while norm of residual > tolerance do
+        // While norm of residual > tolerance do
         while (residualNorm > tolerance && maxIteration > iteration && somethingToBeDone) {
             iteration++;
 
-            // variables
+            // Variables
             int n1Tilde = 0;
             int n2Tilde = 0;
             int n1Union = 0;
@@ -188,7 +190,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             int* smallestJTilde;
 
             // 7) Set L to the set of indices where r(l) != 0
-            // count the numbers of nonzeros in residual
+            // Count the numbers of nonzeros in residual
             for (int i = 0; i < A->m; i++) {
                 if (residual[i] != 0.0) {
                     l++;
@@ -197,7 +199,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // check if k is in I
+            // Check if k is in I
             for (int i = 0; i < n1; i++) {
                 if (k == I[i]) {
                     kNotInI = 0;
@@ -209,7 +211,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 l++;
             }
             
-            // malloc space for L and fill it with the indices
+            // Malloc space for L and fill it with the indices
             L = (int*) malloc(sizeof(int) * l);
 
             int index = 0;
@@ -222,15 +224,13 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
 
 
             // 8) Set JTilde to the set of columns of A corresponding to the indices in L that are not already in J
-            // check what indeces we should keep
+            // Check what indeces we should keep
             keepArray = (int*) malloc(A->n * sizeof(int));
             // set all to 0
             for (int i = 0; i < A->n; i++) {
                 keepArray[i] = 0;
             }
 
-            // index fra 0 til A->n i keep array er en boolean for, om vi skal tilføje den til JTilde
-            // kig på repræsentationen af A
             for (int i = 0; i < A->n; i++) {
                 for (int j = 0; j < l; j++) {
                     for (int h = A->offset[i]; h < A->offset[i + 1]; h++) {
@@ -241,12 +241,12 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // remove the indeces that are already in J
+            // Remove the indeces that are already in J
             for (int i = 0; i < n2; i++) {
                 keepArray[J[i]] = 0;
             }
 
-            // compute the length of JTilde
+            // Compute the length of JTilde
             n2Tilde = 0;
             for (int i = 0; i < A->n; i++) {
                 if (keepArray[i] == 1) {
@@ -254,10 +254,10 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // malloc space for JTilde
+            // Malloc space for JTilde
             JTilde = (int*) malloc(sizeof(int) * n2Tilde);
 
-            // fill JTilde
+            // Fill JTilde
             index = 0;
             for (int i = 0; i < A->n; i++) {
                 if (keepArray[i] == 1) {
@@ -266,7 +266,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 }
             }
 
-            // 9) for each j in JTilde, solve the minimization problem
+            // 9) For each j in JTilde, solve the minimization problem
             // Malloc space for rhoSq
             rhoSq = (float*) malloc(sizeof(float) * n2Tilde);
             for (int i = 0; i < n2Tilde; i++) {
@@ -284,7 +284,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 rhoSq[i] = residualNorm * residualNorm - (rTAe_j * rTAe_j) / (Ae_jNorm * Ae_jNorm);
             }
 
-            // 10) find the s indeces of the column with the smallest rhoSq
+            // 10) Find the s indeces of the column with the smallest rhoSq
             int newN2Tilde = MIN(s, n2Tilde);
             smallestIndices = (int*) malloc(sizeof(int) * newN2Tilde);
 
@@ -292,8 +292,8 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 smallestIndices[i] = -1;
             }
             
-            // we iterate through rhoSq and find the smallest indeces
-            // first, we set the first s indeces to the first s indeces of JTilde
+            // We iterate through rhoSq and find the smallest indeces.
+            // First, we set the first s indeces to the first s indeces of JTilde
             // then if we find a smaller rhoSq, we shift the indeces to the right
             // we insert the index of JTilde with the rhoSq smaller than the current smallest elements
             // smallestIndices then contain the indeces of JTIlde corresponding to the smallest values of rhoSq
@@ -324,7 +324,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
                 JTilde[i] = smallestJTilde[i];
             }
 
-            // 11) determine the new indices Î
+            // 11) Determine the new indices Î
             // Denote by ITilde the new rows, which corresponds to the nonzero rows of A(:, J union JTilde) not contained in I yet
             n2Tilde = newN2Tilde;
             n2Union = n2 + n2Tilde;
@@ -358,7 +358,7 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             }
 
             // 12) Make I U ITilde and J U JTilde
-            // make union of I and ITilde
+            // Make union of I and ITilde
             n1Union = n1 + n1Tilde;
             IUnion = (int*) malloc(sizeof(int) * (n1 + n1Tilde));
             for (int i = 0; i < n1; i++) {
@@ -386,18 +386,16 @@ CSC* sequentialSpai(CSC* A, float tolerance, int maxIteration, int s) {
             free(JUnion);
             free(ITilde);
             free(JTilde);
-            // free(smallestIndices);
-            // printf("smallestIndices freed\n");
             free(smallestJTilde);
             free(rhoSq);
             free(keepArray);
         }
 
         // 16) Set m_k(J) = mHat_k
-        // update kth column of M
+        // Update kth column of M
         M = updateKthColumnCSC(M, mHat_k, k, sortedJ, n2);
 
-        // free memory
+        // Free memory
         free(I);
         free(J);
         free(sortedJ);
