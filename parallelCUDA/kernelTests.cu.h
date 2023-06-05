@@ -194,14 +194,18 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
 
     { // timing the GPU implementations
         gettimeofday(&t_start, NULL);
+
         cudaError_t err = cudaDeviceSynchronize();
         printf("err: %d\n", err);
+
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
         }
+
         err = cudaDeviceSynchronize();
         printf("err: %d\n", err);
+
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
@@ -326,8 +330,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    unsigned long int dim1 = 20000;
-    unsigned long int dim2 = 10000;
+    unsigned long int dim1 = 10;
+    unsigned long int dim2 = 5;
     float sparsity = 1.0;
     int batchsize = 1;
 
