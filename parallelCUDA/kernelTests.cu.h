@@ -41,6 +41,7 @@ void seqSetSecondMatrix(float* A, float* B, int dim1, int dim2, int batchsize) {
             for (int j = 0; j < dim1; j++) {
                 if (i < dim2 && j < dim2) {
                     A[b * dim1 * dim1 + i * dim1 + j] = B[b * dim2 * dim2 + i * dim2 + j];
+                    printf("i, j = %d, %d\n", i, j);
                 } else if (i == j) {
                     A[b * dim1 * dim1 + i * dim1 + j] = 1.0;
                 } else {
@@ -131,7 +132,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
 }
 
 int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsize) {
-    printf("setSeocondMatrixTest - dim1: %d, dim2: %d\n", dim1, dim2);
+    printf("setSecondMatrixTest - dim1: %d, dim2: %d\n", dim1, dim2);
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
