@@ -40,7 +40,7 @@ void seqSetSecondMatrix(float* A, float* B, int dim1, int dim2, int batchsize) {
         for (int i = 0; i < dim1; i++) {
             for (int j = 0; j < dim1; j++) {
                 if (i < dim2 && j < dim2) {
-                    printf("b, i, j = %d, %d, %d\n", b, i, j);
+                    // printf("b, i, j = %d, %d, %d\n", b, i, j);
                     A[b * dim1 * dim1 + i * dim1 + j] = B[b * dim2 * dim2 + i * dim2 + j];
                 } else if (i == j) {
                     A[b * dim1 * dim1 + i * dim1 + j] = 1.0;
