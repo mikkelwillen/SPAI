@@ -12,6 +12,20 @@
 #include "SPAIkernels.cu.h"
 #include "helperKernels.cu.h"
 
+/* kernel for creating a random dense matrix */
+__global__ void createRandomMatrix(float* d_M, time_t t, int m, int n, float sparsity) {
+    int tid = blockIdx.x * blockDim.x + threadIdx.x;
+    if (tid < m * n) {
+        float x = ((float) rand() / (float) (RAND_MAX));
+        if (x < sparsity) {
+            float y = ((float) rand() / (float) (RAND_MAX)) * 100.0 + (float) rand() / (float) (RAND_MAX);
+            d_M[tid] = y;
+        } else {
+            d_M[tid] = 0.0;
+        }
+    }
+}
+
 void seqMatrixMultiplication(float* A, float* B, float* C, int dim1, int dim2, int dim3, int batchsize) {
     for (int b = 0; b < batchsize; b++) {
         for (int i = 0; i < dim1; i++) {
@@ -57,17 +71,23 @@ void seqCSCToDense(CSC* csc, float* dense, int* I, int* J, int n1, int n2, int b
     }
 }
 
-int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, int dim3, int batchsize) {
-    
+int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int dim2, int dim3, int batchsize) {
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
+
+    float* h_A = (float*) malloc(batchsize * dim1 * dim2 * sizeof(float));
+    float* h_B = (float*) malloc(batchsize * dim2 * dim3 * sizeof(float));
+    float* h_C = (float*) malloc(batchsize * dim1 * dim3 * sizeof(float));
+
+    cudaMemcpy(h_A, d_A, batchsize * dim1 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_B, d_B, batchsize * dim2 * dim3 * sizeof(float), cudaMemcpyDeviceToHost);
 
     { // timing the CPU implementations
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            seqMatrixMultiplication(A, B, C, dim1, dim2, dim3, batchsize);
+            seqMatrixMultiplication(h_A, h_B, h_C, dim1, dim2, dim3, batchsize);
         }
         
         cudaDeviceSynchronize();
@@ -79,21 +99,9 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
               , elapsed, gigaBytesPerSec);
     }
 
-    float* d_A;
-    float* d_B;
-    float* d_C;
-
     float** d_PointerA;
     float** d_PointerB;
     float** d_PointerC;
-
-    cudaMalloc((void**)&d_A, batchsize * dim1 * dim2 * sizeof(float));
-    cudaMalloc((void**)&d_B, batchsize * dim2 * dim3 * sizeof(float));
-    cudaMalloc((void**)&d_C, batchsize * dim1 * dim3 * sizeof(float));
-
-    cudaMemcpy(d_A, A, batchsize * dim1 * dim2 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, B, batchsize * dim2 * dim3 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_C, C, batchsize * dim1 * dim3 * sizeof(float), cudaMemcpyHostToDevice);
 
     cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
     cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
@@ -126,16 +134,22 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
     return 0;
 }
 
-int setSecondMatrixTest(float* A, float* B, int dim1, int dim2, int batchsize) {
+int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsize) {
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
+
+    float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
+    float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
+
+    cudaMemcpy(h_A, d_A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
 
     { // timing the CPU implementations
         gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_CPU; i++) {
-            seqSetSecondMatrix(A, B, dim1, dim2, batchsize);
+            seqSetSecondMatrix(h_A, h_B, dim1, dim2, batchsize);
         }
         
         cudaDeviceSynchronize();
@@ -147,17 +161,8 @@ int setSecondMatrixTest(float* A, float* B, int dim1, int dim2, int batchsize) {
               , elapsed, gigaBytesPerSec);
     }
 
-    float* d_A;
-    float* d_B;
-
     float** d_PointerA;
     float** d_PointerB;
-
-    cudaMalloc((void**)&d_A, batchsize * dim1 * dim1 * sizeof(float));
-    cudaMalloc((void**)&d_B, batchsize * dim2 * dim2 * sizeof(float));
-
-    cudaMemcpy(d_A, A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyHostToDevice);
 
     cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
     cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
@@ -295,74 +300,46 @@ int setSecondMatrixTest(float* A, float* B, int dim1, int dim2, int batchsize) {
 // }
 
 int runMatrixMultiplicationTest() {
-
     int dim1 = 10000;
     int dim2 = 10000;
     int dim3 = 10000;
     float sparsity = 1.0;
-
-    CSC* cscA = createRandomCSC(dim1, dim2, sparsity);
-    CSC* cscB = createRandomCSC(dim2, dim3, sparsity);
-
-    int* AI = (int*) malloc(sizeof(int) * dim1);
-    int* AJ = (int*) malloc(sizeof(int) * dim2);
-    for (int i = 0; i < dim1; i++) {
-        AI[i] = i;
-    }
-    for (int i = 0; i < dim2; i++) {
-        AJ[i] = i;
-    }
-
-    int* BI = (int*) malloc(sizeof(int) * dim2);
-    int* BJ = (int*) malloc(sizeof(int) * dim3);
-    for (int i = 0; i < dim2; i++) {
-        BI[i] = i;
-    }
-    for (int i = 0; i < dim3; i++) {
-        BJ[i] = i;
-    }
-
-    float* A = CSCToDense(cscA, AI, AJ, dim1, dim2);
-    float* B = CSCToDense(cscB, BI, BJ, dim2, dim3);
-    float* C = (float*) malloc(sizeof(float) * dim1 * dim3);
-
     int batchsize = 1;
+    
+    time_t t;
+    srand((unsigned) time(&t));
+
+    float* A;
+    float* B;
+    float* C;
+
+    cudaMalloc((void**)&A, dim1 * dim2 * sizeof(float));
+    cudaMalloc((void**)&B, dim2 * dim3 * sizeof(float));
+    cudaMalloc((void**)&C, dim1 * dim3 * sizeof(float));
+
+    createRandomMatrix(A, t, dim1, dim2, sparsity);
+    createRandomMatrix(B, t, dim2, dim3, sparsity);
 
     matrixMultiplicationTest(A, B, C, dim1, dim2, dim3, batchsize);
 }
 
 int runSetSecondMatrixTest() {
-
-    int dim1 = 100000;
-    int dim2 = 50000;
+    int dim1 = 10000;
+    int dim2 = 5000;
     float sparsity = 1.0;
-
-    CSC* cscA = createRandomCSC(dim1, dim1, sparsity);
-    CSC* cscB = createRandomCSC(dim2, dim2, sparsity);
-
-    int* AI = (int*) malloc(sizeof(int) * dim1);
-    int* AJ = (int*) malloc(sizeof(int) * dim1);
-    for (int i = 0; i < dim1; i++) {
-        AI[i] = i;
-    }
-    for (int i = 0; i < dim1; i++) {
-        AJ[i] = i;
-    }
-
-    int* BI = (int*) malloc(sizeof(int) * dim2);
-    int* BJ = (int*) malloc(sizeof(int) * dim2);
-    for (int i = 0; i < dim2; i++) {
-        BI[i] = i;
-    }
-    for (int i = 0; i < dim2; i++) {
-        BJ[i] = i;
-    }
-
-    float* A = CSCToDense(cscA, AI, AJ, dim1, dim1);
-    float* B = CSCToDense(cscB, BI, BJ, dim2, dim2);
-
-
     int batchsize = 1;
+
+    time_t t;
+    srand((unsigned) time(&t));
+
+    float* A;
+    float* B;
+
+    cudaMalloc((void**)&A, dim1 * dim1 * sizeof(float));
+    cudaMalloc((void**)&B, dim1 * dim1 * sizeof(float));
+
+    createRandomMatrix(A, t, dim1, dim1, sparsity);
+    createRandomMatrix(B, t, dim1, dim1, sparsity);
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
