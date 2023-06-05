@@ -614,6 +614,10 @@ batchsize            = the size of the batch */
 __global__ void setFirstMatrix(float** d_PointerFirstMatrix, float** d_PointerQ, int* d_n1, int* d_n1Union, int maxn1, int maxn1Union, int batchsize) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < batchsize * maxn1Union * maxn1Union) {
+        if (tid == 0) {
+            printf("d_n1: %d\n", d_n1[0]);
+            printf("d_n1Union: %d\n", d_n1Union[0]);
+        }
         int b = tid / (maxn1Union * maxn1Union);
         int i = (tid % (maxn1Union * maxn1Union)) / maxn1Union;
         int j = (tid % (maxn1Union * maxn1Union)) % maxn1Union;
