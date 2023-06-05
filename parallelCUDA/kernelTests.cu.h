@@ -125,7 +125,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
         printf("err: %d\n", err);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
-        gigaBytesPerSec = 2 * dim1 * dim2 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
+        gigaBytesPerSec = 2 * dim1 * dim2 * batchsize * sizeof(float) * 1.0e-3f / elapsed;
         printf("\n\nParallel matrixMul runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
@@ -306,9 +306,9 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
 // }
 
 int runMatrixMultiplicationTest() {
-    unsigned long int dim1 = 1000;
-    unsigned long int dim2 = 1000;
-    unsigned long int dim3 = 1000;
+    unsigned long int dim1 = 10;
+    unsigned long int dim2 = dim1;
+    unsigned long int dim3 = dim1;
     float sparsity = 1.0;
     int batchsize = 1;
     
