@@ -189,9 +189,6 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
         h_n1Union[i] = dim1;
         h_n2[i] = dim2;
     }
-    printf("h_n1Tilde[0]: %d\n", h_n1Tilde[0]);
-    printf("h_n1Union[0]: %d\n", h_n1Union[0]);
-    printf("h_n2[0]: %d\n", h_n2[0]);
 
     int* d_n1Tilde;
     int* d_n1Union;
@@ -211,7 +208,7 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
         printf("error: %d\n", test);
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
-            setFirstMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n2, d_n1Union, dim2, dim1, batchsize);
+            setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
         }
         
         test = cudaDeviceSynchronize();
@@ -222,17 +219,6 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
         gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
         printf("\n\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
               , elapsed, gigaBytesPerSec);
-    }
-    cudaMemcpy(h_A, d_A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost);
-    printf("printing h_A\n");
-    for (int i = 0; i < batchsize; i++) {
-        for (int j = 0; j < dim1; j++) {
-            for (int k = 0; k < dim1; k++) {
-                printf("%f ", h_A[i * dim1 * dim1 + j * dim1 + k]);
-            }
-            printf("\n");
-        }
-        printf("\n");
     }
 
     // gpuAssert( cudaPeekAtLastError() );
@@ -374,13 +360,6 @@ int runSetSecondMatrixTest() {
 
     float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
     cudaMemcpy(h_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
-    printf("B:\n");
-    for (int i = 0; i < dim2; i++) {
-        for (int j = 0; j < dim2; j++) {
-            printf("%f ", h_B[i * dim2 + j]);
-        }
-        printf("\n");
-    }
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
