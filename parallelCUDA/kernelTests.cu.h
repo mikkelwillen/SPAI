@@ -140,8 +140,10 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
     float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
     float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
 
-    cudaMemcpy(h_A, d_A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost);
-    cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
+    gpuAssert(
+        cudaMemcpy(h_A, d_A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost));
+    gpuAssert(
+        cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost));
     printf("memcpy done\n");
 
     { // timing the CPU implementations
@@ -326,8 +328,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    int dim1 = 10000;
-    int dim2 = 5000;
+    int dim1 = 100000;
+    int dim2 = 50000;
     float sparsity = 1.0;
     int batchsize = 1;
 
