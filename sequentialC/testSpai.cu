@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
         // create a random matrix
         CSC* csc = createRandomCSC(m, n, sparsity);
 
-        runIdentityTest(csc, m, n, tolerance, maxIterations, s);
+        runIdentityTest(csc, m, n, sparsity, tolerance, maxIterations, s);
     } else if (argc == 7) {
         // Read argumnets from terminal
         int sizeOfMatrix = atoi(argv[1]);
