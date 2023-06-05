@@ -34,7 +34,7 @@ void seqMatrixMultiplication(float* A, float* B, float* C, int dim1, int dim2, i
     }
 }
 
-void seqSetSecondMatrix(float* A, float* B, int dim1, int dim2, int batchsize) {
+void seqSetSecondMatrix(float* A, float* B, unsigned long int dim1, unsigned long int dim2, int batchsize) {
     printf("bib\n");
     for (int b = 0; b < batchsize; b++) {
         for (int i = 0; i < dim1; i++) {
