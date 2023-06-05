@@ -10,6 +10,13 @@
 #include "sequentialSpai.cu.h"
 #include "cuSOLVERInv.cu.h"
 
+/*
+Function for testing and timing the sequential SPAI implementation
+A = the matrix to be inverted
+tolerance = the tolerance
+maxIteration = the maximum number of iterations
+S = smallest indices to be used
+*/
 int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
 
     double gigaBytesPerSec;
@@ -39,6 +46,11 @@ int sequentialTest(CSC* A, float tolerance, int maxIteration, int s) {
 
 }
 
+/*
+Function for testing and timing the cuSOLVER implementation
+A = the matrix to be inverted
+n = the size of the matrix (n x n)
+*/
 int sequentialTestCuSOLVER(float* A, int n) {
 
     double gigaBytesPerSec;
@@ -73,6 +85,16 @@ int sequentialTestCuSOLVER(float* A, int n) {
 
 }
 
+/* 
+Function for testing the accuracy of the sequential SPAI implementation
+A = the matrix to be inverted
+m = the number of rows in the matrix
+n = the number of columns in the matrix
+sparsity = the sparsity of the matrix
+tolerance = the tolerance
+maxIteration = the maximum number of iterations
+S = smallest indices to be used
+*/
 int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, int maxIterations, int s) {
     float* identity = (float*) malloc (sizeof(float) * n * n);
 
@@ -100,32 +122,32 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
         }
     }
 
-    // // print A
-    // printf("A:\n");
-    // for (int i = 0; i < m; i++) {
-    //     for (int j = 0; j < n;j++) {
-    //         printf("%f ", A[i * n + j]);
-    //     }
-    //     printf("\n");
-    // }
+    // print A
+    printf("A:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", A[i * n + j]);
+        }
+        printf("\n");
+    }
 
-    // // print inv
-    // printf("inv:\n");
-    // for (int i = 0; i < m; i++) {
-    //     for (int j = 0; j < n;j++) {
-    //         printf("%f ", inv[i * n + j]);
-    //     }
-    //     printf("\n");
-    // }
+    // print inv
+    printf("inv:\n");
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", inv[i * n + j]);
+        }
+        printf("\n");
+    }
 
-    // // print identity
-    // printf("identity:\n");
-    // for (int i = 0; i < n; i++) {
-    //     for (int j = 0; j < n;j++) {
-    //         printf("%f ", identity[i * n + j]);
-    //     }
-    //     printf("\n");
-    // }
+    // print identity
+    printf("identity:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n;j++) {
+            printf("%f ", identity[i * n + j]);
+        }
+        printf("\n");
+    }
 
     // calculate error
     float error = 0.0;
@@ -138,6 +160,11 @@ int runIdentityTest(CSC* cscA, int m, int n, float sparsity, float tolerance, in
     printf("Error: %.15f%\n", error);
 }
 
+/*
+Function for testing the accuracy of the cuSOLVER implementation
+A = the matrix to be inverted
+n = the size of the matrix (n x n)
+*/
 int runcuSOLVERTest(float* A, int n) {
     float* inv = cuSOLVERInversion(A, n, n);
     printf("After cuSOLVERInversion\n");

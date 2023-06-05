@@ -11,28 +11,29 @@
 #include "permutation.cu.h"
 #include "LSProblem.cu.h"
 
-// Function for updating the QR decomposition
-// cHandle = the cublas handle
-// A = the input CSC matrix
-// AHat = the submatrix of size n1 x n2
-// Q = the Q matrix
-// R = the R matrix
-// I = the row indices of AHat
-// J = the column indices of AHat
-// ITilde = the row indices to potentioally add to AHat
-// JTilde = the column indices to potentially add to AHat
-// IUnion = the union of I and ITilde
-// JUnion = the union of J and JTilde
-// n1 = the lentgh of I
-// n2 = the length of J
-// n1Tilde = the length of ITilde
-// n2Tilde = the length of JTilde
-// n1Union = the length of IUnion
-// n2Union = the length of JUnion
-// m_kOut = the output of the LS problem
-// residual = the residual vector
-// residualNorm = the norm of the residual vector
-// k = the current iteration
+/* Function for updating the QR decomposition
+cHandle = the cublas handle
+A = the input CSC matrix
+AHat = the submatrix of size n1 x n2
+Q = the Q matrix
+R = the R matrix
+I = the row indices of AHat
+J = the column indices of AHat
+ITilde = the row indices to potentioally add to AHat
+JTilde = the column indices to potentially add to AHat
+IUnion = the union of I and ITilde
+JUnion = the union of J and JTilde
+n1 = the lentgh of I
+n2 = the length of J
+n1Tilde = the length of ITilde
+n2Tilde = the length of JTilde
+n1Union = the length of IUnion
+n2Union = the length of JUnion
+m_kOut = the output of the LS problem
+residual = the residual vector
+residualNorm = the norm of the residual vector
+k = the current iteration */
+
 int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R, int** I, int** J, int** sortedJ, int* ITilde, int* JTilde, int* IUnion, int* JUnion, int n1, int n2, int n1Tilde, int n2Tilde, int n1Union, int n2Union, float** m_kOut, float* residual, float* residualNorm, int k) {
     // 13.1) Create A(I, JTilde) and A(ITilde, JTilde)
     float* AIJTilde = CSCToDense(A, (*I), JTilde, n1, n2Tilde);
@@ -93,7 +94,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     int qrSuccess = qrBatched(cHandle, &B2, n1Union - n2, n2Tilde, &B2Q, &B2R);
 
     // 13.6) Compute Q_B and R_B from algorithm 17
-    // make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
+    // Make first matrix with Q in the upper left and identity in the lower right of size n1Union x n1Union
     float* firstMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
@@ -109,7 +110,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         firstMatrix[(n1 + i) * n1Union + n1 + i] = 1.0;
     }
 
-    // make second matrix with identity in the upper left corner and B2Q in the lower right corner of size n1Union x n1Union
+    // Make second matrix with identity in the upper left corner and B2Q in the lower right corner of size n1Union x n1Union
     float* secondMatrix = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
@@ -125,7 +126,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // compute unsortedQ = firstMatrix * secondMatrix
+    // Compute unsortedQ = firstMatrix * secondMatrix
     float* unsortedQ = (float*) malloc(n1Union * n1Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n1Union; j++) {
@@ -136,7 +137,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // make unsortedR with R in the top left corner, B1 in the top right corner and B2R under B1 of size n1Union x n2Union
+    // Make unsortedR with R in the top left corner, B1 in the top right corner and B2R under B1 of size n1Union x n2Union
     float* unsortedR = (float*) malloc(n1Union * n2Union * sizeof(float));
     for (int i = 0; i < n1Union; i++) {
         for (int j = 0; j < n2Union; j++) {
@@ -144,7 +145,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // var n1, tror det er n2
     for (int i = 0; i < n2; i++) {
         for (int j = 0; j < n2; j++) {
             unsortedR[i * n2Union + j] = (*R)[i * n2 + j];
@@ -166,7 +166,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     free(*m_kOut);
     (*m_kOut) = (float*) malloc(n2Union * sizeof(float));
 
-    // 13.7) compute the new solution m_k for the least squares problem
+    // 13.7) Compute the new solution m_k for the least squares problem
     int lsSuccess = LSProblem(cHandle, A, unsortedQ, unsortedR, m_kOut, residual, IUnion, JUnion, n1Union, n2Union, k, residualNorm);
 
     if (lsSuccess != 0) {
@@ -180,7 +180,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     free(*m_kOut);
     (*m_kOut) = (float*) malloc(n2Union * sizeof(float));
 
-    // compute m_KOut = Pc * tempM_k
+    // Compute m_KOut = Pc * tempM_k
     for (int i = 0; i < n2Union; i++) {
         (*m_kOut)[i] = 0.0;
         for (int j = 0; j < n2Union; j++) {
@@ -188,9 +188,9 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
 
-    // 14) compute residual = A * mHat_k - e_k
-    // malloc space for residual
-    // do matrix multiplication
+    // 14) Compute residual = A * mHat_k - e_k
+    // Malloc space for residual
+    // Do matrix multiplication
     int* IDense = (int*) malloc(A->m * sizeof(int));
     int* JDense = (int*) malloc(A->n * sizeof(int));
     for (int i = 0; i < A->m; i++) {
@@ -200,7 +200,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         JDense[j] = j;
     }
 
-    // set I and J to IUnion and JUnion
+    // Set I and J to IUnion and JUnion
     free(*I);
     free(*J);
     (*I) = (int*) malloc(n1Union * sizeof(int));
@@ -212,7 +212,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         (*J)[i] = JUnion[i];
     }
 
-    // set sortedJ to Pc * J
+    // Set sortedJ to Pc * J
     free(*sortedJ);
     (*sortedJ) = (int*) malloc(n2Union * sizeof(int));
     for (int i = 0; i < n2Union; i++) {
@@ -239,7 +239,7 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
         }
     }
    
-    // compute the norm of the residual
+    // Compute the norm of the residual
     *residualNorm = 0.0;
     for (int i = 0; i < A->m; i++) {
         *residualNorm += residual[i] * residual[i];
@@ -263,12 +263,10 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     }
 
 
-    // free memory
+    // Free memory
     free(AIJTilde);
     free(AITildeJTilde);
     free(ABreve);
-    // free(ATilde);
-    // printf("freed ATilde\n");
     free(Pr);
     free(Pc);
     free(B1);
@@ -276,8 +274,6 @@ int updateQR(cublasHandle_t cHandle, CSC* A, float** AHat, float** Q, float** R,
     free(B2Q);
     free(B2R);
     free(firstMatrix);
-    // free(secondMatrix);
-    // printf("freed secondMatrix\n");
     free(unsortedQ);
     free(unsortedR);
     free(tempM_k);
