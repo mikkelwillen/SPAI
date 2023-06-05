@@ -221,99 +221,12 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
     return 0;
 }
 
-// int CSCToBatchedTest(CSC* A, float* ABatched, int* I, int* J, int dim1, int dim2, int batchsize) {
-//     double gigaBytesPerSec;
-//     unsigned long int elapsed;
-//     struct timeval t_start, t_end, t_diff;
-
-//     { // timing the CPU implementations
-//         gettimeofday(&t_start, NULL);
-
-//         for(int i=0; i<RUNS_CPU; i++) {
-//             seqCSCToDense(A, ABatched,  dim1, dim2, batchsize);
-//         }
-        
-//         cudaDeviceSynchronize();
-
-//         gettimeofday(&t_end, NULL);
-//         timeval_subtract(&t_diff, &t_end, &t_start);
-//         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-//         printf("\n\nSequential matrixMul runs in: %lu microsecs\n\n\n"
-//               , elapsed, gigaBytesPerSec);
-//     }
-
-//     float* d_A;
-//     float* d_B;
-
-//     float** d_PointerA;
-//     float** d_PointerB;
-
-//     cudaMalloc((void**)&d_A, batchsize * dim1 * dim1 * sizeof(float));
-//     cudaMalloc((void**)&d_B, batchsize * dim2 * dim2 * sizeof(float));
-
-//     cudaMemcpy(d_A, A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyHostToDevice);
-//     cudaMemcpy(d_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyHostToDevice);
-
-//     cudaMalloc((void**)&d_PointerA, batchsize * sizeof(float*));
-//     cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
-
-//     int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
-//     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim1);
-//     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim2);
-
-//     int* h_n1Tilde = (int*) malloc(batchsize * sizeof(int));
-//     int* h_n1Union = (int*) malloc(batchsize * sizeof(int));
-//     int* h_n2 = (int*) malloc(batchsize * sizeof(int));
-
-//     for (int i = 0; i < batchsize; i++) {
-//         h_n1Tilde[i] = 0;
-//         h_n1Union[i] = dim1;
-//         h_n2[i] = dim2;
-//     }
-
-//     int* d_n1Tilde;
-//     int* d_n1Union;
-//     int* d_n2;
-
-//     cudaMalloc((void**)&d_n1Tilde, batchsize * sizeof(int));
-//     cudaMalloc((void**)&d_n1Union, batchsize * sizeof(int));
-//     cudaMalloc((void**)&d_n2, batchsize * sizeof(int));
-
-//     cudaMemcpy(d_n1Tilde, h_n1Tilde, batchsize * sizeof(int), cudaMemcpyHostToDevice);
-//     cudaMemcpy(d_n1Union, h_n1Union, batchsize * sizeof(int), cudaMemcpyHostToDevice);
-//     cudaMemcpy(d_n2,h_n2, batchsize* sizeof(int), cudaMemcpyHostToDevice);
-
-//     { // timing the GPU implementations
-//         gettimeofday(&t_start, NULL);
-
-//         for(int i=0; i<RUNS_GPU; i++) {
-//             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
-//             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
-//         }
-        
-//         cudaDeviceSynchronize();
-
-//         gettimeofday(&t_end, NULL);
-//         timeval_subtract(&t_diff, &t_end, &t_start);
-//         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
-//         gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
-//         printf("\n\nParallel matrixMul runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
-//               , elapsed, gigaBytesPerSec);
-//     }
-
-//     // gpuAssert( cudaPeekAtLastError() );
-//     return 0;
-// }
-
-int runMatrixMultiplicationTest() {
-    unsigned long int dim1 = 5000;
-    unsigned long int dim2 = dim1;
-    unsigned long int dim3 = dim1;
+int runMatrixMultiplicationTest(unsigned long int size) {
+    unsigned long int dim1 = size;
+    unsigned long int dim2 = size;
+    unsigned long int dim3 = size;
     float sparsity = 1.0;
     int batchsize = 1;
-    
-    time_t t;
-    srand((unsigned) time(&t));
 
     float* A;
     float* B;
@@ -332,14 +245,11 @@ int runMatrixMultiplicationTest() {
     matrixMultiplicationTest(A, B, C, dim1, dim2, dim3, batchsize);
 }
 
-int runSetSecondMatrixTest() {
-    unsigned long int dim1 = 500;
-    unsigned long int dim2 = 250;
+int runSetSecondMatrixTest(unsigned long int size) {
+    unsigned long int dim1 = size;
+    unsigned long int dim2 = size / 2;
     float sparsity = 1.0;
     int batchsize = 1;
-
-    time_t t;
-    srand((unsigned) time(&t));
 
     float* A;
     float* B;
