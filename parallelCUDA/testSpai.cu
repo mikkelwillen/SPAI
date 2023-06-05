@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 
         // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
 
-        runSetSecondMatrixTest();
+        runMatrixMultiplicationTest();
 
         // parallelTest(cscC, tolerance, maxIterations, s, batchsize);
 
