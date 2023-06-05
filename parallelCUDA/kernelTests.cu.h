@@ -137,28 +137,28 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
 
-    // float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
-    // float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
+    float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
+    float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
 
-    // gpuAssert(
-    //     cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost));
-    // printf("memcpy done\n");
+    gpuAssert(
+        cudaMemcpy(h_B, d_B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost));
+    printf("memcpy done\n");
 
-    // { // timing the CPU implementations
-    //     gettimeofday(&t_start, NULL);
+    { // timing the CPU implementations
+        gettimeofday(&t_start, NULL);
 
-    //     for(int i=0; i<RUNS_CPU; i++) {
-    //         seqSetSecondMatrix(h_A, h_B, dim1, dim2, batchsize);
-    //     }
+        for(int i=0; i<RUNS_CPU; i++) {
+            seqSetSecondMatrix(h_A, h_B, dim1, dim2, batchsize);
+        }
         
-    //     cudaDeviceSynchronize();
+        cudaDeviceSynchronize();
 
-    //     gettimeofday(&t_end, NULL);
-    //     timeval_subtract(&t_diff, &t_end, &t_start);
-    //     elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-    //     printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
-    //           , elapsed, gigaBytesPerSec);
-    // }
+        gettimeofday(&t_end, NULL);
+        timeval_subtract(&t_diff, &t_end, &t_start);
+        elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
+        printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
+              , elapsed, gigaBytesPerSec);
+    }
 
     float** d_PointerA;
     float** d_PointerB;
@@ -330,8 +330,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    unsigned long int dim1 = 6000;
-    unsigned long int dim2 = 3000;
+    unsigned long int dim1 = 5000;
+    unsigned long int dim2 = 2500;
     float sparsity = 1.0;
     int batchsize = 1;
 
