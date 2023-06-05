@@ -68,7 +68,7 @@ void seqCSCToDense(CSC* csc, float* dense, int* I, int* J, int n1, int n2, int b
 }
 
 int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int dim2, int dim3, int batchsize) {
-    printf("matrixMultiplicationTest - dim1: %d, dim2: %d, dim3 %d\n", dim1, dim2, dim3);
+    printf("\n\n------------matrixMultiplicationTest - dim1: %d, dim2: %d, dim3 %d------------\n", dim1, dim2, dim3);
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
@@ -92,7 +92,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-        printf("\n\nSequential matrixMul runs in: %lu microsecs\n\n\n"
+        printf("\nSequential matrixMul runs in: %lu microsecs\n"
               , elapsed, gigaBytesPerSec);
     }
 
@@ -111,9 +111,11 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
 
     { // timing the GPU implementations
         cudaError_t err = cudaDeviceSynchronize();
-        printf("err: %d\n", err);
+        if (err != cudaSuccess) {
+            printf("err: %d\n", err);
+        }
+        
         gettimeofday(&t_start, NULL);
-
 
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim3 + BLOCKSIZE - 1) / BLOCKSIZE;
@@ -121,12 +123,16 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
         }
         
         gettimeofday(&t_end, NULL);
+
         err = cudaDeviceSynchronize();
-        printf("err: %d\n", err);
+        if (err != cudaSuccess) {
+            printf("err: %d\n", err);
+        }
+
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
         gigaBytesPerSec = 2 * dim1 * dim2 * batchsize * sizeof(float) * 1.0e-3f / elapsed;
-        printf("\n\nParallel matrixMul runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+        printf("Parallel matrixMul runs in: %lu microsecs, GB/sec: %.2f\n"
               , elapsed, gigaBytesPerSec);
     }
 
@@ -135,7 +141,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
 }
 
 int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned long int dim2, int batchsize) {
-    printf("setSecondMatrixTest - dim1: %d, dim2: %d\n", dim1, dim2);
+    printf("\n\n------------setSecondMatrixTest - dim1: %d, dim2: %d------------\n", dim1, dim2);
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
@@ -159,7 +165,7 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-        printf("\n\nSequential secondMatrix runs in: %lu microsecs\n\n\n"
+        printf("Sequential secondMatrix runs in: %lu microsecs\n"
               , elapsed, gigaBytesPerSec);
     }
 
@@ -196,24 +202,29 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
     cudaMemcpy(d_n2,h_n2, batchsize* sizeof(int), cudaMemcpyHostToDevice);
 
     { // timing the GPU implementations
-        gettimeofday(&t_start, NULL);
-
         cudaError_t err = cudaDeviceSynchronize();
-        printf("err: %d\n", err);
+        if (err != cudaSuccess) {
+            printf("err: %d\n", err);
+        }
+
+        gettimeofday(&t_start, NULL);
 
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
         }
 
-        err = cudaDeviceSynchronize();
-        printf("err: %d\n", err);
-
         gettimeofday(&t_end, NULL);
+
+        err = cudaDeviceSynchronize();
+        if (err != cudaSuccess) {
+            printf("err: %d\n", err);
+        }
+
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
         gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(float) * 1.0e-3f / elapsed;
-        printf("\n\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+        printf("\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n"
               , elapsed, gigaBytesPerSec);
     }
 
