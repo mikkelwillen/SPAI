@@ -6,7 +6,7 @@
 
 #define DEBUG_INFO  true
 
-#define RUNS_GPU            10
+#define RUNS_GPU            1
 #define RUNS_CPU            2
 #define NUM_BLOCKS          1
 #define BLOCKSIZE           1024
