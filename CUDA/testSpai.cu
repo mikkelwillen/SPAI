@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
         sparsityArray[1] = 0.3;
         sparsityArray[2] = 0.5;
 
-        for (int i = 2; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 int n = sizeArray[i];
                 float sparsity = sparsityArray[j];
