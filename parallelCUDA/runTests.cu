@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
         int* sizeArray = (int*) malloc(sizeof(int) * 5);
         sizeArray[0] = 10;
         sizeArray[1] = 100;
-        sizeArray[2] = 500
+        sizeArray[2] = 500;
         sizeArray[3] = 1000;
         sizeArray[4] = 5000;
 
@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         }
         
         for (int i = 0; i < 4; i++) {
-            runSetSecondMatrix(i);
+            runSetSecondMatrixTest(i);
         }
     }
 }
