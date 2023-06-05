@@ -194,7 +194,7 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
 
     { // timing the GPU implementations
         gettimeofday(&t_start, NULL);
-        
+
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
@@ -324,8 +324,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    int dim1 = 10000;
-    int dim2 = 5000;
+    int dim1 = 100000;
+    int dim2 = 50000;
     float sparsity = 1.0;
     int batchsize = 1;
 
