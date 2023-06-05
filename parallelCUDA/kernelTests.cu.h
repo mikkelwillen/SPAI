@@ -306,7 +306,7 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
 // }
 
 int runMatrixMultiplicationTest() {
-    unsigned long int dim1 = 100;
+    unsigned long int dim1 = 1000;
     unsigned long int dim2 = dim1;
     unsigned long int dim3 = dim1;
     float sparsity = 1.0;
