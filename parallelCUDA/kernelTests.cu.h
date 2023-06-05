@@ -13,16 +13,10 @@
 #include "helperKernels.cu.h"
 
 /* kernel for creating a random dense matrix */
-__global__ void createRandomMatrix(float* d_M, time_t t, int m, int n, float sparsity) {
+__global__ void createRandomMatrix(float* d_M, int m, int n, float sparsity) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < m * n) {
-        float x = ((float) rand() / (float) (RAND_MAX));
-        if (x < sparsity) {
-            float y = ((float) rand() / (float) (RAND_MAX)) * 100.0 + (float) rand() / (float) (RAND_MAX);
-            d_M[tid] = y;
-        } else {
-            d_M[tid] = 0.0;
-        }
+        d_M[tid] = (float) ((tid % 2) * (tid % 3) * (tid % 4) * (tid % 5));
     }
 }
 
@@ -318,10 +312,10 @@ int runMatrixMultiplicationTest() {
     cudaMalloc((void**)&C, dim1 * dim3 * sizeof(float));
 
     int numBlocks = (dim1 * dim2 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, t, dim1, dim2, sparsity);
+    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, dim1, dim2, sparsity);
     
     numBlocks = (dim2 * dim3 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, t, dim2, dim3, sparsity);
+    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim3, sparsity);
 
     matrixMultiplicationTest(A, B, C, dim1, dim2, dim3, batchsize);
 }
@@ -342,10 +336,10 @@ int runSetSecondMatrixTest() {
     cudaMalloc((void**)&B, dim2 * dim2 * sizeof(float));
 
     int numBlocks = (dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, t, dim1, dim1, sparsity);
+    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (A, dim1, dim1, sparsity);
     
     numBlocks = (dim2 * dim2 + BLOCKSIZE - 1) / BLOCKSIZE;
-    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, t, dim1, dim1, sparsity);
+    createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim1, dim1, sparsity);
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
 }
