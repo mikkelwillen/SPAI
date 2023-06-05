@@ -16,7 +16,7 @@
 __global__ void createRandomMatrix(float* d_M, int m, int n, float sparsity) {
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
     if (tid < m * n) {
-        d_M[tid] = (float) ((tid % 2) * (tid % 3) * (tid % 4) * (tid % 5));
+        d_M[tid] = (float) ((tid % 2) * (tid % 3) + (tid % 4) * (tid % 5));
     }
 }
 
