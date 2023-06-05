@@ -66,6 +66,7 @@ void seqCSCToDense(CSC* csc, float* dense, int* I, int* J, int n1, int n2, int b
 }
 
 int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int dim2, int dim3, int batchsize) {
+    printf("matrixMultiplicationTest - dim1: %d, dim2: %d, dim3 %d\n", dim1, dim2, dim3);
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
@@ -129,6 +130,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
 }
 
 int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsize) {
+    printf("setSeocondMatrixTest - dim1: %d, dim2: %d\n", dim1, dim2);
     double gigaBytesPerSec;
     unsigned long int elapsed;
     struct timeval t_start, t_end, t_diff;
