@@ -330,8 +330,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    unsigned long int dim1 = 1000;
-    unsigned long int dim2 = 500;
+    unsigned long int dim1 = 10000;
+    unsigned long int dim2 = 5000;
     float sparsity = 1.0;
     int batchsize = 1;
 
