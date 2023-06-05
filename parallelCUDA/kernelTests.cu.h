@@ -204,7 +204,8 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
 
     { // timing the GPU implementations
         gettimeofday(&t_start, NULL);
-
+        cudaError_t test = cudaDeviceSynchronize();
+        printf("error: %d\n", test);
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim1 + BLOCKSIZE - 1) / BLOCKSIZE;
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
