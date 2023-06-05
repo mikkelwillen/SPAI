@@ -35,7 +35,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     const size_t AMemSize = n * n * BATCHSIZE * sizeof(float);
     const size_t APointerMemSize = BATCHSIZE * sizeof(float*);
 
-    // create input and output arrays
+    // Create input and output arrays
     float* d_A;
     float* d_AInv;
     int* d_PivotArray;
@@ -44,7 +44,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
     int* h_info = (int*) malloc(BATCHSIZE * sizeof(int));
     int* d_info;
 
-    // malloc space and copy data for A
+    // Malloc space and copy data for A
     gpuAssert(
         cudaMalloc((void**) &d_A, AMemSize));
     gpuAssert(
@@ -53,23 +53,23 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         cudaMalloc((void**) &d_PointerA, APointerMemSize));
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerA, d_A, BATCHSIZE, n);
 
-    // malloc space for AInv
+    // Malloc space for AInv
     gpuAssert(
         cudaMalloc((void**) &d_AInv, AMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerAInv, APointerMemSize));
     deviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAInv, d_AInv, BATCHSIZE, n);
 
-    // malloc space for pivot array
+    // Malloc space for pivot array
     gpuAssert(
         cudaMalloc((void**) &d_PivotArray, n * BATCHSIZE * sizeof(float)));
 
-    // malloc space for info
+    // Malloc space for info
     gpuAssert(
         cudaMalloc((void**) &d_info, BATCHSIZE * sizeof(int)));
 
-    // run batched LU factorization from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    // Run batched LU factorization from cublas
+    // Cublas docs: https://docs.nvidia.com/cuda/cublas/
     stat = cublasSgetrfBatched(cHandle,
                                n,
                                d_PointerA,
@@ -78,7 +78,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
                                d_info,
                                BATCHSIZE);
 
-    // error handling
+    // Error handling
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgetrfBatched failed");
         printf("\ncublas error: %d\n", stat);
@@ -97,8 +97,8 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         }
     }
 
-    // run batched inversion from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas/
+    // Run batched inversion from cublas
+    // Cublas docs: https://docs.nvidia.com/cuda/cublas/
     stat = cublasSgetriBatched(cHandle,
                                n,
                                d_PointerA,
@@ -109,7 +109,7 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
                                d_info,
                                BATCHSIZE);
     
-    // error handling
+    // Error handling
     if (stat != CUBLAS_STATUS_SUCCESS) {
         printf("\ncublasSgetriBatched failed");
         printf("\ncublas error: %d\n", stat);
@@ -128,11 +128,11 @@ int invBatched(cublasHandle_t cHandle, float** A, int n, float** AInv) {
         }
     }
 
-    // copy result back to host
+    // Copy result back to host
     gpuAssert(
         cudaMemcpy((*AInv), d_AInv, AMemSize, cudaMemcpyDeviceToHost));
 
-    // free memory
+    // Free memory
     gpuAssert(
         cudaFree(d_A));
     gpuAssert(

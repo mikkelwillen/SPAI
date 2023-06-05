@@ -9,8 +9,6 @@
 #include "csc.cu.h"
 #include "constants.cu.h"
 
-// lige nu fungere functionen kun med batchsize = 1. Det skal lige fixes, når vi laver paralleliseringen
-
 // Kernel to copy d_AHat to d_PointerAHat
 // d_AHat is an array of batch matrices
 // d_PointerAHat is an array of pointers to the start of each matrix in d_AHat
@@ -55,7 +53,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     const size_t AHatMemSize = n1 * n2 * BATCHSIZE * sizeof(float);
     const size_t AHatPointerMemSize = BATCHSIZE * sizeof(float*);
 
-    // create input and output arrays
+    // Create input and output arrays
     float* h_tau = (float*) malloc(tauMemSize);
     float* d_AHat;
     float* d_tau;
@@ -63,7 +61,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
     float** d_PointerTau;
     int info;
 
-    // malloc space and copy data for AHat
+    // Malloc space and copy data for AHat
     gpuAssert(
         cudaMalloc((void**) &d_AHat, AHatMemSize));
     gpuAssert(
@@ -72,15 +70,15 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         cudaMalloc((void**) &d_PointerAHat, AHatPointerMemSize));
     AHatDeviceToDevicePointerKernel <<< 1, BATCHSIZE >>> (d_PointerAHat, d_AHat, BATCHSIZE, n1, n2);
     
-    // malloc space for tau
+    // Malloc space for tau
     gpuAssert(
         cudaMalloc((void**) &d_tau, tauMemSize));
     gpuAssert(
         cudaMalloc((void**) &d_PointerTau, tauPointerMemSize));
     tauDeviceToDevicePointerKernel <<< 1, BATCHSIZE * ltau >>> (d_PointerTau, d_tau, BATCHSIZE, ltau);
 
-    // run QR decomposition from cublas
-    // cublas docs: https://docs.nvidia.com/cuda/cublas
+    // Run QR decomposition from cublas
+    // Cublas docs: https://docs.nvidia.com/cuda/cublas
     stat = cublasSgeqrfBatched(cHandle,
                                n1,
                                n2,
@@ -90,7 +88,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
                                &info,
                                BATCHSIZE);
     
-    // error handling
+    // Error handling
     if (info != 0) {
         printf("Parameter error %d in QR decomposition\n", info);
     }
@@ -102,13 +100,13 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         return stat;
     }
 
-    // copy AHat and tau back to host
+    // Copy AHat and tau back to host
     gpuAssert(
         cudaMemcpy((*AHat), d_AHat, AHatMemSize, cudaMemcpyDeviceToHost));
     gpuAssert(
         cudaMemcpy(h_tau, d_tau, tauMemSize, cudaMemcpyDeviceToHost));
     
-    // copy R from AHat
+    // Copy R from AHat
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
             if (i <= j) {
@@ -119,8 +117,8 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         }
     }
 
-    // make Q with Algorithm 1 from Kerr Campbell Richards QRD on GPUs
-    // set Q to I
+    // Make Q with Algorithm 1 from Kerr Campbell Richards QRD on GPUs
+    // Set Q to I
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n1; j++) {
             (*Q)[i * n1 + j] = 0.0;
@@ -128,9 +126,9 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
         (*Q)[i * n1 + i] = 1.0;
     }
 
-    // do for loop
+    // Do for loop
     for (int k = 0; k < n2; k++) {
-        // make v
+        // Make v
         float* v = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
             if (k > i) {
@@ -142,7 +140,7 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
             }
         }
 
-        // compute Q * v
+        // Compute Q * v
         float* Qv = (float*) malloc(n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
             Qv[i] = 0.0;
@@ -151,27 +149,27 @@ int qrBatched(cublasHandle_t cHandle, float** AHat, int n1, int n2, float** Q, f
             }
         }
 
-        // compute Qv * v^T
+        // Compute Qv * v^T
         float* Qvvt = (float*) malloc(n1 * n1 * sizeof(float));
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
                 Qvvt[i * n1 + j] = h_tau[k] * Qv[i] * v[j];
             }
         }
-        // compute Q - Qv * v^T
+        // Compute Q - Qv * v^T
         for (int i = 0; i < n1; i++) {
             for (int j = 0; j < n1; j++) {
                 (*Q)[i * n1 + j] -= Qvvt[i * n1 + j];
             }
         }
 
-        // free memory
+        // Free memory
         free(v);
         free(Qv);
         free(Qvvt);
     }
 
-    // free arrays and destroy cHandle
+    // Free arrays and destroy cHandle
     free(h_tau);
 
     gpuAssert(

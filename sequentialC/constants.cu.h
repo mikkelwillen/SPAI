@@ -6,17 +6,9 @@
 
 #define DEBUG_INFO  true
 
-#define lgWARP      5
-#define WARP        (1<<lgWARP)
-
-//#define WORKGROUP_SIZE      128
-//#define MAX_WORKGROUP_SIZE  1024
-
 #define RUNS_GPU            1
 #define RUNS_CPU            1
-#define NUM_BLOCKS          1
 #define BLOCK_SIZE          256
-#define ELEMS_PER_THREAD    12
 #define BATCHSIZE           1
 
 #define MIN(a, b) a < b ? a : b
