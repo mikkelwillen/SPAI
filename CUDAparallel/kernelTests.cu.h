@@ -235,18 +235,18 @@ int runMatrixMultiplicationTest() {
 int runSetSecondMatrixTest() {
 
     int dim1 = 10;
-    int dim2 = 10;
+    int dim2 = 5;
     float sparsity = 1.0;
 
-    CSC* cscA = createRandomCSC(dim1, dim2, sparsity);
-    CSC* cscB = createRandomCSC(dim2, dim3, sparsity);
+    CSC* cscA = createRandomCSC(dim1, dim1, sparsity);
+    CSC* cscB = createRandomCSC(dim2, dim2, sparsity);
 
     int* AI = (int*) malloc(sizeof(int) * dim1);
     int* AJ = (int*) malloc(sizeof(int) * dim1);
     for (int i = 0; i < dim1; i++) {
         AI[i] = i;
     }
-    for (int i = 0; i < dim2; i++) {
+    for (int i = 0; i < dim1; i++) {
         AJ[i] = i;
     }
 
@@ -255,7 +255,7 @@ int runSetSecondMatrixTest() {
     for (int i = 0; i < dim2; i++) {
         BI[i] = i;
     }
-    for (int i = 0; i < dim3; i++) {
+    for (int i = 0; i < dim2; i++) {
         BJ[i] = i;
     }
 
