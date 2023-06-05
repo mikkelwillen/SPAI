@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
         float tolerance = 0.01;
         int maxIterations = n - 1;
         int s = 1;
-        int batchsize = 1;
+        int batchsize = 2;
     
     
     
@@ -55,10 +55,10 @@ int main(int argc, char** argv) {
         struct CSC* cscD = createCSC(C, n, n);
         struct CSC* cscM4 = createCSC(m4, 4, 4);
 
-        // runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
+        runIdentityTest(cscC, n, n, sparsity, tolerance, maxIterations, s, batchsize);
 
         // runMatrixMultiplicationTest();
-        runMatrixMultiplicationTest();
+        // runMatrixMultiplicationTest();
 
         // parallelTest(cscC, tolerance, maxIterations, s, batchsize);
 

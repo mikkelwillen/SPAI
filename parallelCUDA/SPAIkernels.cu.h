@@ -174,7 +174,6 @@ __global__ void CSCToBatchedDenseMatrices(CSC* d_A, float** d_AHat, int** d_Poin
         //         printf("\n");
         //     }
         // }
-        __syncthreads();
 
         int* I = d_PointerI[b];
         int* J = d_PointerJ[b];

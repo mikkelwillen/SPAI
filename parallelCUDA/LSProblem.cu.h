@@ -21,13 +21,15 @@ d_n1          = the number of rows in A
 currentBatch  = the current batch
 batchsize     = the batchsize for the cublas handle
 maxn1         = the maximum number of rows in A */
-__global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int* d_n2, int maxn1, int maxn2, int currentBatch, int batchsize) {
+__global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_PointerI, int* d_n1, int maxn1, int maxn2, int currentBatch, int batchsize) {
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
     if (tid < maxn1 * maxn2 * batchsize) {
         int b = tid / (maxn1 * maxn2);
         int i = (tid % (maxn1 * maxn2)) / maxn2;
         int j = (tid % (maxn1 * maxn2)) % maxn2;
         int k = currentBatch * batchsize + b;
+
+        int n1 = d_n1[b];
 
         float* d_cHat = d_PointerCHat[b];
         float* d_Q = d_PointerQ[b];
@@ -38,7 +40,7 @@ __global__ void setCHat(float** d_PointerCHat, float** d_PointerQ, int** d_Point
         }
         __syncthreads();
 
-        if (i < d_n1[b]) {
+        if (i < n1) {
             if (k == d_I[i]) {
                 d_cHat[j] = d_Q[i * maxn1 + j];
             }
@@ -157,7 +159,7 @@ int LSProblem(cublasHandle_t cHandle, CSC* d_A, CSC* A, float* d_ADense, float**
     
     // Set the cHat vector
     numBlocks = (maxn1 * maxn2 * batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
-    setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, d_n2, maxn1, maxn2, currentBatch, batchsize);
+    setCHat<<<numBlocks, BLOCKSIZE>>>(d_PointerCHat, d_PointerQ, d_PointerI, d_n1, maxn1, maxn2, currentBatch, batchsize);
 
     // // print the cHat vector
     // float* h_cHat = (float*) malloc(maxn2 * batchsize * sizeof(float));
