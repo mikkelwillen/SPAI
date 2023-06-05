@@ -131,7 +131,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
     return 0;
 }
 
-int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsize) {
+int setSecondMatrixTest(float* d_A, float* d_B, uint32_t dim1, uint32_t dim2, int batchsize) {
     printf("setSecondMatrixTest - dim1: %d, dim2: %d\n", dim1, dim2);
     double gigaBytesPerSec;
     unsigned long int elapsed;
@@ -324,8 +324,8 @@ int runMatrixMultiplicationTest() {
 }
 
 int runSetSecondMatrixTest() {
-    int dim1 = 100000;
-    int dim2 = 50000;
+    uint32_t dim1 = 100000;
+    uint32_t dim2 = 50000;
     float sparsity = 1.0;
     int batchsize = 1;
 
