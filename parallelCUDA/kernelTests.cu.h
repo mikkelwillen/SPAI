@@ -202,8 +202,8 @@ int setSecondMatrixTest(float* d_A, float* d_B, int dim1, int dim2, int batchsiz
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
         }
         
-        cudaDeviceSynchronize();
-
+        cudaError_t test = cudaDeviceSynchronize();
+        printf("test: %d\n", test);
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
