@@ -104,22 +104,25 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
     cudaMalloc((void**)&d_PointerB, batchsize * sizeof(float*));
     cudaMalloc((void**)&d_PointerC, batchsize * sizeof(float*));
 
-    int numBlocks = (batchsize - BLOCKSIZE + 1) / BLOCKSIZE;
+    int numBlocks = (batchsize + BLOCKSIZE - 1) / BLOCKSIZE;
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_A, batchsize, dim1 * dim2);
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerB, d_B, batchsize, dim2 * dim3);
     floatDeviceToDevicePointerKernel<<<numBlocks, BLOCKSIZE>>>(d_PointerC, d_C, batchsize, dim1 * dim3);
 
     { // timing the GPU implementations
+        cudaError_t err = cudaDeviceSynchronize();
+        printf("err: %d\n", err);
         gettimeofday(&t_start, NULL);
+
 
         for(int i=0; i<RUNS_GPU; i++) {
             int numBlocks = (batchsize * dim1 * dim3 + BLOCKSIZE - 1) / BLOCKSIZE;
             matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_PointerC, NULL, NULL, NULL, dim1, dim2, dim3, batchsize);
         }
         
-        cudaDeviceSynchronize();
-
         gettimeofday(&t_end, NULL);
+        err = cudaDeviceSynchronize();
+        printf("err: %d\n", err);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
         gigaBytesPerSec = 2 * dim1 * dim2 * dim3 * batchsize * sizeof(int) * 1.0e-3f / elapsed;
@@ -303,9 +306,9 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
 // }
 
 int runMatrixMultiplicationTest() {
-    unsigned long int dim1 = 10000;
-    unsigned long int dim2 = 10000;
-    unsigned long int dim3 = 10000;
+    unsigned long int dim1 = 1000;
+    unsigned long int dim2 = 1000;
+    unsigned long int dim3 = 1000;
     float sparsity = 1.0;
     int batchsize = 1;
     
