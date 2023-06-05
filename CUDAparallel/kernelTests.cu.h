@@ -44,7 +44,7 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-        printf("\n\nSequential SPAI runs in: %lu microsecs\n\n\n"
+        printf("\n\nSequential matrixMul runs in: %lu microsecs\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
 
@@ -86,8 +86,8 @@ int matrixMultiplicationTest(float* A, float* B, float* C, int dim1, int dim2, i
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
-        gigaBytesPerSec = 2 * dim3 * sizeof(int) * 1.0e-3f / elapsed;
-        printf("\n\nSequential SPAI runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
+        gigaBytesPerSec = 2 * dim1 * dim2 * dim3 * sizeof(int) * 1.0e-3f / elapsed;
+        printf("\n\nParallel matrixMul runs in: %lu microsecs, GB/sec: %.2f\n\n\n"
               , elapsed, gigaBytesPerSec);
     }
 
