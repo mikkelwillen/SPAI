@@ -9,7 +9,7 @@
 #define RUNS_GPU            10
 #define RUNS_CPU            2
 #define NUM_BLOCKS          1
-#define BLOCKSIZE           32
+#define BLOCKSIZE           1024
 
 #define MIN(a, b) a < b ? a : b
 #define MAX(a, b) a > b ? a : b
