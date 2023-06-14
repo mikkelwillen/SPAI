@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
         int m = 100;
         int n = m;
         float sparsity = 0.1;
-        float tolerance = 0.001;
+        float tolerance = 0.1;
         int maxIterations = n - 1;
         int s = 1;
 
