@@ -17,9 +17,9 @@ If arguments are given in the terminal, they will be used for the test
 int main(int argc, char** argv) {
     if (argc == 1) {
         initHwd();
-        int m = 100;
+        int m = 10;
         int n = m;
-        float sparsity = 0.1;
+        float sparsity = 0.3;
         float tolerance = 0.001;
         int maxIterations = n - 1;
         int s = 1;
