@@ -122,9 +122,10 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
             matrixMultiplication<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_PointerC, NULL, NULL, NULL, dim1, dim2, dim3, batchsize);
         }
         
+        err = cudaDeviceSynchronize();
+        
         gettimeofday(&t_end, NULL);
 
-        err = cudaDeviceSynchronize();
         if (err != cudaSuccess) {
             printf("err: %d\n", err);
         }
@@ -214,9 +215,10 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
             setSecondMatrix<<<numBlocks, BLOCKSIZE>>>(d_PointerA, d_PointerB, d_n1Tilde, d_n1Union, d_n2, dim1, batchsize);
         }
 
+        err = cudaDeviceSynchronize();
+
         gettimeofday(&t_end, NULL);
 
-        err = cudaDeviceSynchronize();
         if (err != cudaSuccess) {
             printf("err: %d\n", err);
         }
@@ -308,9 +310,8 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
             CSCToBatchedDenseMatrices<<<numBlocks, BLOCKSIZE>>>(d_csc, d_PointerA, d_PointerI, d_PointerJ, d_n1, d_n2, dim1, dim2, h_csc->n, batchsize);
         }
 
-        gettimeofday(&t_end, NULL);
-
         err = cudaDeviceSynchronize();
+        gettimeofday(&t_end, NULL);
         if (err != cudaSuccess) {
             printf("err: %d\n", err);
         }
