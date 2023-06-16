@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-matrixMul = ["10 x 10", "100 x 100", "500 x 500", "1000 x 1000", "5000 x 5000"]
-sequential = [0.000011, 0.006504, 0.746897, 4.025718, 1031.4439322]
-kernel = [0.000005, 0.000004, 0.000004, 0.000005, 0.000005]
+matrixMul = ["10 x 10", "100 x 100", "200 x 200", "300 x 300", "400 x 400", "500 x 500", "1000 x 1000", "1500 x 1500", "2000 x 2000", "2500 x 2500", "3000 x 3000", "3500 x 3500", "4000 x 4000", "4500 x 4500", "5000 x 5000"]
+sequential = [0.000011, 0.006522, 0.050982, 0.172691, 0.382062]
+kernel = [0.000008, 0.000021, 0.000033, 0.000047, 0.000098]
 
 plt.plot(matrixMul, sequential, linestyle="-", color="blue", label="Sequential")
 plt.plot(matrixMul, kernel, linestyle="-", color="Orange", label="Parallel")

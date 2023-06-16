@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
         sizeArray[13] = 4500;
         sizeArray[14] = 5000;
 
-        for (int i = 0; i < 15; i++) {
+        for (int i = 13; i < 15; i++) {
             int size = sizeArray[i];
             runMatrixMultiplicationTest(size);
         }
