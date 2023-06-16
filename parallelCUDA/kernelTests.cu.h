@@ -292,7 +292,7 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
     cudaMalloc((void**)&d_n1, batchsize * sizeof(int));
     cudaMalloc((void**)&d_n2, batchsize * sizeof(int));
 
-    cudaMemcpy(d_n1Tilde, h_n1, batchsize * sizeof(int), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_n1, h_n1, batchsize * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_n2,h_n2, batchsize* sizeof(int), cudaMemcpyHostToDevice);
 
     { // timing the GPU implementations

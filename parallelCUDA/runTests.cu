@@ -21,15 +21,15 @@ int main(int argc, char** argv) {
         sizeArray[3] = 1000;
         sizeArray[4] = 5000;
 
-        for (int i = 0; i < 5; i++) {
-            int size = sizeArray[i];
-            runMatrixMultiplicationTest(size);
-        }
+        // for (int i = 0; i < 5; i++) {
+        //     int size = sizeArray[i];
+        //     runMatrixMultiplicationTest(size);
+        // }
         
-        for (int i = 0; i < 4; i++) {
-            int size = sizeArray[i];
-            runSetSecondMatrixTest(size);
-        }
+        // for (int i = 0; i < 4; i++) {
+        //     int size = sizeArray[i];
+        //     runSetSecondMatrixTest(size);
+        // }
 
         for (int i = 0; i < 5; i++) {
             int size = sizeArray[i];
