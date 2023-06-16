@@ -30,5 +30,10 @@ int main(int argc, char** argv) {
             int size = sizeArray[i];
             runSetSecondMatrixTest(size);
         }
+
+        for (int i = 0; i < 5; i++) {
+            int size = sizeArray[i];
+            runCSCToBatchedTest(size);
+        }
     }
 }
