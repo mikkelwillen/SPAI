@@ -123,7 +123,7 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
         }
         
         err = cudaDeviceSynchronize();
-        
+
         gettimeofday(&t_end, NULL);
 
         if (err != cudaSuccess) {
@@ -263,7 +263,7 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
         gettimeofday(&t_end, NULL);
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_CPU;
-        printf("Sequential secondMatrix runs in: %lu microsecs\n"
+        printf("Sequential CSCToBatched runs in: %lu microsecs\n"
               , elapsed, gigaBytesPerSec);
     }
 
@@ -319,7 +319,7 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
         timeval_subtract(&t_diff, &t_end, &t_start);
         elapsed = (t_diff.tv_sec*1e6+t_diff.tv_usec) / RUNS_GPU;
         gigaBytesPerSec = 2 * dim1 * dim1 * batchsize * sizeof(float) * 1.0e-3f / elapsed;
-        printf("\nParallel secondMatrix runs in: %lu microsecs, GB/sec: %.2f\n"
+        printf("\nParallel CSCToBatched runs in: %lu microsecs, GB/sec: %.2f\n"
               , elapsed, gigaBytesPerSec);
     }
 
