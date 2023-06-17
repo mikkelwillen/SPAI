@@ -455,8 +455,8 @@ int runCSCToBatchedTest(unsigned long int size) {
     CSCToBatchedTest(d_csc, A, d_I, d_J, dim1, dim2, batchsize);
 
     cudaFree(A);
-    freeCSC(h_A);
-    freeDeviceCSC(d_A);
+    freeCSC(h_csc);
+    freeDeviceCSC(d_csc);
     cudaFree(d_I);
     cudaFree(d_J);
 }
