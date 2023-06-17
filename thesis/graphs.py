@@ -51,8 +51,8 @@ plt.legend()
 plt.show()
 
 # CSC to Batched dense
-sequential = [0.000011, 0.006513, 0.050452, 0.168493,0.374001, 0.458631, 3.530385, 11.977657, 28.161084, 56.214897, 96.528684]
-kernel = [0.000010, 0.000010, 0.000010, 0.000010, 0.000011, 0.000010, 0.000028, 0.000012, 0.000017, 0.000023, 0.000188]
+sequential = [0.000011, 0.006513, 0.050452, 0.168493,0.374001, 0.458631, 3.530385, 11.977657, 28.161084, 56.214897, 96.528684, 153.856608, 227.295646]
+kernel = [0.000010, 0.000010, 0.000010, 0.000010, 0.000011, 0.000010, 0.000028, 0.000012, 0.000017, 0.000023, 0.000188, 0.000038]
 plt.plot(matrixSize, sequential, linestyle="-", color="blue", label="Sequential")
 plt.plot(matrixSize, kernel, linestyle="-", color="Orange", label="Parallel")
 plt.xlabel("Matrix size")
@@ -62,7 +62,7 @@ plt.grid(axis = 'y')
 plt.legend()
 plt.show()
 
-peak = [0.8, 8.0, 32.00, 72.00, 116.36, 200.00, 285.75, 1500.00, 1882.35, 2173.91, 382.98]
+peak = [0.8, 8.0, 32.00, 72.00, 116.36, 200.00, 285.75, 1500.00, 1882.35, 2173.91, 382.98, 2578.95, 2723.40]
 plt.plot(matrixSize, peak, linestyle="-", color="blue", label="% \of peak performance")
 plt.plot(matrixSize, max, linestyle="-", color="Orange", label="100%")
 plt.xlabel("Matrix size")
