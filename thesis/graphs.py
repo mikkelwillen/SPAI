@@ -39,7 +39,7 @@ plt.grid(axis = 'y')
 plt.legend()
 plt.show()
 
-peak = [0, 0.45, 11.36, 25, 68.31]
+peak = [0.1, 10.0, 40.0, 90.0, 142.22, 200.00, 421.05, 580.65]
 plt.plot(matrixSize, peak, linestyle="-", color="blue", label="% \of peak performance")
 plt.plot(matrixSize, max, linestyle="-", color="Orange", label="100%")
 plt.xlabel("Matrix size")
