@@ -83,18 +83,17 @@ def testofScipy(A):
     print("Norm of Scipy-implementation: ", np.linalg.norm(A * AInv - np.identity(AInv.shape[1])))
 
 # For n = 10, 100, 1000, 10000, 100000:
-size = [10, 100, 1000, 10000, 100000]
-den = [0.1, 0.3, 0.5]
+size = [10, 100, 200, 300, 400, 500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000]
+den = [0.3]
 for n in size:
     for d in den:
         print("\nTesting for n = %a and density = %a" % (n, d))
-        if n > 10 or d > 0.1:
-            A = scipy.sparse.random(n, n, density=d, format='csc', random_state=1)
+        A = scipy.sparse.random(n, n, density=d, format='csc', random_state=1)
 
-            testofScipy(A)
+        testofScipy(A)
 
-            testErrorAndSpeed(SPAI.SPAI, A)
+        testErrorAndSpeed(SPAI.SPAI, A)
 
-        else:
-            print("A is singular")
+        
+
 
