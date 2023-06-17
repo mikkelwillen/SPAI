@@ -96,6 +96,10 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
               , elapsed, gigaBytesPerSec);
     }
 
+    free(h_A);
+    free(h_B);
+    free(h_C);
+
     float** d_PointerA;
     float** d_PointerB;
     float** d_PointerC;
@@ -137,6 +141,10 @@ int matrixMultiplicationTest(float* d_A, float* d_B, float* d_C, int dim1, int d
               , elapsed, gigaBytesPerSec);
     }
 
+    cudaFree(d_PointerA);
+    cudaFree(d_PointerB);
+    cudaFree(d_PointerC);
+
     // gpuAssert( cudaPeekAtLastError() );
     return 0;
 }
@@ -169,6 +177,9 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
         printf("Sequential secondMatrix runs in: %lu microsecs\n"
               , elapsed, gigaBytesPerSec);
     }
+
+    free(h_A);
+    free(h_B);
 
     float** d_PointerA;
     float** d_PointerB;
@@ -230,6 +241,16 @@ int setSecondMatrixTest(float* d_A, float* d_B, unsigned long int dim1, unsigned
               , elapsed, gigaBytesPerSec);
     }
 
+    free(h_n1Tilde);
+    free(h_n1Union);
+    free(h_n2);
+
+    cudaFree(d_PointerA);
+    cudaFree(d_PointerB);
+    cudaFree(d_n1Tilde);
+    cudaFree(d_n1Union);
+    cudaFree(d_n2);
+
     // gpuAssert( cudaPeekAtLastError() );
     return 0;
 }
@@ -266,6 +287,10 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
         printf("Sequential CSCToBatched runs in: %lu microsecs\n"
               , elapsed, gigaBytesPerSec);
     }
+
+    free(h_A);
+    free(h_I);
+    free(h_J);
 
     float** d_PointerA;
     int** d_PointerI;
@@ -323,6 +348,16 @@ int CSCToBatchedTest(CSC* d_csc, float* d_A, int* d_I, int* d_J, unsigned long i
               , elapsed, gigaBytesPerSec);
     }
 
+    free(h_n1);
+    free(h_n2);
+
+    cudaFree(d_PointerA);
+    cudaFree(d_PointerI);
+    cudaFree(d_PointerJ);
+    cudaFree(d_n1);
+    cudaFree(d_n2);
+
+
     // gpuAssert( cudaPeekAtLastError() );
     return 0;
 }
@@ -349,6 +384,10 @@ int runMatrixMultiplicationTest(unsigned long int size) {
     createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim3, sparsity);
 
     matrixMultiplicationTest(A, B, C, dim1, dim2, dim3, batchsize);
+
+    cudaFree(A);
+    cudaFree(B);
+    cudaFree(C);
 }
 
 int runSetSecondMatrixTest(unsigned long int size) {
@@ -367,13 +406,11 @@ int runSetSecondMatrixTest(unsigned long int size) {
     createRandomMatrix <<<numBlocks, BLOCKSIZE>>> (B, dim2, dim2, sparsity);
 
     cudaDeviceSynchronize();
-    float* h_A = (float*) malloc(batchsize * dim1 * dim1 * sizeof(float));
-    cudaMemcpy(h_A, A, batchsize * dim1 * dim1 * sizeof(float), cudaMemcpyDeviceToHost);
-
-    float* h_B = (float*) malloc(batchsize * dim2 * dim2 * sizeof(float));
-    cudaMemcpy(h_B, B, batchsize * dim2 * dim2 * sizeof(float), cudaMemcpyDeviceToHost);
 
     setSecondMatrixTest(A, B, dim1, dim2, batchsize);
+
+    cudaFree(A);
+    cudaFree(B);
 }
 
 int runCSCToBatchedTest(unsigned long int size) {
@@ -409,10 +446,19 @@ int runCSCToBatchedTest(unsigned long int size) {
 
     cudaMemcpy(d_I, h_I, dim1 * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_J, h_J, dim2 * sizeof(int), cudaMemcpyHostToDevice);
+
+    free(h_I);
+    free(h_J);
     
     cudaDeviceSynchronize();
 
     CSCToBatchedTest(d_csc, A, d_I, d_J, dim1, dim2, batchsize);
+
+    cudaFree(A);
+    freeCSC(h_A);
+    freeDeviceCSC(d_A);
+    cudaFree(d_I);
+    cudaFree(d_J);
 }
 
 # endif
