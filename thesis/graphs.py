@@ -28,8 +28,8 @@ plt.legend()
 plt.show()
 
 # Set second matrix
-sequential = [0.000002, 0.000044, 0.000159, 0.000352, 0.000729, 0.001139, 0.004281, ]
-kernel = [0.000005, 0.000006, 0.00006, 0.000005, 0.000006, 0.000006, 0.000012]
+sequential = [0.000005, 0.000074, 0.000273, 0.000644, 0.001121, 0.001733, 0.007266, 0.015941]
+kernel = [0.000008, 0.000008, 0.000008, 0.000008, 0.000009, 0.000010, 0.000019, 0.000031]
 plt.plot(matrixSize, sequential, linestyle="-", color="blue", label="Sequential")
 plt.plot(matrixSize, kernel, linestyle="-", color="Orange", label="Parallel")
 plt.xlabel("Matrix size")

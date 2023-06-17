@@ -36,10 +36,10 @@ int main(int argc, char** argv) {
         //     runMatrixMultiplicationTest(size);
         // }
         
-        for (int i = 8; i < 15; i++) {
-            int size = sizeArray[i];
-            runSetSecondMatrixTest(size);
-        }
+        // for (int i = 0; i < 15; i++) {
+        //     int size = sizeArray[i];
+        //     runSetSecondMatrixTest(size);
+        // }
 
         for (int i = 0; i < 15; i++) {
             int size = sizeArray[i];
